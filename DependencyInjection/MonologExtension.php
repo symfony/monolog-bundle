@@ -124,6 +124,14 @@ class MonologExtension extends Extension
             $definition->addTag('kernel.event_listener', array('event' => 'kernel.response', 'method' => 'onKernelResponse'));
             break;
 
+        case 'chromephp':
+            $definition->setArguments(array(
+                $handler['level'],
+                $handler['bubble'],
+            ));
+            $definition->addTag('kernel.event_listener', array('event' => 'kernel.response', 'method' => 'onKernelResponse'));
+            break;
+
         case 'rotating_file':
             $definition->setArguments(array(
                 $handler['path'],
