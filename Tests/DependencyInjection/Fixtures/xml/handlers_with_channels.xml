@@ -1,0 +1,31 @@
+<?xml version="1.0" ?>
+
+<srv:container xmlns="http://symfony.com/schema/dic/monolog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:srv="http://symfony.com/schema/dic/services"
+    xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd
+                        http://symfony.com/schema/dic/monolog http://symfony.com/schema/dic/monolog/monolog-1.0.xsd">
+
+    <config>
+        <handler name="custom" type="stream" path="/tmp/symfony.log" bubble="false" level="ERROR">
+            <channels>
+                <channel>foo</channel>
+            </channels>
+        </handler>
+        <handler name="main" type="group" handler="nested">
+            <member>nested</member>
+            <channels>
+                <channel>!foo</channel>
+                <channel>!bar</channel>
+            </channels>
+        </handler>
+        <handler name="nested" type="stream" />
+        <handler name="extra" type="syslog" ident="monolog" facility="user" level="ALERT" />
+        <handler name="more" type="native_mailer" to-email="monitoring@example.org" from-email="webmaster@example.org" subject="Monolog report" level="CRITICAL">
+            <channels type="inclusive">
+                <channel>security</channel>
+                <channel>doctrine</channel>
+            </channels>
+        </handler>
+    </config>
+</srv:container>

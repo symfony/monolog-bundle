@@ -146,6 +146,21 @@ abstract class MonologExtensionTest extends TestCase
         $this->assertDICConstructorArguments($handler, array('/tmp/last.log', \Monolog\Logger::ERROR, true));
     }
 
+    public function testHandlersWithChannels()
+    {
+        $container = $this->getContainer('handlers_with_channels');
+
+        $this->assertEquals(
+            array(
+                'monolog.handler.custom' => array('type' => 'inclusive', 'elements' => array('foo')),
+                'monolog.handler.main' => array('type' => 'exclusive', 'elements' => array('foo', 'bar')),
+                'monolog.handler.extra' => null,
+                'monolog.handler.more' => array('type' => 'inclusive', 'elements' => array('security', 'doctrine')),
+            ),
+            $container->getParameter('monolog.handlers_to_channels')
+        );
+    }
+
     /**
      * @expectedException InvalidArgumentException
      */

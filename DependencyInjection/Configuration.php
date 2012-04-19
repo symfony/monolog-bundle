@@ -89,23 +89,26 @@ class Configuration implements ConfigurationInterface
                                 ->fixXmlConfig('channel', 'elements')
                                 ->canBeUnset()
                                 ->beforeNormalization()
+                                    ->ifString()
+                                    ->then(function($v) { return array('elements' => array($v)); })
+                                ->end()
+                                ->beforeNormalization()
+                                    ->ifTrue(function($v) { return is_array($v) && is_numeric(key($v)); })
+                                    ->then(function($v) { return array('elements' => $v); })
+                                ->end()
+                                ->validate()
+                                    ->ifTrue(function($v) { return empty($v); })
+                                    ->thenUnset()
+                                ->end()
+                                ->validate()
                                     ->always(function ($v) {
-
-                                        if (is_string($v)) {
-                                            $v = array($v);
-                                        }
-
-                                        if (null === $v || count($v) == 0) {
-                                            return null;
-                                        }
-
-                                        if (isset($v['type'])) {
-                                            return $v;
-                                        }
-
                                         $isExclusive = null;
+                                        if (isset($v['type'])) {
+                                            $isExclusive = 'exclusive' === $v['type'];
+                                        }
+
                                         $elements = array();
-                                        foreach ($v as $element) {
+                                        foreach ($v['elements'] as $element) {
                                             if (0 === strpos($element, '!')) {
                                                 if (false === $isExclusive) {
                                                     throw new InvalidConfigurationException('Cannot combine exclusive/inclusive definitions in channels list.');

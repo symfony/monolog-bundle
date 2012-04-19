@@ -44,8 +44,6 @@ class MonologExtension extends Extension
             $loader->load('monolog.xml');
             $container->setAlias('logger', 'monolog.logger');
 
-            $logger = $container->getDefinition('monolog.logger_prototype');
-
             $handlers = array();
 
             foreach ($config['handlers'] as $name => $handler) {
