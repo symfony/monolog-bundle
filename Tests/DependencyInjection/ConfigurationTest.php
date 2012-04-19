@@ -14,9 +14,6 @@ namespace Symfony\Bundle\MonologBundle\Tests\DependencyInjection;
 use Symfony\Bundle\MonologBundle\DependencyInjection\Configuration;
 use Symfony\Component\Config\Definition\Processor;
 
-/**
- * @author Alexandre Salomé <alexandre.salome@gmail.com>
- */
 class ConfigurationTest extends \PHPUnit_Framework_TestCase
 {
     /**
@@ -97,6 +94,7 @@ class ConfigurationTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('inclusive', $config['handlers']['foo']['channels']['type']);
         $this->assertEquals('A', $config['handlers']['foo']['channels']['elements'][0]);
         $this->assertEquals('B', $config['handlers']['foo']['channels']['elements'][1]);
+
         // Check bar
         $this->assertCount(2, $config['handlers']['bar']['channels']['elements']);
         $this->assertEquals('exclusive', $config['handlers']['bar']['channels']['type']);
@@ -159,8 +157,8 @@ class ConfigurationTest extends \PHPUnit_Framework_TestCase
      */
     protected function process($configs)
     {
-        $configuration = new Configuration();
         $processor = new Processor();
-        return $processor->process($configuration->getConfigTreeBuilder()->buildTree(), $configs);
+
+        return $processor->processConfiguration(new Configuration(), $configs);
     }
 }

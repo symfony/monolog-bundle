@@ -22,6 +22,9 @@
         "symfony/config": "2.1.*",
         "monolog/monolog": "1.*"
     },
+    "require-dev": {
+        "symfony/yaml": "2.1.*"
+    },
     "autoload": {
         "psr-0": { "Symfony\\Bundle\\MonologBundle": "" }
     },

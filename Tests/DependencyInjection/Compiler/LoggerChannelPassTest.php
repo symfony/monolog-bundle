@@ -61,10 +61,6 @@ class LoggerChannelPassTest extends TestCase
         $container->set('monolog.handler.test', new Definition('%monolog.handler.null.class%', array (100, false)));
         $definition->addMethodCall('pushHandler', array(new Reference('monolog.handler.test')));
 
-        $service = new Definition('TestClass', array('false', new Reference('logger')));
-        $service->addTag('monolog.logger', array ('channel' => 'test'));
-        $container->setDefinition('test', $service);
-
         // Handlers
         $container->set('monolog.handler.a', new Definition('%monolog.handler.null.class%', array (100, false)));
         $container->set('monolog.handler.b', new Definition('%monolog.handler.null.class%', array (100, false)));

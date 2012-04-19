@@ -16,7 +16,7 @@ use Symfony\Bundle\MonologBundle\DependencyInjection\MonologExtension;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
 
-class MonologExtensionTest extends TestCase
+abstract class MonologExtensionTest extends TestCase
 {
     public function testLoadWithDefault()
     {
@@ -54,14 +54,8 @@ class MonologExtensionTest extends TestCase
 
     public function testLoadWithSeveralHandlers()
     {
-        $container = new ContainerBuilder();
-        $loader = new MonologExtension();
+        $container = $this->getContainer('multiple_handlers');
 
-        $loader->load(array(array('handlers' => array(
-            'custom' => array('type' => 'stream', 'path' => '/tmp/symfony.log', 'bubble' => false, 'level' => 'ERROR'),
-            'main' => array('type' => 'fingers_crossed', 'action_level' => 'ERROR', 'handler' => 'nested'),
-            'nested' => array('type' => 'stream')
-        ))), $container);
         $this->assertTrue($container->hasDefinition('monolog.logger'));
         $this->assertTrue($container->hasDefinition('monolog.handler.custom'));
         $this->assertTrue($container->hasDefinition('monolog.handler.main'));
@@ -82,19 +76,8 @@ class MonologExtensionTest extends TestCase
 
     public function testLoadWithOverwriting()
     {
-        $container = new ContainerBuilder();
-        $loader = new MonologExtension();
+        $container = $this->getContainer('overwriting');
 
-        $loader->load(array(
-            array('handlers' => array(
-                'custom' => array('type' => 'stream', 'path' => '/tmp/symfony.log', 'bubble' => false, 'level' => 'ERROR'),
-                'main' => array('type' => 'fingers_crossed', 'action_level' => 'ERROR', 'handler' => 'nested'),
-                'nested' => array('type' => 'stream')
-            )),
-            array('handlers' => array(
-                'custom' => array('type' => 'stream', 'path' => '/tmp/symfony.log', 'bubble' => true, 'level' => 'WARNING'),
-            ))
-        ), $container);
         $this->assertTrue($container->hasDefinition('monolog.logger'));
         $this->assertTrue($container->hasDefinition('monolog.handler.custom'));
         $this->assertTrue($container->hasDefinition('monolog.handler.main'));
@@ -115,20 +98,8 @@ class MonologExtensionTest extends TestCase
 
     public function testLoadWithNewAtEnd()
     {
-        $container = new ContainerBuilder();
-        $loader = new MonologExtension();
+        $container = $this->getContainer('new_at_end');
 
-        $loader->load(array(
-            array('handlers' => array(
-                'custom' => array('type' => 'stream', 'path' => '/tmp/symfony.log', 'bubble' => true, 'level' => 'ERROR'),
-                'main' => array('type' => 'fingers_crossed', 'action_level' => 'ERROR', 'handler' => 'nested'),
-                'nested' => array('type' => 'stream')
-            )),
-            array('handlers' => array(
-                'custom' => array('type' => 'stream', 'path' => '/tmp/symfony.log', 'bubble' => false, 'level' => 'WARNING'),
-                'new' => array('type' => 'stream', 'path' => '/tmp/monolog.log', 'bubble' => true, 'level' => 'ERROR'),
-            ))
-        ), $container);
         $this->assertTrue($container->hasDefinition('monolog.logger'));
         $this->assertTrue($container->hasDefinition('monolog.handler.custom'));
         $this->assertTrue($container->hasDefinition('monolog.handler.main'));
@@ -147,21 +118,8 @@ class MonologExtensionTest extends TestCase
 
     public function testLoadWithNewAndPriority()
     {
-        $container = new ContainerBuilder();
-        $loader = new MonologExtension();
+        $container = $this->getContainer('new_and_priority');
 
-        $loader->load(array(
-            array('handlers' => array(
-                'custom' => array('type' => 'stream', 'path' => '/tmp/symfony.log', 'bubble' => true, 'level' => 'ERROR'),
-                'main' => array('type' => 'buffer', 'level' => 'INFO', 'handler' => 'nested'),
-                'nested' => array('type' => 'stream')
-            )),
-            array('handlers' => array(
-                'custom' => array('type' => 'stream', 'path' => '/tmp/symfony.log', 'bubble' => true, 'level' => 'WARNING'),
-                'first' => array('type' => 'rotating_file', 'path' => '/tmp/monolog.log', 'bubble' => true, 'level' => 'ERROR', 'priority' => 3),
-                'last' => array('type' => 'stream', 'path' => '/tmp/last.log', 'bubble' => true, 'level' => 'ERROR', 'priority' => -3),
-            ))
-        ), $container);
         $this->assertTrue($container->hasDefinition('monolog.logger'));
         $this->assertTrue($container->hasDefinition('monolog.handler.custom'));
         $this->assertTrue($container->hasDefinition('monolog.handler.main'));
@@ -243,6 +201,22 @@ class MonologExtensionTest extends TestCase
 
         $loader->load(array(array('handlers' => array('debug' => array('type' => 'stream')))), $container);
     }
+
+    protected function getContainer($fixture)
+    {
+        $container = new ContainerBuilder();
+        $container->registerExtension(new MonologExtension());
+
+        $this->loadFixture($container, $fixture);
+
+        $container->getCompilerPassConfig()->setOptimizationPasses(array());
+        $container->getCompilerPassConfig()->setRemovingPasses(array());
+        $container->compile();
+
+        return $container;
+    }
+
+    abstract protected function loadFixture(ContainerBuilder $container, $fixture);
 
     /**
      * Assertion on the Class of a DIC Service Definition.
