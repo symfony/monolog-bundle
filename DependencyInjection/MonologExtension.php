@@ -44,11 +44,14 @@ class MonologExtension extends Extension
             $loader->load('monolog.xml');
             $container->setAlias('logger', 'monolog.logger');
 
-            $logger = $container->getDefinition('monolog.logger_prototype');
-
             $handlers = array();
+
             foreach ($config['handlers'] as $name => $handler) {
-                $handlers[] = array('id' => $this->buildHandler($container, $name, $handler), 'priority' => $handler['priority'] );
+                $handlers[] = array(
+                    'id'       => $this->buildHandler($container, $name, $handler),
+                    'priority' => $handler['priority'],
+                    'channels' => isset($handler['channels']) ? $handler['channels'] : null
+                );
             }
 
             $handlers = array_reverse($handlers);
@@ -59,11 +62,13 @@ class MonologExtension extends Extension
 
                 return $a['priority'] < $b['priority'] ? -1 : 1;
             });
+            $handlersToChannels = array();
             foreach ($handlers as $handler) {
                 if (!in_array($handler['id'], $this->nestedHandlers)) {
-                    $logger->addMethodCall('pushHandler', array(new Reference($handler['id'])));
+                    $handlersToChannels[$handler['id']] = $handler['channels'];
                 }
             }
+            $container->setParameter('monolog.handlers_to_channels', $handlersToChannels);
 
             $this->addClassesToCompile(array(
                 'Monolog\\Formatter\\FormatterInterface',

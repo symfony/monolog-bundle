@@ -13,6 +13,7 @@ namespace Symfony\Bundle\MonologBundle\DependencyInjection;
 
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
+use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 
 /**
  * This class contains the configuration information for the bundle
@@ -82,6 +83,60 @@ class Configuration implements ConfigurationInterface
                                 ->children()
                                     ->scalarNode('id')->isRequired()->end()
                                     ->scalarNode('factory-method')->defaultNull()->end()
+                                ->end()
+                            ->end()
+                            ->arrayNode('channels')
+                                ->fixXmlConfig('channel', 'elements')
+                                ->canBeUnset()
+                                ->beforeNormalization()
+                                    ->ifString()
+                                    ->then(function($v) { return array('elements' => array($v)); })
+                                ->end()
+                                ->beforeNormalization()
+                                    ->ifTrue(function($v) { return is_array($v) && is_numeric(key($v)); })
+                                    ->then(function($v) { return array('elements' => $v); })
+                                ->end()
+                                ->validate()
+                                    ->ifTrue(function($v) { return empty($v); })
+                                    ->thenUnset()
+                                ->end()
+                                ->validate()
+                                    ->always(function ($v) {
+                                        $isExclusive = null;
+                                        if (isset($v['type'])) {
+                                            $isExclusive = 'exclusive' === $v['type'];
+                                        }
+
+                                        $elements = array();
+                                        foreach ($v['elements'] as $element) {
+                                            if (0 === strpos($element, '!')) {
+                                                if (false === $isExclusive) {
+                                                    throw new InvalidConfigurationException('Cannot combine exclusive/inclusive definitions in channels list.');
+                                                }
+                                                $elements[] = substr($element, 1);
+                                                $isExclusive = true;
+                                            } else {
+                                                if (true === $isExclusive) {
+                                                    throw new InvalidConfigurationException('Cannot combine exclusive/inclusive definitions in channels list');
+                                                }
+                                                $elements[] = $element;
+                                                $isExclusive = false;
+                                            }
+                                        }
+
+                                        return array('type' => $isExclusive ? 'exclusive' : 'inclusive', 'elements' => $elements);
+                                    })
+                                ->end()
+                                ->children()
+                                    ->scalarNode('type')
+                                        ->validate()
+                                            ->ifNotInArray(array('inclusive', 'exclusive'))
+                                            ->thenInvalid('The type of channels has to be inclusive or exclusive')
+                                        ->end()
+                                    ->end()
+                                    ->arrayNode('elements')
+                                        ->prototype('scalar')->end()
+                                    ->end()
                                 ->end()
                             ->end()
                             ->scalarNode('formatter')->end()

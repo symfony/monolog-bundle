@@ -17,6 +17,7 @@
         <xsd:sequence>
             <xsd:element name="email-prototype" type="email-prototype" minOccurs="0" maxOccurs="1" />
             <xsd:element name="member" type="xsd:string" minOccurs="0" maxOccurs="unbounded" />
+            <xsd:element name="channels" type="channels" minOccurs="0" maxOccurs="1" />
         </xsd:sequence>
         <xsd:attribute name="type" type="xsd:string" />
         <xsd:attribute name="priority" type="xsd:integer" />
@@ -46,6 +47,13 @@
             <xsd:enumeration value="critical" />
             <xsd:enumeration value="alert" />
 
+            <xsd:enumeration value="DEBUG" />
+            <xsd:enumeration value="INFO" />
+            <xsd:enumeration value="WARNING" />
+            <xsd:enumeration value="ERROR" />
+            <xsd:enumeration value="CRITICAL" />
+            <xsd:enumeration value="ALERT" />
+
             <xsd:enumeration value="100" />
             <xsd:enumeration value="200" />
             <xsd:enumeration value="300" />
@@ -59,4 +67,18 @@
         <xsd:attribute name="id" type="xsd:string" />
         <xsd:attribute name="method" type="xsd:string" />
     </xsd:complexType>
+
+    <xsd:complexType name="channels">
+        <xsd:sequence>
+            <xsd:element name="channel" type="xsd:string" minOccurs="0" maxOccurs="unbounded" />
+        </xsd:sequence>
+        <xsd:attribute name="type" type="xsd:string" />
+    </xsd:complexType>
+
+    <xsd:simpleType name="channel_type">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="inclusive" />
+            <xsd:enumeration value="exclusive" />
+        </xsd:restriction>
+    </xsd:simpleType>
 </xsd:schema>
