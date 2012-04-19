@@ -122,6 +122,33 @@ class ConfigurationTest extends \PHPUnit_Framework_TestCase
         $config = $this->process($configs);
     }
 
+    /**
+     * @expectedException Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
+     */
+    public function testMergingInvalidChannels()
+    {
+        $configs = array(
+            array(
+                'handlers' => array(
+                    'foo' => array(
+                        'type' => 'stream',
+                        'path' => '/foo',
+                        'channels' => 'A',
+                    )
+                )
+            ),
+            array(
+                'handlers' => array(
+                    'foo' => array(
+                        'channels' => '!B',
+                    )
+                )
+            )
+        );
+
+        $config = $this->process($configs);
+    }
+
     public function testWithType()
     {
         $configs = array(
