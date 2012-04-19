@@ -63,6 +63,7 @@ class Configuration implements ConfigurationInterface
                             ->scalarNode('facility')->defaultValue('user')->end() // syslog
                             ->scalarNode('max_files')->defaultValue(0)->end() // rotating
                             ->scalarNode('action_level')->defaultValue('WARNING')->end() // fingers_crossed
+                            ->scalarNode('activation_strategy')->end() // fingers_crossed
                             ->booleanNode('stop_buffering')->defaultTrue()->end()// fingers_crossed
                             ->scalarNode('buffer_size')->defaultValue(0)->end() // fingers_crossed and buffer
                             ->scalarNode('handler')->end() // fingers_crossed and buffer

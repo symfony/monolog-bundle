@@ -151,9 +151,18 @@ class MonologExtension extends Extension
             $nestedHandlerId = $this->getHandlerId($handler['handler']);
             $this->nestedHandlers[] = $nestedHandlerId;
 
+            if (!isset($handler['activation_strategy'])) {
+                $container
+                    ->register($handlerId.'.activation_strategy', '%monolog.handler.fingers_crossed.error_level_activation_strategy.class%')
+                    ->addArgument($handler['activation_level'])
+                ;
+
+                $handler['activation_strategy'] = $handlerId.'.activation_strategy';
+            }
+
             $definition->setArguments(array(
                 new Reference($nestedHandlerId),
-                $handler['action_level'],
+                new Reference($handler['activation_strategy']),
                 $handler['buffer_size'],
                 $handler['bubble'],
                 $handler['stop_buffering'],
