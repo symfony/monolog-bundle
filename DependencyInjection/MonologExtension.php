@@ -129,6 +129,14 @@ class MonologExtension extends Extension
             $definition->addTag('kernel.event_listener', array('event' => 'kernel.response', 'method' => 'onKernelResponse'));
             break;
 
+        case 'gelf':
+            $definition->setArguments(array(
+                new Reference($handler['publisher']),
+                $handler['level'],
+                $handler['bubble'],
+            ));
+            break;
+
         case 'chromephp':
             $definition->setArguments(array(
                 $handler['level'],
