@@ -32,6 +32,7 @@
         <xsd:attribute name="buffer-size" type="xsd:integer" />
         <xsd:attribute name="max-files" type="xsd:integer" />
         <xsd:attribute name="handler" type="xsd:string" />
+        <xsd:attribute name="publisher" type="xsd:string" />
         <xsd:attribute name="from-email" type="xsd:string" />
         <xsd:attribute name="to-email" type="xsd:string" />
         <xsd:attribute name="subject" type="xsd:string" />
