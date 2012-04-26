@@ -32,14 +32,14 @@ class ConfigurationTest extends \PHPUnit_Framework_TestCase
 
         $this->assertArrayHasKey('handlers', $config);
         $this->assertArrayHasKey('foobar', $config['handlers']);
-        $this->assertEquals('stream',   $config['handlers']['foobar']['type']);
+        $this->assertEquals('stream', $config['handlers']['foobar']['type']);
         $this->assertEquals('/foo/bar', $config['handlers']['foobar']['path']);
     }
 
     public function provideProcessStringChannels()
     {
         return array(
-            array('foo',  'foo', true),
+            array('foo', 'foo', true),
             array('!foo', 'foo', false)
         );
     }
@@ -53,8 +53,8 @@ class ConfigurationTest extends \PHPUnit_Framework_TestCase
             array(
                 'handlers' => array(
                     'foobar' => array(
-                        'type' =>     'stream',
-                        'path' =>     '/foo/bar',
+                        'type' => 'stream',
+                        'path' => '/foo/bar',
                         'channels' => $string
                     )
                 )
@@ -66,6 +66,43 @@ class ConfigurationTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($isInclusive ? 'inclusive' : 'exclusive', $config['handlers']['foobar']['channels']['type']);
         $this->assertCount(1, $config['handlers']['foobar']['channels']['elements']);
         $this->assertEquals($expectedString, $config['handlers']['foobar']['channels']['elements'][0]);
+    }
+
+    public function provideGelfPublisher()
+    {
+        return array(
+            array(
+                'gelf.publisher'
+            ),
+            array(
+                array(
+                    'id' => 'gelf.publisher'
+                )
+            )
+        );
+    }
+
+    /**
+     * @dataProvider provideGelfPublisher
+     */
+    public function testGelfPublisherService($publisher)
+    {
+        $configs = array(
+            array(
+                'handlers' => array(
+                    'gelf' => array(
+                        'type' => 'gelf',
+                        'publisher' => $publisher,
+                    ),
+                )
+            )
+        );
+
+        $config = $this->process($configs);
+
+        $this->assertArrayHasKey('id', $config['handlers']['gelf']['publisher']);
+        $this->assertArrayNotHasKey('hostname', $config['handlers']['gelf']['publisher']);
+        $this->assertEquals('gelf.publisher', $config['handlers']['gelf']['publisher']['id']);
     }
 
     public function testArrays()

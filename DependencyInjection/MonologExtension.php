@@ -130,8 +130,22 @@ class MonologExtension extends Extension
             break;
 
         case 'gelf':
+            if (isset($handler['publisher']['id'])) {
+                $publisherId = $handler['publisher']['id'];
+            } else {
+                $publisher = new Definition("%monolog.gelf.publisher.class%", array(
+                    $handler['publisher']['hostname'],
+                    $handler['publisher']['port'],
+                    $handler['publisher']['chunk_size'],
+                ));
+
+                $publisherId = 'monolog.gelf.publisher';
+                $publisher->setPublic(false);
+                $container->setDefinition($publisherId, $publisher);
+            }
+
             $definition->setArguments(array(
-                new Reference($handler['publisher']),
+                new Reference($publisherId),
                 $handler['level'],
                 $handler['bubble'],
             ));

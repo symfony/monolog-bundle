@@ -18,6 +18,7 @@
             <xsd:element name="email-prototype" type="email-prototype" minOccurs="0" maxOccurs="1" />
             <xsd:element name="member" type="xsd:string" minOccurs="0" maxOccurs="unbounded" />
             <xsd:element name="channels" type="channels" minOccurs="0" maxOccurs="1" />
+            <xsd:element name="publisher" type="publisher" minOccurs="0" maxOccurs="1" />
         </xsd:sequence>
         <xsd:attribute name="type" type="xsd:string" />
         <xsd:attribute name="priority" type="xsd:integer" />
@@ -32,7 +33,6 @@
         <xsd:attribute name="buffer-size" type="xsd:integer" />
         <xsd:attribute name="max-files" type="xsd:integer" />
         <xsd:attribute name="handler" type="xsd:string" />
-        <xsd:attribute name="publisher" type="xsd:string" />
         <xsd:attribute name="from-email" type="xsd:string" />
         <xsd:attribute name="to-email" type="xsd:string" />
         <xsd:attribute name="subject" type="xsd:string" />
@@ -63,6 +63,13 @@
             <xsd:enumeration value="550" />
         </xsd:restriction>
     </xsd:simpleType>
+
+    <xsd:complexType name="publisher">
+        <xsd:attribute name="id" type="xsd:string" />
+        <xsd:attribute name="hostname" type="xsd:string" />
+        <xsd:attribute name="port" type="xsd:integer" />
+        <xsd:attribute name="chunk_size" type="xsd:integer" />
+    </xsd:complexType>
 
     <xsd:complexType name="email-prototype">
         <xsd:attribute name="id" type="xsd:string" />
