@@ -67,7 +67,25 @@ class Configuration implements ConfigurationInterface
                             ->booleanNode('stop_buffering')->defaultTrue()->end()// fingers_crossed
                             ->scalarNode('buffer_size')->defaultValue(0)->end() // fingers_crossed and buffer
                             ->scalarNode('handler')->end() // fingers_crossed and buffer
-                            ->scalarNode('publisher')->end() // gelf
+                            ->arrayNode('publisher')
+                                ->canBeUnset()
+                                ->beforeNormalization()
+                                    ->ifString()
+                                    ->then(function($v) { return array('id'=> $v); })
+                                ->end()
+                                ->children()
+                                    ->scalarNode('id')->end()
+                                    ->scalarNode('hostname')->end()
+                                    ->scalarNode('port')->defaultValue(12201)->end()
+                                    ->scalarNode('chunk_size')->defaultValue(1420)->end()
+                                ->end()
+                                ->validate()
+                                    ->ifTrue(function($v) {
+                                        return !isset($v['id']) && !isset($v['hostname']);
+                                    })
+                                    ->thenInvalid('What must be set is either the hostname or the id.')
+                                ->end()
+                            ->end() // gelf
                             ->arrayNode('members') // group
                                 ->canBeUnset()
                                 ->performNoDeepMerging()
@@ -158,6 +176,10 @@ class Configuration implements ConfigurationInterface
                         ->validate()
                             ->ifTrue(function($v) { return 'service' === $v['type'] && !isset($v['id']); })
                             ->thenInvalid('The id has to be specified to use a service as handler')
+                        ->end()
+                        ->validate()
+                            ->ifTrue(function($v) { return 'gelf' === $v['type'] && !isset($v['publisher']); })
+                            ->thenInvalid('The publisher has to be specified to use a GelfHandler')
                         ->end()
                     ->end()
                     ->validate()

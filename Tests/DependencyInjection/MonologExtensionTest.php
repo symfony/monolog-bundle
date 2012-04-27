@@ -197,6 +197,28 @@ abstract class MonologExtensionTest extends TestCase
     /**
      * @expectedException Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
      */
+    public function testExceptionWhenUsingGelfWithoutPublisher()
+    {
+        $container = new ContainerBuilder();
+        $loader = new MonologExtension();
+
+        $loader->load(array(array('handlers' => array('gelf' => array('type' => 'gelf')))), $container);
+    }
+
+    /**
+     * @expectedException Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
+     */
+    public function testExceptionWhenUsingGelfWithoutPublisherHostname()
+    {
+        $container = new ContainerBuilder();
+        $loader = new MonologExtension();
+
+        $loader->load(array(array('handlers' => array('gelf' => array('type' => 'gelf', 'publisher' => array())))), $container);
+    }
+
+    /**
+     * @expectedException Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
+     */
     public function testExceptionWhenUsingServiceWithoutId()
     {
         $container = new ContainerBuilder();
