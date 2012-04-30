@@ -196,7 +196,7 @@ class Configuration implements ConfigurationInterface
                             'processors' => array('some_callable')
                             ),
                         'main' => array(
-                            'type' => 'fingerscrossed',
+                            'type' => 'fingers_crossed',
                             'action_level' => 'WARNING',
                             'buffer_size' => 30,
                             'handler' => 'custom',
