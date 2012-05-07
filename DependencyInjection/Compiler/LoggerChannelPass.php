@@ -15,6 +15,7 @@ use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\DefinitionDecorator;
+use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
 
 /**
  * Replaces the default logger by another one with its own channel for tagged services.
@@ -23,7 +24,7 @@ use Symfony\Component\DependencyInjection\DefinitionDecorator;
  */
 class LoggerChannelPass implements CompilerPassInterface
 {
-    protected $channels = array();
+    protected $channels = array('app');
 
     public function process(ContainerBuilder $container)
     {
@@ -50,7 +51,12 @@ class LoggerChannelPass implements CompilerPassInterface
 
         foreach ($handlersToChannels as $handler => $channels) {
             foreach ($this->processChannels($channels) as $channel) {
-                $logger = $container->getDefinition('monolog.logger.'.$channel);
+                try {
+                    $logger = $container->getDefinition($channel === 'app' ? 'monolog.logger' : 'monolog.logger.'.$channel);
+                } catch (InvalidArgumentException $e) {
+                    $msg = 'Monolog configuration error: The logging channel "'.$channel.'" assigned to the "'.substr($handler, 16).'" handler does not exist.';
+                    throw new \InvalidArgumentException($msg, 0, $e);
+                }
                 $logger->addMethodCall('pushHandler', array(new Reference($handler)));
             }
         }
