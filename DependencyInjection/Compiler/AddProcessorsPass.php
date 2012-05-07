@@ -16,7 +16,7 @@ use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\Reference;
 
 /**
- * Registers processors in Monolg loggers or handlers.
+ * Registers processors in Monolog loggers or handlers.
  *
  * @author Christophe Coevoet <stof@notk.org>
  */

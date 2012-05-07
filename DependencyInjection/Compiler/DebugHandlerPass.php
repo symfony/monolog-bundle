@@ -32,6 +32,6 @@ class DebugHandlerPass implements CompilerPassInterface
 
         $debugHandler = new Definition('%monolog.handler.debug.class%', array(Logger::DEBUG, true));
         $container->setDefinition('monolog.handler.debug', $debugHandler);
-        $container->getDefinition('monolog.logger_prototype')->addMethodCall('pushHandler', array (new Reference('monolog.handler.debug')));
+        $container->getDefinition('monolog.logger_prototype')->addMethodCall('pushHandler', array(new Reference('monolog.handler.debug')));
     }
 }
