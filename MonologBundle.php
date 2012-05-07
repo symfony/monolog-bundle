@@ -28,8 +28,8 @@ class MonologBundle extends Bundle
     {
         parent::build($container);
 
-        $container->addCompilerPass(new LoggerChannelPass());
-        $container->addCompilerPass(new DebugHandlerPass());
+        $container->addCompilerPass($channelPass = new LoggerChannelPass());
+        $container->addCompilerPass(new DebugHandlerPass($channelPass));
         $container->addCompilerPass(new AddProcessorsPass());
     }
 }

@@ -24,14 +24,26 @@ use Monolog\Logger;
  */
 class DebugHandlerPass implements CompilerPassInterface
 {
+    private $channelPass;
+
+    public function __construct(LoggerChannelPass $channelPass)
+    {
+        $this->channelPass = $channelPass;
+    }
+
     public function process(ContainerBuilder $container)
     {
-        if (!$container->hasDefinition('monolog.logger_prototype') || !$container->hasDefinition('profiler')) {
+        if (!$container->hasDefinition('profiler')) {
             return;
         }
 
         $debugHandler = new Definition('%monolog.handler.debug.class%', array(Logger::DEBUG, true));
         $container->setDefinition('monolog.handler.debug', $debugHandler);
-        $container->getDefinition('monolog.logger_prototype')->addMethodCall('pushHandler', array(new Reference('monolog.handler.debug')));
+
+        foreach ($this->channelPass->getChannels() as $channel) {
+            $container
+                ->getDefinition($channel === 'app' ? 'monolog.logger' : 'monolog.logger.'.$channel)
+                ->addMethodCall('pushHandler', array(new Reference('monolog.handler.debug')));
+        }
     }
 }

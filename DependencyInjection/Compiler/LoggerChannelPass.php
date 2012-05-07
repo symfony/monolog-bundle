@@ -62,6 +62,11 @@ class LoggerChannelPass implements CompilerPassInterface
         }
     }
 
+    public function getChannels()
+    {
+        return $this->channels;
+    }
+
     protected function processChannels($configuration)
     {
         if (null === $configuration) {
