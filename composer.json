@@ -28,5 +28,10 @@
     "autoload": {
         "psr-0": { "Symfony\\Bundle\\MonologBundle": "" }
     },
-    "target-dir": "Symfony/Bundle/MonologBundle"
+    "target-dir": "Symfony/Bundle/MonologBundle",
+    "extra": {
+        "branch-alias": {
+            "dev-master": "2.1.x-dev"
+        }
+    }
 }
