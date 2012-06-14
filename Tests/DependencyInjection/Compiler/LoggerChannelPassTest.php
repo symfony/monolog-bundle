@@ -52,6 +52,16 @@ class LoggerChannelPassTest extends TestCase
         }
     }
 
+    public function testProcessSetters()
+    {
+        $container = $this->getContainerWithSetter();
+        $this->assertTrue($container->hasDefinition('monolog.logger.test'), '->process adds a logger service for tagged service');
+
+        $service = $container->getDefinition('foo');
+        $calls = $service->getMethodCalls();
+        $this->assertEquals('monolog.logger.test', (string) $calls[0][1][0], '->process replaces the logger by the new one in setters');
+    }
+
     protected function getContainer()
     {
         $container = new ContainerBuilder();
@@ -84,6 +94,31 @@ class LoggerChannelPassTest extends TestCase
                 'elements' => array('foo')
             )
         ));
+
+        $container->getCompilerPassConfig()->setOptimizationPasses(array());
+        $container->getCompilerPassConfig()->setRemovingPasses(array());
+        $container->addCompilerPass(new LoggerChannelPass());
+        $container->compile();
+
+        return $container;
+    }
+
+    protected function getContainerWithSetter()
+    {
+        $container = new ContainerBuilder();
+        $loader = new XmlFileLoader($container, new FileLocator(__DIR__.'/../../../Resources/config'));
+        $loader->load('monolog.xml');
+        $definition = $container->getDefinition('monolog.logger_prototype');
+        $container->set('monolog.handler.test', new Definition('%monolog.handler.null.class%', array (100, false)));
+        $definition->addMethodCall('pushHandler', array(new Reference('monolog.handler.test')));
+
+        // Channels
+        $service = new Definition('TestClass');
+        $service->addTag('monolog.logger', array ('channel' => 'test'));
+        $service->addMethodCall('setLogger', array(new Reference('logger')));
+        $container->setDefinition('foo', $service);
+
+        $container->setParameter('monolog.handlers_to_channels', array());
 
         $container->getCompilerPassConfig()->setOptimizationPasses(array());
         $container->getCompilerPassConfig()->setRemovingPasses(array());
