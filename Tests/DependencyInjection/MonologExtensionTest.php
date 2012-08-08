@@ -15,6 +15,7 @@ use Symfony\Bundle\MonologBundle\DependencyInjection\MonologExtension;
 use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\LoggerChannelPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
+use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 
 class MonologExtensionTest extends DependencyInjectionTest
 {
@@ -138,6 +139,34 @@ class MonologExtensionTest extends DependencyInjectionTest
         $handler = $container->getDefinition('monolog.handler.main');
         $this->assertDICDefinitionClass($handler, '%monolog.handler.syslog.class%');
         $this->assertDICConstructorArguments($handler, array(false, 'user', \Monolog\Logger::DEBUG, true, LOG_CONS));
+    }
+
+    public function testSocketHandler()
+    {
+        try {
+            $this->getContainer(array(array('handlers' => array('socket' => array('type' => 'socket')))));
+            $this->fail();
+        } catch (InvalidConfigurationException $e) {
+            $this->assertContains('connection_string', $e->getMessage());
+        }
+
+        $container = $this->getContainer(array(array('handlers' => array('socket' => array(
+            'type' => 'socket', 'timeout' => 1, 'persistent' => true,
+            'connection_string' => 'localhost:50505', 'connection_timeout' => '0.6')
+        ))));
+        $this->assertTrue($container->hasDefinition('monolog.logger'));
+        $this->assertTrue($container->hasDefinition('monolog.handler.socket'));
+
+        $logger = $container->getDefinition('monolog.logger');
+        $this->assertDICDefinitionMethodCallAt(0, $logger, 'pushHandler', array(new Reference('monolog.handler.socket')));
+
+        $handler = $container->getDefinition('monolog.handler.socket');
+        $this->assertDICDefinitionClass($handler, '%monolog.handler.socket.class%');
+        $this->assertDICConstructorArguments($handler, array('localhost:50505', \Monolog\Logger::DEBUG, true));
+        $this->assertDICDefinitionMethodCallAt(0, $handler, 'setTimeout', array('1'));
+        $this->assertDICDefinitionMethodCallAt(1, $handler, 'setConnectionTimeout', array('0.6'));
+        $this->assertDICDefinitionMethodCallAt(2, $handler, 'setPersistent', array(true));
+
     }
 
     protected function getContainer(array $config = array())
