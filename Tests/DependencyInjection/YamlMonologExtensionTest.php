@@ -15,7 +15,7 @@ use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 
-class YamlMonologExtensionTest extends MonologExtensionTest
+class YamlMonologExtensionTest extends FixtureMonologExtensionTest
 {
     protected function loadFixture(ContainerBuilder $container, $fixture)
     {
