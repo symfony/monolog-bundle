@@ -12,6 +12,7 @@
 namespace Symfony\Bundle\MonologBundle\Tests\DependencyInjection;
 
 use Symfony\Bundle\MonologBundle\DependencyInjection\MonologExtension;
+use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\LoggerChannelPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
 
@@ -19,10 +20,8 @@ class MonologExtensionTest extends DependencyInjectionTest
 {
     public function testLoadWithDefault()
     {
-        $container = new ContainerBuilder();
-        $loader = new MonologExtension();
-
-        $loader->load(array(array('handlers' => array('main' => array('type' => 'stream')))), $container);
+        $container = $this->getContainer(array(array('handlers' => array('main' => array('type' => 'stream')))));
+        
         $this->assertTrue($container->hasDefinition('monolog.logger'));
         $this->assertTrue($container->hasDefinition('monolog.handler.main'));
 
@@ -36,10 +35,7 @@ class MonologExtensionTest extends DependencyInjectionTest
 
     public function testLoadWithCustomValues()
     {
-        $container = new ContainerBuilder();
-        $loader = new MonologExtension();
-
-        $loader->load(array(array('handlers' => array('custom' => array('type' => 'stream', 'path' => '/tmp/symfony.log', 'bubble' => false, 'level' => 'ERROR')))), $container);
+        $container = $this->getContainer(array(array('handlers' => array('custom' => array('type' => 'stream', 'path' => '/tmp/symfony.log', 'bubble' => false, 'level' => 'ERROR')))));
         $this->assertTrue($container->hasDefinition('monolog.logger'));
         $this->assertTrue($container->hasDefinition('monolog.handler.custom'));
 
@@ -127,5 +123,19 @@ class MonologExtensionTest extends DependencyInjectionTest
         $loader = new MonologExtension();
 
         $loader->load(array(array('handlers' => array('debug' => array('type' => 'stream')))), $container);
+    }
+    
+    protected function getContainer(array $config = array())
+    {
+        $container = new ContainerBuilder();
+        $container->getCompilerPassConfig()->setOptimizationPasses(array());
+        $container->getCompilerPassConfig()->setRemovingPasses(array());
+        $container->addCompilerPass(new LoggerChannelPass());
+        
+        $loader = new MonologExtension();
+        $loader->load($config, $container);
+        $container->compile();
+        
+        return $container;
     }
 }

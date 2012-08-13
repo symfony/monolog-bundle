@@ -47,23 +47,22 @@ class MonologExtension extends Extension
             $handlers = array();
 
             foreach ($config['handlers'] as $name => $handler) {
-                $handlers[] = array(
+                $handlers[$handler['priority']][] = array(
                     'id'       => $this->buildHandler($container, $name, $handler),
-                    'priority' => $handler['priority'],
                     'channels' => isset($handler['channels']) ? $handler['channels'] : null
                 );
             }
 
-            $handlers = array_reverse($handlers);
-            uasort($handlers, function($a, $b) {
-                if ($a['priority'] == $b['priority']) {
-                    return 0;
+            ksort($handlers);
+            $sortedHandlers = array();
+            foreach ($handlers as $priorityHandlers) {
+                foreach (array_reverse($priorityHandlers) as $handler) {
+                    $sortedHandlers[] = $handler;
                 }
+            }
 
-                return $a['priority'] < $b['priority'] ? -1 : 1;
-            });
             $handlersToChannels = array();
-            foreach ($handlers as $handler) {
+            foreach ($sortedHandlers as $handler) {
                 if (!in_array($handler['id'], $this->nestedHandlers)) {
                     $handlersToChannels[$handler['id']] = $handler['channels'];
                 }
