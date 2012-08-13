@@ -10,20 +10,20 @@
         <service id="security_logger" class="Foo">
             <tag name="monolog.logger" channel="security" />
         </service>
-        
+
         <service id="doctrine_logger" class="Foo">
             <tag name="monolog.logger" channel="doctrine" />
         </service>
-        
+
         <service id="foo_logger" class="Foo">
             <tag name="monolog.logger" channel="foo" />
         </service>
-        
+
         <service id="bar_logger" class="Foo">
             <tag name="monolog.logger" channel="bar" />
         </service>
     </services>
-    
+
     <monolog:config>
         <monolog:handler name="custom" type="stream" path="/tmp/symfony.log" bubble="false" level="ERROR">
             <monolog:channels>

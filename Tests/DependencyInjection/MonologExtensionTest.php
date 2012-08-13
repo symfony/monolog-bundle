@@ -21,7 +21,7 @@ class MonologExtensionTest extends DependencyInjectionTest
     public function testLoadWithDefault()
     {
         $container = $this->getContainer(array(array('handlers' => array('main' => array('type' => 'stream')))));
-        
+
         $this->assertTrue($container->hasDefinition('monolog.logger'));
         $this->assertTrue($container->hasDefinition('monolog.handler.main'));
 
@@ -124,18 +124,18 @@ class MonologExtensionTest extends DependencyInjectionTest
 
         $loader->load(array(array('handlers' => array('debug' => array('type' => 'stream')))), $container);
     }
-    
+
     protected function getContainer(array $config = array())
     {
         $container = new ContainerBuilder();
         $container->getCompilerPassConfig()->setOptimizationPasses(array());
         $container->getCompilerPassConfig()->setRemovingPasses(array());
         $container->addCompilerPass(new LoggerChannelPass());
-        
+
         $loader = new MonologExtension();
         $loader->load($config, $container);
         $container->compile();
-        
+
         return $container;
     }
 }
