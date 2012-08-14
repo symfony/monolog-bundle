@@ -29,7 +29,6 @@ class LoggerChannelPassTest extends TestCase
         $service = $container->getDefinition('test');
         $this->assertEquals('monolog.logger.test', (string) $service->getArgument(1), '->process replaces the logger by the new one');
 
-
         // pushHandlers for service "test"
         $expected = array(
             'test' => array('monolog.handler.a', 'monolog.handler.b', 'monolog.handler.c'),

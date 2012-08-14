@@ -1,3 +1,20 @@
+services:
+    security_logger:
+        class: Foo
+        tags: [{ name: monolog.logger, channel: security }]
+
+    doctrine_logger:
+        class: Foo
+        tags: [{ name: monolog.logger, channel: doctrine }]
+
+    foo_logger:
+        class: Foo
+        tags: [{ name: monolog.logger, channel: foo }]
+
+    bar_logger:
+        class: Foo
+        tags: [{ name: monolog.logger, channel: bar }]
+
 monolog:
     handlers:
         custom:
