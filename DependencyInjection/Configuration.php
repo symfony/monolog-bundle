@@ -96,7 +96,7 @@ class Configuration implements ConfigurationInterface
                                 ->prototype('scalar')->end()
                                 ->beforeNormalization()
                                     ->ifString()
-                                    ->then(function($v) { return array('id' => $v); })
+                                    ->then(function($v) { return array($v); })
                                 ->end()
                             ->end()
                             ->scalarNode('subject')->end() // swift_mailer and native_mailer
