@@ -60,6 +60,7 @@ class Configuration implements ConfigurationInterface
                             ->booleanNode('bubble')->defaultTrue()->end()
                             ->scalarNode('path')->defaultValue('%kernel.logs_dir%/%kernel.environment%.log')->end() // stream and rotating
                             ->scalarNode('ident')->defaultFalse()->end() // syslog
+                            ->scalarNode('logopts')->defaultValue(LOG_PID)->end() // syslog
                             ->scalarNode('facility')->defaultValue('user')->end() // syslog
                             ->scalarNode('max_files')->defaultValue(0)->end() // rotating
                             ->scalarNode('action_level')->defaultValue('WARNING')->end() // fingers_crossed

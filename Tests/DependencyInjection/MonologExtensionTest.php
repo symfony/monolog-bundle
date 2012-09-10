@@ -125,6 +125,21 @@ class MonologExtensionTest extends DependencyInjectionTest
         $loader->load(array(array('handlers' => array('debug' => array('type' => 'stream')))), $container);
     }
 
+    public function testSyslogHandlerWithLogopts()
+    {
+        $container = $this->getContainer(array(array('handlers' => array('main' => array('type' => 'syslog', 'logopts' => LOG_CONS)))));
+
+        $this->assertTrue($container->hasDefinition('monolog.logger'));
+        $this->assertTrue($container->hasDefinition('monolog.handler.main'));
+
+        $logger = $container->getDefinition('monolog.logger');
+        $this->assertDICDefinitionMethodCallAt(0, $logger, 'pushHandler', array(new Reference('monolog.handler.main')));
+
+        $handler = $container->getDefinition('monolog.handler.main');
+        $this->assertDICDefinitionClass($handler, '%monolog.handler.syslog.class%');
+        $this->assertDICConstructorArguments($handler, array(false, 'user', \Monolog\Logger::DEBUG, true, LOG_CONS));
+    }
+
     protected function getContainer(array $config = array())
     {
         $container = new ContainerBuilder();
