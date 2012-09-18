@@ -112,6 +112,10 @@ class Configuration implements ConfigurationInterface
                                     ->scalarNode('factory-method')->defaultNull()->end()
                                 ->end()
                             ->end()
+                            ->scalarNode('connection_string')->end() // socket_handler
+                            ->scalarNode('timeout')->end() // socket_handler
+                            ->scalarNode('connection_timeout')->end() // socket_handler
+                            ->booleanNode('persistent')->end() // socket_handler
                             ->arrayNode('channels')
                                 ->fixXmlConfig('channel', 'elements')
                                 ->canBeUnset()
@@ -187,6 +191,10 @@ class Configuration implements ConfigurationInterface
                         ->validate()
                             ->ifTrue(function($v) { return 'gelf' === $v['type'] && !isset($v['publisher']); })
                             ->thenInvalid('The publisher has to be specified to use a GelfHandler')
+                        ->end()
+                        ->validate()
+                            ->ifTrue(function($v) { return 'socket' === $v['type'] && !isset($v['connection_string']); })
+                            ->thenInvalid('The connection_string has to be specified to use a SocketHandler')
                         ->end()
                     ->end()
                     ->validate()
