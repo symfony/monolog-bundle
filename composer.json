@@ -17,14 +17,14 @@
     ],
     "require": {
         "php": ">=5.3.2",
-        "symfony/monolog-bridge": "2.1.*",
-        "symfony/dependency-injection": "2.1.*",
-        "symfony/config": "2.1.*",
+        "symfony/monolog-bridge": ">=2.1.0,<2.3-dev",
+        "symfony/dependency-injection": ">=2.1.0,<2.3-dev",
+        "symfony/config": ">=2.1.0,<2.3-dev",
         "monolog/monolog": "1.*"
     },
     "require-dev": {
-        "symfony/yaml": "2.1.*",
-        "symfony/config": "2.1.*"
+        "symfony/yaml": ">=2.1.0,<2.3-dev",
+        "symfony/config": ">=2.1.0,<2.3-dev"
     },
     "autoload": {
         "psr-0": { "Symfony\\Bundle\\MonologBundle": "" }
