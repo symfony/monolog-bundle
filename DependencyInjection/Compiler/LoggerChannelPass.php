@@ -42,6 +42,15 @@ class LoggerChannelPass implements CompilerPassInterface
                             $definition->replaceArgument($index, new Reference($loggerId, $argument->getInvalidBehavior(), $argument->isStrict()));
                         }
                     }
+                    $calls = $definition->getMethodCalls();
+                    foreach ($calls as $i => $call) {
+                        foreach ($call[1] as $index => $argument) {
+                            if ($argument instanceof Reference && 'logger' === (string) $argument) {
+                                $calls[$i][1][$index] = new Reference($loggerId, $argument->getInvalidBehavior(), $argument->isStrict());
+                            }
+                        }
+                    }
+                    $definition->setMethodCalls($calls);
                 }
             }
         }
