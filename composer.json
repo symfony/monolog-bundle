@@ -2,7 +2,7 @@
     "name": "symfony/monolog-bundle",
     "type": "symfony-bundle",
     "description": "Symfony MonologBundle",
-    "keywords": [],
+    "keywords": ["log", "logging"],
     "homepage": "http://symfony.com",
     "license": "MIT",
     "authors": [
