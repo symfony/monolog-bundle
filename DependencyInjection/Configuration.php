@@ -68,6 +68,9 @@ class Configuration implements ConfigurationInterface
                             ->booleanNode('stop_buffering')->defaultTrue()->end()// fingers_crossed
                             ->scalarNode('buffer_size')->defaultValue(0)->end() // fingers_crossed and buffer
                             ->scalarNode('handler')->end() // fingers_crossed and buffer
+                            ->scalarNode('token')->end() // pushover
+                            ->scalarNode('user')->end() // pushover
+                            ->scalarNode('title')->defaultNull()->end() // pushover
                             ->arrayNode('publisher')
                                 ->canBeUnset()
                                 ->beforeNormalization()
@@ -195,6 +198,10 @@ class Configuration implements ConfigurationInterface
                         ->validate()
                             ->ifTrue(function($v) { return 'socket' === $v['type'] && !isset($v['connection_string']); })
                             ->thenInvalid('The connection_string has to be specified to use a SocketHandler')
+                        ->end()
+                        ->validate()
+                            ->ifTrue(function($v) { return 'pushover' === $v['type'] && (empty($v['token']) || empty($v['user'])); })
+                            ->thenInvalid('The token and user have to be specified to use a PushoverHandler')
                         ->end()
                     ->end()
                     ->validate()

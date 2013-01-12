@@ -277,6 +277,16 @@ class MonologExtension extends Extension
             }
             break;
 
+        case 'pushover':
+            $definition->setArguments(array(
+                $handler['token'],
+                $handler['user'],
+                $handler['title'],
+                $handler['level'],
+                $handler['bubble'],
+            ));
+            break;
+
         // Handlers using the constructor of AbstractHandler without adding their own arguments
         case 'test':
         case 'null':
