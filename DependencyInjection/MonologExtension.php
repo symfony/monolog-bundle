@@ -240,6 +240,11 @@ class MonologExtension extends Extension
                 $message->addMethodCall('setFrom', array($handler['from_email']));
                 $message->addMethodCall('setTo', array($handler['to_email']));
                 $message->addMethodCall('setSubject', array($handler['subject']));
+
+                if (isset($handler['content_type'])) {
+                    $message->addMethodCall('setContentType', array($handler['content_type']));
+                }
+
                 $messageId = sprintf('%s.mail_prototype', $handlerId);
                 $container->setDefinition($messageId, $message);
                 $prototype = new Reference($messageId);
