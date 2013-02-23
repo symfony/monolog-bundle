@@ -104,6 +104,7 @@ class Configuration implements ConfigurationInterface
                                 ->end()
                             ->end()
                             ->scalarNode('subject')->end() // swift_mailer and native_mailer
+                            ->scalarNode('content_type')->defaultNull()->end() // swift_mailer
                             ->arrayNode('email_prototype') // swift_mailer
                                 ->canBeUnset()
                                 ->beforeNormalization()
