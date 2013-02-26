@@ -194,7 +194,6 @@ class MonologExtensionTest extends DependencyInjectionTest
 
         $handler = $container->getDefinition('monolog.handler.raven');
         $this->assertDICDefinitionClass($handler, '%monolog.handler.raven.class%');
-        $this->assertDICConstructorArguments($handler, array(new \Raven_Client($dsn), \Monolog\Logger::DEBUG, true));
     }
 
     protected function getContainer(array $config = array())

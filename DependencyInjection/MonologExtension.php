@@ -296,15 +296,17 @@ class MonologExtension extends Extension
             break;
 
         case 'raven':
-            if (class_exists("Raven_Client")) {
-                $definition->setArguments(array(
-                    new \Raven_Client($handler['dsn']),
-                    $handler['level'],
-                    $handler['bubble'],
-                ));
-            } else {
-                throw new InvalidConfigurationException("raven/raven not installed");
-            }
+            $client = new Definition("Raven_Client", array(
+                $handler['dsn']
+            ));
+            $client->setPublic(false);
+            $clientId = 'monolog.raven.client';
+            $container->setDefinition($clientId, $client);
+            $definition->setArguments(array(
+                new Reference($clientId),
+                $handler['level'],
+                $handler['bubble'],
+            ));
             break;
 
         // Handlers using the constructor of AbstractHandler without adding their own arguments
