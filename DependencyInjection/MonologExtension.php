@@ -17,6 +17,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
+use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 
 /**
  * MonologExtension is an extension for the Monolog library.
@@ -292,6 +293,18 @@ class MonologExtension extends Extension
                 $handler['level'],
                 $handler['bubble'],
             ));
+            break;
+
+        case 'raven':
+            if (class_exists("Raven_Client")) {
+                $definition->setArguments(array(
+                    new \Raven_Client($handler['dsn']),
+                    $handler['level'],
+                    $handler['bubble'],
+                ));
+            } else {
+                throw new InvalidConfigurationException("raven/raven not installed");
+            }
             break;
 
         // Handlers using the constructor of AbstractHandler without adding their own arguments
