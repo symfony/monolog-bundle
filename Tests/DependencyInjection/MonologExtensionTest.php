@@ -171,9 +171,6 @@ class MonologExtensionTest extends DependencyInjectionTest
 
     public function testRavenHandler()
     {
-        if (!class_exists("Raven_Client")) {
-            $this->markTestSkipped("raven/raven not installed");
-        }
         $dsn = 'http://43f6017361224d098402974103bfc53d:a6a0538fc2934ba2bed32e08741b2cd3@marca.python.live.cheggnet.com:9000/1';
 
         try {
