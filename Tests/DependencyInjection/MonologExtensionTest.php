@@ -169,6 +169,30 @@ class MonologExtensionTest extends DependencyInjectionTest
 
     }
 
+    public function testRavenHandler()
+    {
+        $dsn = 'http://43f6017361224d098402974103bfc53d:a6a0538fc2934ba2bed32e08741b2cd3@marca.python.live.cheggnet.com:9000/1';
+
+        try {
+            $this->getContainer(array(array('handlers' => array('raven' => array('type' => 'raven')))));
+            $this->fail();
+        } catch (InvalidConfigurationException $e) {
+            $this->assertContains('DSN', $e->getMessage());
+        }
+
+        $container = $this->getContainer(array(array('handlers' => array('raven' => array(
+            'type' => 'raven', 'dsn' => $dsn )
+        ))));
+        $this->assertTrue($container->hasDefinition('monolog.logger'));
+        $this->assertTrue($container->hasDefinition('monolog.handler.raven'));
+
+        $logger = $container->getDefinition('monolog.logger');
+        $this->assertDICDefinitionMethodCallAt(0, $logger, 'pushHandler', array(new Reference('monolog.handler.raven')));
+
+        $handler = $container->getDefinition('monolog.handler.raven');
+        $this->assertDICDefinitionClass($handler, '%monolog.handler.raven.class%');
+    }
+
     protected function getContainer(array $config = array())
     {
         $container = new ContainerBuilder();
