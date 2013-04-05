@@ -186,6 +186,33 @@ class ConfigurationTest extends \PHPUnit_Framework_TestCase
         $config = $this->process($configs);
     }
 
+    public function testWithSwiftMailerHandler()
+    {
+        $configs = array(
+            array(
+                'handlers' => array(
+                    'swift' => array(
+                        'type' => 'swift_mailer',
+                        'from_email' => 'foo@bar.com',
+                        'to_email' => 'foo@bar.com',
+                        'subject' => 'Subject',
+                        'email_prototype' => array(
+                            'id' => 'monolog.prototype',
+                            'method' => 'getPrototype'
+                        )
+                    )
+                )
+            )
+        );
+
+        $config = $this->process($configs);
+
+        // Check email_prototype
+        $this->assertCount(2, $config['handlers']['swift']['email_prototype']);
+        $this->assertEquals('monolog.prototype', $config['handlers']['swift']['email_prototype']['id']);
+        $this->assertEquals('getPrototype', $config['handlers']['swift']['email_prototype']['method']);
+    }
+
     public function testWithType()
     {
         $configs = array(
