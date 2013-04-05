@@ -109,7 +109,7 @@ class Configuration implements ConfigurationInterface
                                 ->end()
                                 ->children()
                                     ->scalarNode('id')->isRequired()->end()
-                                    ->scalarNode('factory-method')->defaultNull()->end()
+                                    ->scalarNode('method')->defaultNull()->end()
                                 ->end()
                             ->end()
                             ->scalarNode('connection_string')->end() // socket_handler
