@@ -21,6 +21,7 @@ use Monolog\Logger;
  * Adds the DebugHandler when the profiler is enabled.
  *
  * @author Christophe Coevoet <stof@notk.org>
+ * @author Jordi Boggiano <j.boggiano@seld.be>
  */
 class DebugHandlerPass implements CompilerPassInterface
 {
@@ -34,6 +35,19 @@ class DebugHandlerPass implements CompilerPassInterface
     public function process(ContainerBuilder $container)
     {
         if (!$container->hasDefinition('profiler')) {
+            return;
+        }
+
+        // detect if the profiler is present but will be disabled
+        $enabled = true;
+        foreach ($container->getDefinition('profiler')->getMethodCalls() as $call) {
+            if ($call[0] === 'disable') {
+                $enabled = false;
+            } elseif ($call[0] === 'enable') {
+                $enabled = true;
+            }
+        }
+        if (!$enabled) {
             return;
         }
 
