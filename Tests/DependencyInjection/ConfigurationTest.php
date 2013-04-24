@@ -196,6 +196,7 @@ class ConfigurationTest extends \PHPUnit_Framework_TestCase
                         'from_email' => 'foo@bar.com',
                         'to_email' => 'foo@bar.com',
                         'subject' => 'Subject',
+                        'mailer'  => 'mailer',
                         'email_prototype' => array(
                             'id' => 'monolog.prototype',
                             'method' => 'getPrototype'
@@ -211,6 +212,7 @@ class ConfigurationTest extends \PHPUnit_Framework_TestCase
         $this->assertCount(2, $config['handlers']['swift']['email_prototype']);
         $this->assertEquals('monolog.prototype', $config['handlers']['swift']['email_prototype']['id']);
         $this->assertEquals('getPrototype', $config['handlers']['swift']['email_prototype']['method']);
+        $this->assertEquals('mailer', $config['handlers']['swift']['mailer']);
     }
 
     public function testWithType()

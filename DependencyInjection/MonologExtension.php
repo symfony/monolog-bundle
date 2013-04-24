@@ -251,7 +251,7 @@ class MonologExtension extends Extension
                 $prototype = new Reference($messageId);
             }
             $definition->setArguments(array(
-                new Reference('mailer'),
+                new Reference($handler['mailer']),
                 $prototype,
                 $handler['level'],
                 $handler['bubble'],
