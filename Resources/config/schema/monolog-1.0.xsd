@@ -80,7 +80,7 @@
         <xsd:sequence>
             <xsd:element name="channel" type="xsd:string" minOccurs="0" maxOccurs="unbounded" />
         </xsd:sequence>
-        <xsd:attribute name="type" type="xsd:string" />
+        <xsd:attribute name="type" type="channel_type" />
     </xsd:complexType>
 
     <xsd:simpleType name="channel_type">
