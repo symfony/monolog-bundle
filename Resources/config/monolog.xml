@@ -6,8 +6,10 @@
 
     <parameters>
         <parameter key="monolog.logger.class">Symfony\Bridge\Monolog\Logger</parameter>
+        <parameter key="monolog.listener.console.class">Symfony\Bundle\MonologBundle\EventListener\LogToConsoleListener</parameter>
         <parameter key="monolog.gelf.publisher.class">Gelf\MessagePublisher</parameter>
         <parameter key="monolog.handler.stream.class">Monolog\Handler\StreamHandler</parameter>
+        <parameter key="monolog.handler.console.class">Symfony\Bundle\MonologBundle\Handler\ConsoleHandler</parameter>
         <parameter key="monolog.handler.group.class">Monolog\Handler\GroupHandler</parameter>
         <parameter key="monolog.handler.buffer.class">Monolog\Handler\BufferHandler</parameter>
         <parameter key="monolog.handler.rotating_file.class">Monolog\Handler\RotatingFileHandler</parameter>
@@ -37,6 +39,11 @@
 
         <service id="monolog.logger_prototype" class="%monolog.logger.class%" abstract="true">
             <argument /><!-- Channel -->
+        </service>
+
+        <service id="monolog.listener.console" class="%monolog.listener.console.class%" abstract="true">
+            <tag name="kernel.event_subscriber" />
+            <argument /><!-- Array of ConsoleHandlers -->
         </service>
     </services>
 </container>
