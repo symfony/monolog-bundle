@@ -40,11 +40,5 @@
         <service id="monolog.logger_prototype" class="%monolog.logger.class%" abstract="true">
             <argument /><!-- Channel -->
         </service>
-
-        <!-- The MonologExtension removes the abstract flag when handlers of type "console" are used and inserts them -->
-        <service id="monolog.listener.console" class="%monolog.listener.console.class%" abstract="true">
-            <tag name="kernel.event_subscriber" />
-            <argument type="collection" /><!-- Array of ConsoleHandler instances -->
-        </service>
     </services>
 </container>

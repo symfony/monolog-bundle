@@ -28,7 +28,6 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 class MonologExtension extends Extension
 {
     private $nestedHandlers = array();
-    private $consoleHandlers = array();
 
     /**
      * Loads the Monolog configuration.
@@ -53,12 +52,6 @@ class MonologExtension extends Extension
                     'id'       => $this->buildHandler($container, $name, $handler),
                     'channels' => isset($handler['channels']) ? $handler['channels'] : null
                 );
-            }
-
-            if ($this->consoleHandlers) {
-                $consoleListener = $container->getDefinition('monolog.listener.console');
-                $consoleListener->replaceArgument(0, $this->consoleHandlers);
-                $consoleListener->setAbstract(false);
             }
 
             ksort($handlers);
@@ -134,7 +127,7 @@ class MonologExtension extends Extension
             $definition->setArguments(array(
                 $handler['bubble'],
             ));
-            $this->consoleHandlers[] = new Reference($handlerId);
+            $definition->addTag('kernel.event_subscriber');
             break;
 
         case 'firephp':

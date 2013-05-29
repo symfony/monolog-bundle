@@ -14,17 +14,22 @@ namespace Symfony\Bundle\MonologBundle\Handler;
 use Monolog\Handler\AbstractProcessingHandler;
 use Monolog\Logger;
 use Symfony\Bundle\MonologBundle\Formatter\ConsoleFormatter;
+use Symfony\Component\Console\ConsoleEvents;
+use Symfony\Component\Console\Event\ConsoleCommandEvent;
+use Symfony\Component\Console\Event\ConsoleTerminateEvent;
 use Symfony\Component\Console\Output\ConsoleOutputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
  * Writes to the console output depending on its verbosity setting.
  *
- * It is disabled by default and gets activated when setOutput is called.
+ * It is disabled by default and gets activated as soon as a command is executed.
+ * Instead of listening to the console events, setOutput can also be called manually.
  *
  * @author Tobias Schultze <http://tobion.de>
  */
-class ConsoleHandler extends AbstractProcessingHandler
+class ConsoleHandler extends AbstractProcessingHandler implements EventSubscriberInterface
 {
     /**
      * @var OutputInterface|null
@@ -104,6 +109,38 @@ class ConsoleHandler extends AbstractProcessingHandler
         $this->output = null;
 
         parent::close();
+    }
+
+    /**
+     * Before a command is executed, the handler gets activated and the console output
+     * is set in order to know where to write the logs.
+     *
+     * @param ConsoleCommandEvent $event
+     */
+    public function onCommand(ConsoleCommandEvent $event)
+    {
+        $this->setOutput($event->getOutput());
+    }
+
+    /**
+     * After a command has been executed, it disables the output.
+     *
+     * @param ConsoleTerminateEvent $event
+     */
+    public function onTerminate(ConsoleTerminateEvent $event)
+    {
+        $this->close();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public static function getSubscribedEvents()
+    {
+        return array(
+            ConsoleEvents::COMMAND => 'onCommand',
+            ConsoleEvents::TERMINATE => 'onTerminate'
+        );
     }
 
     /**
