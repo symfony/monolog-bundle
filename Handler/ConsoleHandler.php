@@ -1,9 +1,9 @@
 <?php
 
 /*
- * This file is part of the Monolog package.
+ * This file is part of the Symfony package.
  *
- * (c) Jordi Boggiano <j.boggiano@seld.be>
+ * (c) Fabien Potencier <fabien@symfony.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -170,7 +170,7 @@ class ConsoleHandler extends AbstractProcessingHandler
             if (!is_resource($this->errorStream)) {
                 $this->errorStream = null;
                 $this->errorStreamCreated = false;
-                throw new \UnexpectedValueException(sprintf('The stream "%s" could not be opened: '.$errorMessage, self::FALLBACK_STREAM));
+                throw new \UnexpectedValueException(sprintf('The stream "%s" could not be opened: '.$errorMessage, self::FALLBACK_ERROR_STREAM));
             }
             $this->errorStreamCreated = true;
         }
