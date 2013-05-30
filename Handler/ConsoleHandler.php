@@ -25,7 +25,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
  * Writes logs to the console output depending on its verbosity setting.
  *
  * It is disabled by default and gets activated as soon as a command is executed.
- * Instead of listening to the console events, setOutput can also be called manually.
+ * Instead of listening to the console events, the output can also be set manually.
  *
  * The minimum logging level at which this handler will be triggered depends on the
  * verbosity setting of the console output. The default mapping is:
@@ -58,13 +58,16 @@ class ConsoleHandler extends AbstractProcessingHandler implements EventSubscribe
     /**
      * Constructor.
      *
-     * @param Boolean $bubble            Whether the messages that are handled can bubble up the stack
-     * @param array   $verbosityLevelMap Array that maps the OutputInterface verbosity to a minimum logging level
-     *                                   (leave empty to use the default mapping)
+     * @param OutputInterface|null $output            The console output to use (the handler remains disabled when passing null
+     *                                                until the output is set, e.g. by using console events)
+     * @param Boolean              $bubble            Whether the messages that are handled can bubble up the stack
+     * @param array                $verbosityLevelMap Array that maps the OutputInterface verbosity to a minimum logging
+     *                                                level (leave empty to use the default mapping)
      */
-    public function __construct($bubble = true, array $verbosityLevelMap = array())
+    public function __construct(OutputInterface $output = null, $bubble = true, array $verbosityLevelMap = array())
     {
         parent::__construct(Logger::DEBUG, $bubble);
+        $this->output = $output;
 
         if ($verbosityLevelMap) {
             $this->verbosityLevelMap = $verbosityLevelMap;

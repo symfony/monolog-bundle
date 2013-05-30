@@ -25,7 +25,7 @@ class ConsoleHandlerTest extends TestCase
 {
     public function testConstructor()
     {
-        $handler = new ConsoleHandler(false);
+        $handler = new ConsoleHandler(null, false);
         $this->assertFalse($handler->getBubble(), 'the bubble parameter gets propagated');
     }
 
@@ -46,8 +46,7 @@ class ConsoleHandlerTest extends TestCase
             ->method('getVerbosity')
             ->will($this->returnValue($verbosity))
         ;
-        $handler = new ConsoleHandler();
-        $handler->setOutput($output);
+        $handler = new ConsoleHandler($output);
         $this->assertSame($isHandling, $handler->isHandling(array('level' => $level)),
             '->isHandling returns correct value depending on console verbosity and log level'
         );
@@ -81,8 +80,7 @@ class ConsoleHandlerTest extends TestCase
             ->method('getVerbosity')
             ->will($this->returnValue(OutputInterface::VERBOSITY_DEBUG))
         ;
-        $handler = new ConsoleHandler();
-        $handler->setOutput($output);
+        $handler = new ConsoleHandler($output);
         $this->assertFalse($handler->isHandling(array('level' => Logger::NOTICE)),
             'when verbosity is set to quiet, the handler does not handle the log'
         );
@@ -126,7 +124,7 @@ class ConsoleHandlerTest extends TestCase
             ->will($this->returnValue($errorOutput))
         ;
 
-        $handler = new ConsoleHandler(false);
+        $handler = new ConsoleHandler(null, false);
         $handler->setOutput($output);
 
         $infoRecord = array(
