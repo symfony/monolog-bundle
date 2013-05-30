@@ -38,7 +38,7 @@ class ConsoleHandlerTest extends TestCase
     /**
      * @dataProvider provideVerbosityMappingTests
      */
-    public function testVerbosityMapping($verbosity, $level, $isHandling)
+    public function testVerbosityMapping($verbosity, $level, $isHandling, array $map = array())
     {
         $output = $this->getMock('Symfony\Component\Console\Output\OutputInterface');
         $output
@@ -46,7 +46,7 @@ class ConsoleHandlerTest extends TestCase
             ->method('getVerbosity')
             ->will($this->returnValue($verbosity))
         ;
-        $handler = new ConsoleHandler($output);
+        $handler = new ConsoleHandler($output, true, $map);
         $this->assertSame($isHandling, $handler->isHandling(array('level' => $level)),
             '->isHandling returns correct value depending on console verbosity and log level'
         );
@@ -64,6 +64,12 @@ class ConsoleHandlerTest extends TestCase
             array(OutputInterface::VERBOSITY_VERY_VERBOSE, Logger::DEBUG, false),
             array(OutputInterface::VERBOSITY_DEBUG, Logger::DEBUG, true),
             array(OutputInterface::VERBOSITY_DEBUG, Logger::EMERGENCY, true),
+            array(OutputInterface::VERBOSITY_NORMAL, Logger::NOTICE, true, array(
+                OutputInterface::VERBOSITY_NORMAL => Logger::NOTICE
+            )),
+            array(OutputInterface::VERBOSITY_DEBUG, Logger::NOTICE, true, array(
+                OutputInterface::VERBOSITY_NORMAL => Logger::NOTICE
+            )),
         );
     }
 
