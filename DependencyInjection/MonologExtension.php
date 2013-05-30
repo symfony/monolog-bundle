@@ -124,6 +124,7 @@ class MonologExtension extends Extension
 
         case 'console':
             $definition->setArguments(array(
+                null,
                 $handler['bubble'],
                 isset($handler['verbosity_levels']) ? $handler['verbosity_levels'] : array()
             ));
