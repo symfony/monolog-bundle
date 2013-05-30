@@ -122,6 +122,60 @@ class Configuration implements ConfigurationInterface
                             ->scalarNode('connection_timeout')->end() // socket_handler
                             ->booleanNode('persistent')->end() // socket_handler
                             ->scalarNode('dsn')->end() // raven_handler
+                            ->arrayNode('verbosity_levels') // console
+                                ->beforeNormalization()
+                                    ->ifArray()
+                                    ->then(function ($v) {
+                                        $map = array();
+                                        $verbosities = array('VERBOSITY_NORMAL', 'VERBOSITY_VERBOSE', 'VERBOSITY_VERY_VERBOSE', 'VERBOSITY_DEBUG');
+                                        // allow numeric indexed array with ascendning verbosity and lowercase names of the constants
+                                        foreach ($v as $verbosity => $level) {
+                                            if (is_int($verbosity) && isset($verbosities[$verbosity])) {
+                                                $map[$verbosities[$verbosity]] = strtoupper($level);
+                                            } else {
+                                                $map[strtoupper($verbosity)] = strtoupper($level);
+                                            }
+                                        }
+
+                                        return $map;
+                                    })
+                                ->end()
+                                ->children()
+                                    ->scalarNode('VERBOSITY_NORMAL')->defaultValue('WARNING')->end()
+                                    ->scalarNode('VERBOSITY_VERBOSE')->defaultValue('NOTICE')->end()
+                                    ->scalarNode('VERBOSITY_VERY_VERBOSE')->defaultValue('INFO')->end()
+                                    ->scalarNode('VERBOSITY_DEBUG')->defaultValue('DEBUG')->end()
+                                ->end()
+                                ->validate()
+                                    ->always(function ($v) {
+                                        $map = array();
+                                        foreach ($v as $verbosity => $level) {
+                                            $verbosityConstant = 'Symfony\Component\Console\Output\OutputInterface::'.$verbosity;
+
+                                            if (!defined($verbosityConstant)) {
+                                                throw new InvalidConfigurationException(sprintf(
+                                                    'The configured verbosity "%s" is invalid as it is not defined in Symfony\Component\Console\Output\OutputInterface.',
+                                                     $verbosity
+                                                ));
+                                            }
+                                            if (!is_int($level)) {
+                                                $levelConstant = 'Monolog\Logger::'.$level;
+                                                if (!defined($levelConstant)) {
+                                                    throw new InvalidConfigurationException(sprintf(
+                                                        'The configured minimum log level "%s" for verbosity "%s" is invalid as it is not defined in Monolog\Logger.',
+                                                         $level, $verbosity
+                                                    ));
+                                                }
+                                                $level = constant($levelConstant);
+                                            }
+
+                                            $map[constant($verbosityConstant)] = $level;
+                                        }
+
+                                        return $map;
+                                    })
+                                ->end()
+                            ->end()
                             ->arrayNode('channels')
                                 ->fixXmlConfig('channel', 'elements')
                                 ->canBeUnset()

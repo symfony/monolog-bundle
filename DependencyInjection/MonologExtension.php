@@ -17,7 +17,6 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
-use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 
 /**
  * MonologExtension is an extension for the Monolog library.
@@ -126,6 +125,7 @@ class MonologExtension extends Extension
         case 'console':
             $definition->setArguments(array(
                 $handler['bubble'],
+                isset($handler['verbosity_levels']) ? $handler['verbosity_levels'] : array()
             ));
             $definition->addTag('kernel.event_subscriber');
             break;

@@ -22,10 +22,19 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
- * Writes to the console output depending on its verbosity setting.
+ * Writes logs to the console output depending on its verbosity setting.
  *
  * It is disabled by default and gets activated as soon as a command is executed.
  * Instead of listening to the console events, setOutput can also be called manually.
+ *
+ * The minimum logging level at which this handler will be triggered depends on the
+ * verbosity setting of the console output. The default mapping is:
+ * - OutputInterface::VERBOSITY_NORMAL will show all WARNING and higher logs
+ * - OutputInterface::VERBOSITY_VERBOSE (-v) will show all NOTICE and higher logs
+ * - OutputInterface::VERBOSITY_VERY_VERBOSE (-vv) will show all INFO and higher logs
+ * - OutputInterface::VERBOSITY_DEBUG (-vvv) will show all DEBUG and higher logs, i.e. all logs
+ *
+ * This mapping can be customized with the $verbosityLevelMap constructor parameter.
  *
  * @author Tobias Schultze <http://tobion.de>
  */
@@ -34,18 +43,32 @@ class ConsoleHandler extends AbstractProcessingHandler implements EventSubscribe
     /**
      * @var OutputInterface|null
      */
-    protected $output;
+    private $output;
+
+    /**
+     * @var array
+     */
+    private $verbosityLevelMap = array(
+        OutputInterface::VERBOSITY_NORMAL => Logger::WARNING,
+        OutputInterface::VERBOSITY_VERBOSE => Logger::NOTICE,
+        OutputInterface::VERBOSITY_VERY_VERBOSE => Logger::INFO,
+        OutputInterface::VERBOSITY_DEBUG => Logger::DEBUG
+    );
 
     /**
      * Constructor.
      *
-     * The minimum logging level it is set based on the output verbosity in setOutput.
-     *
-     * @param Boolean $bubble Whether the messages that are handled can bubble up the stack or not
+     * @param Boolean $bubble            Whether the messages that are handled can bubble up the stack
+     * @param array   $verbosityLevelMap Array that maps the OutputInterface verbosity to a minimum logging level
+     *                                   (leave empty to use the default mapping)
      */
-    public function __construct($bubble = true)
+    public function __construct($bubble = true, array $verbosityLevelMap = array())
     {
         parent::__construct(Logger::DEBUG, $bubble);
+
+        if ($verbosityLevelMap) {
+            $this->verbosityLevelMap = $verbosityLevelMap;
+        }
     }
 
     /**
@@ -145,23 +168,14 @@ class ConsoleHandler extends AbstractProcessingHandler implements EventSubscribe
      */
     private function updateLevel()
     {
-        if (null === $this->output || OutputInterface::VERBOSITY_QUIET === $this->output->getVerbosity()) {
+        if (null === $this->output || OutputInterface::VERBOSITY_QUIET === $verbosity = $this->output->getVerbosity()) {
             return false;
         }
 
-        switch ($this->output->getVerbosity()) {
-            case OutputInterface::VERBOSITY_NORMAL:
-                $this->setLevel(Logger::WARNING);
-                break;
-            case OutputInterface::VERBOSITY_VERBOSE:
-                $this->setLevel(Logger::NOTICE);
-                break;
-            case OutputInterface::VERBOSITY_VERY_VERBOSE:
-                $this->setLevel(Logger::INFO);
-                break;
-            default:
-                $this->setLevel(Logger::DEBUG);
-                break;
+        if (isset($this->verbosityLevelMap[$verbosity])) {
+            $this->setLevel($this->verbosityLevelMap[$verbosity]);
+        } else {
+            $this->setLevel(Logger::DEBUG);
         }
 
         return true;
