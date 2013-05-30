@@ -6,7 +6,6 @@
 
     <parameters>
         <parameter key="monolog.logger.class">Symfony\Bridge\Monolog\Logger</parameter>
-        <parameter key="monolog.listener.console.class">Symfony\Bundle\MonologBundle\EventListener\LogToConsoleListener</parameter>
         <parameter key="monolog.gelf.publisher.class">Gelf\MessagePublisher</parameter>
         <parameter key="monolog.handler.stream.class">Monolog\Handler\StreamHandler</parameter>
         <parameter key="monolog.handler.console.class">Symfony\Bundle\MonologBundle\Handler\ConsoleHandler</parameter>
