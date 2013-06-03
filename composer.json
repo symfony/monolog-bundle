@@ -24,10 +24,7 @@
     },
     "require-dev": {
         "symfony/yaml": "~2.2-beta2",
-        "symfony/console": "~2.2-beta2"
-    },
-    "suggest": {
-        "symfony/console": "For the possibility to show log messages in console commands depending on verbosity settings."
+        "symfony/console": "~2.3"
     },
     "autoload": {
         "psr-0": { "Symfony\\Bundle\\MonologBundle": "" }
