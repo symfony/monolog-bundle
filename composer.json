@@ -24,7 +24,7 @@
     },
     "require-dev": {
         "symfony/yaml": "~2.2-beta2",
-        "symfony/console": "~2.3"
+        "symfony/console": "~2.3-beta1"
     },
     "autoload": {
         "psr-0": { "Symfony\\Bundle\\MonologBundle": "" }
