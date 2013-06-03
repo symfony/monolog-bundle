@@ -158,7 +158,7 @@ class Configuration implements ConfigurationInterface
                                                      $verbosity
                                                 ));
                                             }
-                                            if (!is_int($level)) {
+                                            if (!is_numeric($level)) {
                                                 $levelConstant = 'Monolog\Logger::'.$level;
                                                 if (!defined($levelConstant)) {
                                                     throw new InvalidConfigurationException(sprintf(
@@ -167,6 +167,8 @@ class Configuration implements ConfigurationInterface
                                                     ));
                                                 }
                                                 $level = constant($levelConstant);
+                                            } else {
+                                                $level = (int) $level;
                                             }
 
                                             $map[constant($verbosityConstant)] = $level;
