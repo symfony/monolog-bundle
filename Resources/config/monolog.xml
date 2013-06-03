@@ -8,6 +8,7 @@
         <parameter key="monolog.logger.class">Symfony\Bridge\Monolog\Logger</parameter>
         <parameter key="monolog.gelf.publisher.class">Gelf\MessagePublisher</parameter>
         <parameter key="monolog.handler.stream.class">Monolog\Handler\StreamHandler</parameter>
+        <parameter key="monolog.handler.console.class">Symfony\Bridge\Monolog\Handler\ConsoleHandler</parameter>
         <parameter key="monolog.handler.group.class">Monolog\Handler\GroupHandler</parameter>
         <parameter key="monolog.handler.buffer.class">Monolog\Handler\BufferHandler</parameter>
         <parameter key="monolog.handler.rotating_file.class">Monolog\Handler\RotatingFileHandler</parameter>

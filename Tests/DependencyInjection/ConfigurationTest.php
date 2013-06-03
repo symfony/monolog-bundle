@@ -11,8 +11,10 @@
 
 namespace Symfony\Bundle\MonologBundle\Tests\DependencyInjection;
 
+use Monolog\Logger;
 use Symfony\Bundle\MonologBundle\DependencyInjection\Configuration;
 use Symfony\Component\Config\Definition\Processor;
+use Symfony\Component\Console\Output\OutputInterface;
 
 class ConfigurationTest extends \PHPUnit_Framework_TestCase
 {
@@ -213,6 +215,34 @@ class ConfigurationTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('monolog.prototype', $config['handlers']['swift']['email_prototype']['id']);
         $this->assertEquals('getPrototype', $config['handlers']['swift']['email_prototype']['method']);
         $this->assertEquals('mailer', $config['handlers']['swift']['mailer']);
+    }
+
+    public function testWithConsoleHandler()
+    {
+        $configs = array(
+            array(
+                'handlers' => array(
+                    'console' => array(
+                        'type' => 'console',
+                        'verbosity_levels' => array(
+                            'VERBOSITY_NORMAL' => 'NOTICE',
+                            'verbosity_verbose' => 'info',
+                            'VERBOSITY_very_VERBOSE' => 150
+                        )
+                    )
+                )
+            )
+        );
+
+        $config = $this->process($configs);
+
+        $this->assertSame('console', $config['handlers']['console']['type']);
+        $this->assertSame(array(
+            OutputInterface::VERBOSITY_NORMAL => Logger::NOTICE,
+            OutputInterface::VERBOSITY_VERBOSE => Logger::INFO,
+            OutputInterface::VERBOSITY_VERY_VERBOSE => 150,
+            OutputInterface::VERBOSITY_DEBUG => Logger::DEBUG
+        ), $config['handlers']['console']['verbosity_levels']);
     }
 
     public function testWithType()
