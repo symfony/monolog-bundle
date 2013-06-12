@@ -106,7 +106,7 @@ class MonologExtension extends Extension
     {
         $handlerId = $this->getHandlerId($name);
         $definition = new Definition(sprintf('%%monolog.handler.%s.class%%', $handler['type']));
-        $handler['level'] = is_int($handler['level']) ? $handler['level'] : constant('Monolog\Logger::'.strtoupper($handler['level']));
+        $handler['level'] = is_int($handler['level']) ? $handler['level'] : constant('\Monolog\Logger::'.strtoupper($handler['level']));
 
         switch ($handler['type']) {
         case 'service':
