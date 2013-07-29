@@ -132,6 +132,12 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
  *
+ * - amqp:
+ *   - exchange: service id of an AMQPExchange
+ *   - [exchange_name]: string, defaults to log
+ *   - [level]: level name or int value, defaults to DEBUG
+ *   - [bubble]: bool, defaults to true
+ *
  * - null:
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
@@ -193,6 +199,8 @@ class Configuration implements ConfigurationInterface
                             ->scalarNode('buffer_size')->defaultValue(0)->end() // fingers_crossed and buffer
                             ->scalarNode('handler')->end() // fingers_crossed and buffer
                             ->scalarNode('url')->end() // cube
+                            ->scalarNode('exchange')->end() // amqp
+                            ->scalarNode('exchange_name')->defaultValue('log')->end() // amqp
                             ->scalarNode('room')->end() // hipchat
                             ->scalarNode('notify')->defaultFalse()->end() // hipchat
                             ->scalarNode('nickname')->defaultValue('Monolog')->end() // hipchat
@@ -408,6 +416,10 @@ class Configuration implements ConfigurationInterface
                         ->validate()
                             ->ifTrue(function($v) { return 'cube' === $v['type'] && empty($v['url']); })
                             ->thenInvalid('The url has to be specified to use a CubeHandler')
+                        ->end()
+                        ->validate()
+                            ->ifTrue(function($v) { return 'amqp' === $v['type'] && empty($v['exchange']); })
+                            ->thenInvalid('The exchange has to be specified to use a AmqpHandler')
                         ->end()
                     ->end()
                     ->validate()

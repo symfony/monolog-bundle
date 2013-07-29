@@ -327,6 +327,15 @@ class MonologExtension extends Extension
             ));
             break;
 
+        case 'amqp':
+            $definition->setArguments(array(
+                new Reference($handler['exchange']),
+                $handler['exchange_name'],
+                $handler['level'],
+                $handler['bubble'],
+            ));
+            break;
+
         case 'raven':
             $clientId = 'monolog.raven.client.' . sha1($handler['dsn']);
             if (!$container->hasDefinition($clientId)) {
