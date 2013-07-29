@@ -308,6 +308,17 @@ class MonologExtension extends Extension
             ));
             break;
 
+        case 'hipchat':
+            $definition->setArguments(array(
+                $handler['token'],
+                $handler['room'],
+                $handler['nickname'],
+                $handler['notify'],
+                $handler['level'],
+                $handler['bubble'],
+            ));
+            break;
+
         case 'raven':
             $clientId = 'monolog.raven.client.' . sha1($handler['dsn']);
             if (!$container->hasDefinition($clientId)) {

@@ -187,7 +187,10 @@ class Configuration implements ConfigurationInterface
                             ->booleanNode('stop_buffering')->defaultTrue()->end()// fingers_crossed
                             ->scalarNode('buffer_size')->defaultValue(0)->end() // fingers_crossed and buffer
                             ->scalarNode('handler')->end() // fingers_crossed and buffer
-                            ->scalarNode('token')->end() // pushover
+                            ->scalarNode('room')->end() // hipchat
+                            ->scalarNode('notify')->defaultFalse()->end() // hipchat
+                            ->scalarNode('nickname')->defaultValue('Monolog')->end() // hipchat
+                            ->scalarNode('token')->end() // pushover & hipchat
                             ->variableNode('user') // pushover
                                 ->validate()
                                     ->ifTrue(function($v) {
@@ -391,6 +394,10 @@ class Configuration implements ConfigurationInterface
                         ->validate()
                             ->ifTrue(function($v) { return 'raven' === $v['type'] && !array_key_exists('dsn', $v); })
                             ->thenInvalid('The DSN has to be specified to use a RavenHandler')
+                        ->end()
+                        ->validate()
+                            ->ifTrue(function($v) { return 'hipchat' === $v['type'] && (empty($v['token']) || empty($v['room'])); })
+                            ->thenInvalid('The token and room have to be specified to use a HipChatHandler')
                         ->end()
                     ->end()
                     ->validate()
