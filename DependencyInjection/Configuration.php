@@ -69,7 +69,14 @@ class Configuration implements ConfigurationInterface
                             ->scalarNode('buffer_size')->defaultValue(0)->end() // fingers_crossed and buffer
                             ->scalarNode('handler')->end() // fingers_crossed and buffer
                             ->scalarNode('token')->end() // pushover
-                            ->scalarNode('user')->end() // pushover
+                            ->variableNode('user') // pushover
+                                ->validate()
+                                    ->ifTrue(function($v) {
+                                        return !is_string($v) && !is_array($v);
+                                    })
+                                    ->thenInvalid('User must be a string or an array.')
+                                ->end()
+                            ->end()
                             ->scalarNode('title')->defaultNull()->end() // pushover
                             ->arrayNode('publisher')
                                 ->canBeUnset()
