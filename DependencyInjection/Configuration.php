@@ -127,6 +127,11 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
  *
+ * - cube:
+ *   - url: http/udp url to the cube server
+ *   - [level]: level name or int value, defaults to DEBUG
+ *   - [bubble]: bool, defaults to true
+ *
  * - null:
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
@@ -187,6 +192,7 @@ class Configuration implements ConfigurationInterface
                             ->booleanNode('stop_buffering')->defaultTrue()->end()// fingers_crossed
                             ->scalarNode('buffer_size')->defaultValue(0)->end() // fingers_crossed and buffer
                             ->scalarNode('handler')->end() // fingers_crossed and buffer
+                            ->scalarNode('url')->end() // cube
                             ->scalarNode('room')->end() // hipchat
                             ->scalarNode('notify')->defaultFalse()->end() // hipchat
                             ->scalarNode('nickname')->defaultValue('Monolog')->end() // hipchat
@@ -398,6 +404,10 @@ class Configuration implements ConfigurationInterface
                         ->validate()
                             ->ifTrue(function($v) { return 'hipchat' === $v['type'] && (empty($v['token']) || empty($v['room'])); })
                             ->thenInvalid('The token and room have to be specified to use a HipChatHandler')
+                        ->end()
+                        ->validate()
+                            ->ifTrue(function($v) { return 'cube' === $v['type'] && empty($v['url']); })
+                            ->thenInvalid('The url has to be specified to use a CubeHandler')
                         ->end()
                     ->end()
                     ->validate()
