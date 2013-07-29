@@ -58,6 +58,7 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
  * - fingers_crossed:
  *   - handler: the wrapped handler's name
  *   - [action_level|activation_strategy]: minimum level or service id to activate the handler, defaults to WARNING
+ *   - [excluded_404s]: if set, the strategy will be changed to one that excludes 404s coming from URLs matching any of those patterns
  *   - [buffer_size]: defaults to 0 (unlimited)
  *   - [stop_buffering]: bool to disable buffering once the handler has been activated, defaults to true
  *   - [bubble]: bool, defaults to true
@@ -205,6 +206,10 @@ class Configuration implements ConfigurationInterface
                             ->scalarNode('action_level')->defaultValue('WARNING')->end() // fingers_crossed
                             ->scalarNode('activation_strategy')->defaultNull()->end() // fingers_crossed
                             ->booleanNode('stop_buffering')->defaultTrue()->end()// fingers_crossed
+                            ->arrayNode('excluded_404s') // fingers_crossed
+                                ->canBeUnset()
+                                ->prototype('scalar')->end()
+                            ->end()
                             ->scalarNode('buffer_size')->defaultValue(0)->end() // fingers_crossed and buffer
                             ->scalarNode('handler')->end() // fingers_crossed and buffer
                             ->scalarNode('url')->end() // cube
@@ -390,6 +395,10 @@ class Configuration implements ConfigurationInterface
                         ->validate()
                             ->ifTrue(function($v) { return ('fingers_crossed' === $v['type'] || 'buffer' === $v['type']) && 1 !== count($v['handler']); })
                             ->thenInvalid('The handler has to be specified to use a FingersCrossedHandler or BufferHandler')
+                        ->end()
+                        ->validate()
+                            ->ifTrue(function($v) { return 'fingers_crossed' === $v['type'] && !empty($v['excluded_404s']) && !empty($v['activation_strategy']); })
+                            ->thenInvalid('You can not use excluded_404s together with a custom activation_strategy in a FingersCrossedHandler')
                         ->end()
                         ->validate()
                             ->ifTrue(function($v) { return 'swift_mailer' === $v['type'] && empty($v['email_prototype']) && (empty($v['from_email']) || empty($v['to_email']) || empty($v['subject'])); })
