@@ -15,6 +15,7 @@ use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\Definition;
+use Symfony\Component\HttpKernel\Kernel;
 use Monolog\Logger;
 
 /**
@@ -35,19 +36,6 @@ class DebugHandlerPass implements CompilerPassInterface
     public function process(ContainerBuilder $container)
     {
         if (!$container->hasDefinition('profiler')) {
-            return;
-        }
-
-        // detect if the profiler is present but will be disabled
-        $enabled = true;
-        foreach ($container->getDefinition('profiler')->getMethodCalls() as $call) {
-            if ($call[0] === 'disable') {
-                $enabled = false;
-            } elseif ($call[0] === 'enable') {
-                $enabled = true;
-            }
-        }
-        if (!$enabled) {
             return;
         }
 
