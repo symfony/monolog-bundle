@@ -86,6 +86,8 @@ class MonologExtension extends Extension
                 'Monolog\\Handler\\FingersCrossed\\ErrorLevelActivationStrategy',
             ));
         }
+
+        $container->setParameter('monolog.additional_channels', isset($config['channels']) ? $config['channels'] : array());
     }
 
     /**

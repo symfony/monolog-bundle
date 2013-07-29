@@ -174,6 +174,10 @@ class Configuration implements ConfigurationInterface
         $rootNode
             ->fixXmlConfig('handler')
             ->children()
+                ->arrayNode('channels')
+                    ->canBeUnset()
+                    ->prototype('scalar')->end()
+                ->end()
                 ->arrayNode('handlers')
                     ->canBeUnset()
                     ->useAttributeAsKey('name')
