@@ -21,6 +21,125 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
  * This information is solely responsible for how the different configuration
  * sections are normalized, and merged.
  *
+ * Possible handler types and related configurations (brackets indicate optional params):
+ *
+ * - service:
+ *   - id
+ *
+ * - stream:
+ *   - path: string
+ *   - [level]: level name or int value, defaults to DEBUG
+ *   - [bubble]: bool, defaults to true
+ *
+ * - console:
+ *   - [verbosity_levels]: level => verbosity configuration
+ *   - [level]: level name or int value, defaults to DEBUG
+ *   - [bubble]: bool, defaults to true
+ *
+ * - firephp:
+ *   - [level]: level name or int value, defaults to DEBUG
+ *   - [bubble]: bool, defaults to true
+ *
+ * - gelf:
+ *   - publisher: {id: ...} or {hostname: ..., port: ..., chunk_size: ...}
+ *   - [level]: level name or int value, defaults to DEBUG
+ *   - [bubble]: bool, defaults to true
+ *
+ * - chromephp:
+ *   - [level]: level name or int value, defaults to DEBUG
+ *   - [bubble]: bool, defaults to true
+ *
+ * - rotating_file:
+ *   - path: string
+ *   - [max_files]: files to keep, defaults to zero (infinite)
+ *   - [level]: level name or int value, defaults to DEBUG
+ *   - [bubble]: bool, defaults to true
+ *
+ * - fingers_crossed:
+ *   - handler: the wrapped handler's name
+ *   - [action_level|activation_strategy]: minimum level or service id to activate the handler, defaults to WARNING
+ *   - [buffer_size]: defaults to 0 (unlimited)
+ *   - [stop_buffering]: bool to disable buffering once the handler has been activated, defaults to true
+ *   - [bubble]: bool, defaults to true
+ *
+ * - buffer:
+ *   - handler: the wrapped handler's name
+ *   - [buffer_size]: defaults to 0 (unlimited)
+ *   - [level]: level name or int value, defaults to DEBUG
+ *   - [bubble]: bool, defaults to true
+ *
+ * - group:
+ *   - members: the wrapped handlers by name
+ *   - [bubble]: bool, defaults to true
+ *
+ * - syslog:
+ *   - ident: string
+ *   - [facility]: defaults to LOG_USER
+ *   - [logopts]: defaults to LOG_PID
+ *   - [level]: level name or int value, defaults to DEBUG
+ *   - [bubble]: bool, defaults to true
+ *
+ * - swift_mailer:
+ *   - from_email: optional if email_prototype is given
+ *   - to_email: optional if email_prototype is given
+ *   - subject: optional if email_prototype is given
+ *   - [email_prototype]: service id of a message, defaults to a default message with the three fields above
+ *   - [mailer]: mailer service, defaults to mailer
+ *   - [level]: level name or int value, defaults to DEBUG
+ *   - [bubble]: bool, defaults to true
+ *
+ * - native_mailer:
+ *   - from_email: string
+ *   - to_email: string
+ *   - subject: string
+ *   - [level]: level name or int value, defaults to DEBUG
+ *   - [bubble]: bool, defaults to true
+ *
+ * - socket:
+ *   - connection_string: string
+ *   - [timeout]: float
+ *   - [connection_timeout]: float
+ *   - [persistent]: bool
+ *   - [level]: level name or int value, defaults to DEBUG
+ *   - [bubble]: bool, defaults to true
+ *
+ * - pushover:
+ *   - token: pushover api token
+ *   - user: user id or array of ids
+ *   - [title]: optional title for messages, defaults to the server hostname
+ *   - [level]: level name or int value, defaults to DEBUG
+ *   - [bubble]: bool, defaults to true
+ *
+ * - raven:
+ *   - dsn: connection string
+ *   - [level]: level name or int value, defaults to DEBUG
+ *   - [bubble]: bool, defaults to true
+ *
+ * - newrelic:
+ *   - [level]: level name or int value, defaults to DEBUG
+ *   - [bubble]: bool, defaults to true
+ *
+ * - hipchat:
+ *   - token: hipchat api token
+ *   - room: room id or name
+ *   - [notify]: defaults to false
+ *   - [nickname]: defaults to Monolog
+ *   - [level]: level name or int value, defaults to DEBUG
+ *   - [bubble]: bool, defaults to true
+ *
+ * - null:
+ *   - [level]: level name or int value, defaults to DEBUG
+ *   - [bubble]: bool, defaults to true
+ *
+ * - test:
+ *   - [level]: level name or int value, defaults to DEBUG
+ *   - [bubble]: bool, defaults to true
+ *
+ * - debug:
+ *   - [level]: level name or int value, defaults to DEBUG
+ *   - [bubble]: bool, defaults to true
+ *
+ *
  * @author Jordi Boggiano <j.boggiano@seld.be>
  * @author Christophe Coevoet <stof@notk.org>
  */
