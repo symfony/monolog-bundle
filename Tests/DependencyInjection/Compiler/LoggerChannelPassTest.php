@@ -49,6 +49,8 @@ class LoggerChannelPassTest extends TestCase
                 $this->assertEquals($handler, (string) $arguments[0]);
             }
         }
+
+        $this->assertNotNull($container->getDefinition('monolog.logger.manualchan'));
     }
 
     public function testProcessSetters()
@@ -82,6 +84,7 @@ class LoggerChannelPassTest extends TestCase
             $container->setDefinition($name, $service);
         }
 
+        $container->setParameter('monolog.additional_channels', array('manualchan'));
         $container->setParameter('monolog.handlers_to_channels', array(
             'monolog.handler.a' => array(
                 'type' => 'inclusive',
@@ -117,6 +120,7 @@ class LoggerChannelPassTest extends TestCase
         $service->addMethodCall('setLogger', array(new Reference('logger')));
         $container->setDefinition('foo', $service);
 
+        $container->setParameter('monolog.additional_channels', array('manualchan'));
         $container->setParameter('monolog.handlers_to_channels', array());
 
         $container->getCompilerPassConfig()->setOptimizationPasses(array());
