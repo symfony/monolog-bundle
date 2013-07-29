@@ -336,6 +336,14 @@ class MonologExtension extends Extension
             ));
             break;
 
+        case 'error_log':
+            $definition->setArguments(array(
+                $handler['message_type'],
+                $handler['level'],
+                $handler['bubble'],
+            ));
+            break;
+
         case 'raven':
             $clientId = 'monolog.raven.client.' . sha1($handler['dsn']);
             if (!$container->hasDefinition($clientId)) {

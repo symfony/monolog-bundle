@@ -138,6 +138,11 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
  *
+ * - error_log:
+ *   - [message_type]: int 0 or 4, defaults to 0
+ *   - [level]: level name or int value, defaults to DEBUG
+ *   - [bubble]: bool, defaults to true
+ *
  * - null:
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
@@ -265,6 +270,7 @@ class Configuration implements ConfigurationInterface
                             ->scalarNode('connection_timeout')->end() // socket_handler
                             ->booleanNode('persistent')->end() // socket_handler
                             ->scalarNode('dsn')->end() // raven_handler
+                            ->scalarNode('message_type')->defaultValue(0)->end() // error_log
                             ->arrayNode('verbosity_levels') // console
                                 ->beforeNormalization()
                                     ->ifArray()
