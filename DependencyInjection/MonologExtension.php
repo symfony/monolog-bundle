@@ -320,6 +320,7 @@ class MonologExtension extends Extension
             break;
 
         // Handlers using the constructor of AbstractHandler without adding their own arguments
+        case 'newrelic':
         case 'test':
         case 'null':
         case 'debug':
