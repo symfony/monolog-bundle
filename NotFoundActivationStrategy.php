@@ -44,11 +44,18 @@ class NotFoundActivationStrategy extends ErrorLevelActivationStrategy
 
     public function isHandlerActivated(array $record)
     {
-        if (parent::isHandlerActivated($record) && $this->request && isset($record['context']['exception']) && $record['context']['exception'] instanceof HttpException && $record['context']['exception']->getStatusCode() == 404) {
+        $isActivated = parent::isHandlerActivated($record);
+        if (
+            $isActivated
+            && $this->request
+            && isset($record['context']['exception'])
+            && $record['context']['exception'] instanceof HttpException
+            && $record['context']['exception']->getStatusCode() == 404
+        ) {
             return !preg_match($this->blacklist, $this->request->getPathInfo());
         }
 
-        return false;
+        return $isActivated;
     }
 
     public function setRequest(Request $req = null)
