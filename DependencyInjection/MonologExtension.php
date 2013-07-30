@@ -18,7 +18,6 @@ use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\HttpKernel\Kernel;
 
 /**
  * MonologExtension is an extension for the Monolog library.
@@ -127,8 +126,8 @@ class MonologExtension extends Extension
             break;
 
         case 'console':
-            if (Kernel::VERSION_ID < 20400) {
-                throw new \RuntimeException('The console handler requires Symfony 2.4+');
+            if (!class_exists('Symfony\Bridge\Monolog\Handler\ConsoleHandler')) {
+                throw new \RuntimeException('The console handler requires symfony/monolog-bridge 2.4+');
             }
 
             $definition->setArguments(array(
