@@ -276,6 +276,7 @@ class MonologExtension extends Extension
                 $handler['level'],
                 $handler['bubble'],
             ));
+            $definition->addMethodCall('setTransport', array(new Reference('swiftmailer.transport.real')));
             break;
 
         case 'native_mailer':
