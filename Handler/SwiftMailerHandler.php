@@ -1,9 +1,9 @@
 <?php
 
 /*
- * This file is part of the Monolog package.
+ * This file is part of the Symfony package.
  *
- * (c) Jordi Boggiano <j.boggiano@seld.be>
+ * (c) Fabien Potencier <fabien@symfony.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -12,6 +12,7 @@
 namespace Symfony\Bundle\MonologBundle\Handler;
 
 use Monolog\Handler\SwiftMailerHandler as BaseSwiftMailerHandler;
+use Symfony\Component\HttpKernel\Event\PostResponseEvent;
 
 /**
  * Extended SwiftMailerHandler that flushes mail queue if necessary
@@ -22,6 +23,8 @@ class SwiftMailerHandler extends BaseSwiftMailerHandler
 {
     protected $transport;
 
+    protected $instantFlush = false;
+
     /**
      * @param \Swift_Transport $transport
      */
@@ -31,19 +34,31 @@ class SwiftMailerHandler extends BaseSwiftMailerHandler
     }
 
     /**
+     * After the kernel has been terminated we will always flush messages
+     *
+     * @param PostResponseEvent $event
+     */
+    public function onKernelTerminate(PostResponseEvent $event)
+    {
+        $this->instantFlush = true;
+    }
+
+    /**
      * {@inheritdoc}
      */
     protected function send($content, array $records)
     {
         parent::send($content, $records);
 
-        $this->flushQueue();
+        if ($this->instantFlush) {
+            $this->flushMemorySpool();
+        }
     }
 
     /**
-     * Flushes the mail queue if necessary
+     * Flushes the mail queue if a memory spool is used
      */
-    private function flushQueue()
+    private function flushMemorySpool()
     {
         $transport = $this->mailer->getTransport();
         if (!$transport instanceof \Swift_Transport_SpoolTransport) {
