@@ -369,6 +369,13 @@ class MonologExtension extends Extension
             ));
             break;
 
+        case 'errorlog':
+             $definition->setArguments(array(
+                (isset($handler['message_type']) ? $handler['message_type'] : 0),
+                $handler['level'],
+                $handler['bubble'],
+            ));
+            break;
         // Handlers using the constructor of AbstractHandler without adding their own arguments
         case 'newrelic':
         case 'test':
