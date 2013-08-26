@@ -247,6 +247,13 @@ class MonologExtension extends Extension
             break;
 
         case 'swift_mailer':
+            $oldHandler = false;
+            // fallback for older symfony versions that don't have the new SwiftMailerHandler in the bridge
+            if (!class_exists($definition->getClass())) {
+                $definition = new Definition('Monolog\Handler\SwiftMailerHandler');
+                $oldHandler = true;
+            }
+
             if (isset($handler['email_prototype'])) {
                 if (!empty($handler['email_prototype']['method'])) {
                     $prototype = array(new Reference($handler['email_prototype']['id']), $handler['email_prototype']['method']);
@@ -276,8 +283,10 @@ class MonologExtension extends Extension
                 $handler['level'],
                 $handler['bubble'],
             ));
-            $definition->addMethodCall('setTransport', array(new Reference('swiftmailer.transport.real')));
-            $definition->addTag('kernel.event_listener', array('event' => 'kernel.terminate', 'method' => 'onKernelTerminate'));
+            if (!$oldHandler) {
+                $definition->addMethodCall('setTransport', array(new Reference('swiftmailer.transport.real')));
+                $definition->addTag('kernel.event_listener', array('event' => 'kernel.terminate', 'method' => 'onKernelTerminate'));
+            }
             break;
 
         case 'native_mailer':
