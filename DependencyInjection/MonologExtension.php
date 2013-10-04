@@ -249,7 +249,8 @@ class MonologExtension extends Extension
         case 'swift_mailer':
             $oldHandler = false;
             // fallback for older symfony versions that don't have the new SwiftMailerHandler in the bridge
-            if (!class_exists($definition->getClass())) {
+            $newHandlerClass = $container->getParameterBag()->resolveValue($definition->getClass());
+            if (!class_exists($newHandlerClass)) {
                 $definition = new Definition('Monolog\Handler\SwiftMailerHandler');
                 $oldHandler = true;
             }
