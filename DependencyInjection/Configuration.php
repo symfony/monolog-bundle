@@ -55,6 +55,11 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
  *
+ * - mongo:
+ *   - mongo: {id: ...} or {host, [port], [user, pass], database, collection}
+ *   - [level]: level name or int value, defaults to DEBUG
+ *   - [bubble]: bool, defaults to true
+ *
  * - fingers_crossed:
  *   - handler: the wrapped handler's name
  *   - [action_level|activation_strategy]: minimum level or service id to activate the handler, defaults to WARNING
@@ -247,6 +252,28 @@ class Configuration implements ConfigurationInterface
                                     ->thenInvalid('What must be set is either the hostname or the id.')
                                 ->end()
                             ->end() // gelf
+                            ->arrayNode('mongo')
+                                ->canBeUnset()
+                                ->beforeNormalization()
+                                    ->ifString()
+                                    ->then(function($v) { return array('id'=> $v); })
+                                ->end()
+                                ->children()
+                                    ->scalarNode('id')->end()
+                                    ->scalarNode('host')->end()
+                                    ->scalarNode('port')->defaultValue(27017)->end()
+                                    ->scalarNode('user')->end()
+                                    ->scalarNode('pass')->end()
+                                    ->scalarNode('database')->end()
+                                    ->scalarNode('collection')->end()
+                                ->end()
+                                ->validate()
+                                    ->ifTrue(function($v) {
+                                        return !isset($v['id']) && !isset($v['host']);
+                                    })
+                                    ->thenInvalid('What must be set is either the host or the id.')
+                                ->end()
+                            ->end() // mongo
                             ->arrayNode('members') // group
                                 ->canBeUnset()
                                 ->performNoDeepMerging()

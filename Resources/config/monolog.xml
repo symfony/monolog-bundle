@@ -33,6 +33,9 @@
 
         <parameter key="monolog.handler.fingers_crossed.class">Monolog\Handler\FingersCrossedHandler</parameter>
         <parameter key="monolog.handler.fingers_crossed.error_level_activation_strategy.class">Monolog\Handler\FingersCrossed\ErrorLevelActivationStrategy</parameter>
+        <parameter key="monolog.handler.mongo.class">Monolog\Handler\MongoDBHandler</parameter>
+        <parameter key="monolog.mongo.client.class">MongoClient</parameter>
+
     </parameters>
 
     <services>
