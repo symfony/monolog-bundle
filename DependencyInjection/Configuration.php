@@ -273,6 +273,12 @@ class Configuration implements ConfigurationInterface
                                     })
                                     ->thenInvalid('What must be set is either the host or the id.')
                                 ->end()
+                                ->validate()
+                                    ->ifTrue(function($v) {
+                                        return isset($v['user']) && !isset($v['pass']);
+                                    })
+                                    ->thenInvalid('If you set user, you must provide a password.')
+                                ->end()
                             ->end() // mongo
                             ->arrayNode('members') // group
                                 ->canBeUnset()
