@@ -56,7 +56,14 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
  *   - [bubble]: bool, defaults to true
  *
  * - mongo:
- *   - mongo: {id: ...} or {host, [port], [user, pass], database, collection}
+ *   - mongo:  
+ *      - id: optional if host is given 
+ *      - host: database host name, optional if id is given
+ *      - [port]: defaults to 27017
+ *      - [user]: database user name
+ *      - pass: mandatory if user is present
+ *      - [database]: defaults to monolog
+ *      - [collection]: defaults to logs
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
  *
@@ -264,8 +271,8 @@ class Configuration implements ConfigurationInterface
                                     ->scalarNode('port')->defaultValue(27017)->end()
                                     ->scalarNode('user')->end()
                                     ->scalarNode('pass')->end()
-                                    ->scalarNode('database')->end()
-                                    ->scalarNode('collection')->end()
+                                    ->scalarNode('database')->defaultValue('monolog')->end()
+                                    ->scalarNode('collection')->defaultValue('logs')->end()
                                 ->end()
                                 ->validate()
                                     ->ifTrue(function($v) {
