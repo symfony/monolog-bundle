@@ -185,7 +185,7 @@ class MonologExtension extends Extension
                     $server
                 ));
 
-                $clientId = 'monolog.mongo.client';
+                $clientId = uniqid('monolog.mongo.client.');
                 $client->setPublic(false);
                 $container->setDefinition($clientId, $client);
             }
