@@ -56,12 +56,12 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
  *   - [bubble]: bool, defaults to true
  *
  * - mongo:
- *   - mongo:  
- *      - id: optional if host is given 
+ *   - mongo:
+ *      - id: optional if host is given
  *      - host: database host name, optional if id is given
  *      - [port]: defaults to 27017
  *      - [user]: database user name
- *      - pass: mandatory if user is present
+ *      - pass: mandatory only if user is present
  *      - [database]: defaults to monolog
  *      - [collection]: defaults to logs
  *   - [level]: level name or int value, defaults to DEBUG
@@ -479,6 +479,10 @@ class Configuration implements ConfigurationInterface
                         ->validate()
                             ->ifTrue(function($v) { return 'cube' === $v['type'] && empty($v['url']); })
                             ->thenInvalid('The url has to be specified to use a CubeHandler')
+                        ->end()
+                        ->validate()
+                            ->ifTrue(function($v) { return 'mongo' === $v['type'] && !isset($v['mongo']); })
+                            ->thenInvalid('The mongo configuration has to be specified to use a MongoHandler')
                         ->end()
                         ->validate()
                             ->ifTrue(function($v) { return 'amqp' === $v['type'] && empty($v['exchange']); })
