@@ -55,6 +55,18 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
  *
+ * - mongo:
+ *   - mongo:
+ *      - id: optional if host is given
+ *      - host: database host name, optional if id is given
+ *      - [port]: defaults to 27017
+ *      - [user]: database user name
+ *      - pass: mandatory only if user is present
+ *      - [database]: defaults to monolog
+ *      - [collection]: defaults to logs
+ *   - [level]: level name or int value, defaults to DEBUG
+ *   - [bubble]: bool, defaults to true
+ *
  * - fingers_crossed:
  *   - handler: the wrapped handler's name
  *   - [action_level|activation_strategy]: minimum level or service id to activate the handler, defaults to WARNING
@@ -247,6 +259,34 @@ class Configuration implements ConfigurationInterface
                                     ->thenInvalid('What must be set is either the hostname or the id.')
                                 ->end()
                             ->end() // gelf
+                            ->arrayNode('mongo')
+                                ->canBeUnset()
+                                ->beforeNormalization()
+                                    ->ifString()
+                                    ->then(function($v) { return array('id'=> $v); })
+                                ->end()
+                                ->children()
+                                    ->scalarNode('id')->end()
+                                    ->scalarNode('host')->end()
+                                    ->scalarNode('port')->defaultValue(27017)->end()
+                                    ->scalarNode('user')->end()
+                                    ->scalarNode('pass')->end()
+                                    ->scalarNode('database')->defaultValue('monolog')->end()
+                                    ->scalarNode('collection')->defaultValue('logs')->end()
+                                ->end()
+                                ->validate()
+                                    ->ifTrue(function($v) {
+                                        return !isset($v['id']) && !isset($v['host']);
+                                    })
+                                    ->thenInvalid('What must be set is either the host or the id.')
+                                ->end()
+                                ->validate()
+                                    ->ifTrue(function($v) {
+                                        return isset($v['user']) && !isset($v['pass']);
+                                    })
+                                    ->thenInvalid('If you set user, you must provide a password.')
+                                ->end()
+                            ->end() // mongo
                             ->arrayNode('members') // group
                                 ->canBeUnset()
                                 ->performNoDeepMerging()
@@ -439,6 +479,10 @@ class Configuration implements ConfigurationInterface
                         ->validate()
                             ->ifTrue(function($v) { return 'cube' === $v['type'] && empty($v['url']); })
                             ->thenInvalid('The url has to be specified to use a CubeHandler')
+                        ->end()
+                        ->validate()
+                            ->ifTrue(function($v) { return 'mongo' === $v['type'] && !isset($v['mongo']); })
+                            ->thenInvalid('The mongo configuration has to be specified to use a MongoHandler')
                         ->end()
                         ->validate()
                             ->ifTrue(function($v) { return 'amqp' === $v['type'] && empty($v['exchange']); })
