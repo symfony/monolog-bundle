@@ -196,6 +196,7 @@ class Configuration implements ConfigurationInterface
                     ->useAttributeAsKey('name')
                     ->prototype('array')
                         ->fixXmlConfig('member')
+                        ->fixXmlConfig('excluded_404')
                         ->canBeUnset()
                         ->children()
                             ->scalarNode('type')
