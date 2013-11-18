@@ -185,6 +185,7 @@ class Configuration implements ConfigurationInterface
         $rootNode = $treeBuilder->root('monolog');
 
         $rootNode
+            ->fixXmlConfig('channel')
             ->fixXmlConfig('handler')
             ->children()
                 ->arrayNode('channels')
