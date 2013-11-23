@@ -156,7 +156,7 @@ class MonologExtension extends Extension
                     $handler['publisher']['chunk_size'],
                 ));
 
-                $publisherId = 'monolog.gelf.publisher';
+                $publisherId = uniqid('monolog.gelf.publisher.');
                 $publisher->setPublic(false);
                 $container->setDefinition($publisherId, $publisher);
             }
@@ -169,7 +169,6 @@ class MonologExtension extends Extension
             break;
 
         case 'mongo':
-
             if (isset($handler['mongo']['id'])) {
                 $clientId = $handler['mongo']['id'];
             } else {
