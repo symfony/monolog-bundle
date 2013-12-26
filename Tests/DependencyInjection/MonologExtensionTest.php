@@ -193,6 +193,46 @@ class MonologExtensionTest extends DependencyInjectionTest
         $this->assertDICDefinitionClass($handler, '%monolog.handler.raven.class%');
     }
 
+    public function testLogglyHandler()
+    {
+        $token = '026308d8-2b63-4225-8fe9-e01294b6e472';
+        try {
+            $this->getContainer(array(array('handlers' => array('loggly' => array('type' => 'loggly')))));
+            $this->fail();
+        } catch (InvalidConfigurationException $e) {
+            $this->assertContains('token', $e->getMessage());
+        }
+
+        try {
+            $this->getContainer(array(array('handlers' => array('loggly' => array(
+                'type' => 'loggly', 'token' => $token, 'tags' => 'x, 1zone ,www.loggly.com,-us,apache$')
+            ))));
+            $this->fail();
+        } catch (InvalidConfigurationException $e) {
+            $this->assertContains('-us, apache$', $e->getMessage());
+        }
+
+        $container = $this->getContainer(array(array('handlers' => array('loggly' => array(
+            'type' => 'loggly', 'token' => $token)
+        ))));
+        $this->assertTrue($container->hasDefinition('monolog.logger'));
+        $this->assertTrue($container->hasDefinition('monolog.handler.loggly'));
+
+        $logger = $container->getDefinition('monolog.logger');
+        $this->assertDICDefinitionMethodCallAt(0, $logger, 'pushHandler', array(new Reference('monolog.handler.loggly')));
+        $handler = $container->getDefinition('monolog.handler.loggly');
+        $this->assertDICDefinitionClass($handler, '%monolog.handler.loggly.class%');
+        $this->assertDICConstructorArguments($handler, array($token, \Monolog\Logger::DEBUG, true));
+        $this->assertEmpty($handler->getMethodCalls());
+
+        $container = $this->getContainer(array(array('handlers' => array('loggly' => array(
+            'type' => 'loggly', 'token' => $token, 'tags' => array(' ', 'foo', '', 'bar'))
+        ))));
+        $handler = $container->getDefinition('monolog.handler.loggly');
+        $this->assertDICDefinitionMethodCallAt(0, $handler, 'setTag', array('foo,bar'));
+
+    }
+
     protected function getContainer(array $config = array())
     {
         $container = new ContainerBuilder();
