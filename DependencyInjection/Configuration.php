@@ -168,6 +168,11 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
  *
+ * - loggly:
+ *   - token: loggly api token
+ *   - [level]: level name or int value, defaults to DEBUG
+ *   - [bubble]: bool, defaults to true
+ *   - [tags]: tag names
  *
  * @author Jordi Boggiano <j.boggiano@seld.be>
  * @author Christophe Coevoet <stof@notk.org>
@@ -198,6 +203,7 @@ class Configuration implements ConfigurationInterface
                     ->prototype('array')
                         ->fixXmlConfig('member')
                         ->fixXmlConfig('excluded_404')
+                        ->fixXmlConfig('tag')
                         ->canBeUnset()
                         ->children()
                             ->scalarNode('type')
@@ -232,7 +238,7 @@ class Configuration implements ConfigurationInterface
                             ->scalarNode('room')->end() // hipchat
                             ->scalarNode('notify')->defaultFalse()->end() // hipchat
                             ->scalarNode('nickname')->defaultValue('Monolog')->end() // hipchat
-                            ->scalarNode('token')->end() // pushover & hipchat
+                            ->scalarNode('token')->end() // pushover & hipchat & loggly
                             ->variableNode('user') // pushover
                                 ->validate()
                                     ->ifTrue(function($v) {
@@ -322,6 +328,17 @@ class Configuration implements ConfigurationInterface
                             ->booleanNode('persistent')->end() // socket_handler
                             ->scalarNode('dsn')->end() // raven_handler
                             ->scalarNode('message_type')->defaultValue(0)->end() // error_log
+                            ->arrayNode('tags') // loggly
+                                ->beforeNormalization()
+                                    ->ifString()
+                                    ->then(function($v) { return explode(',', $v); })
+                                ->end()
+                                ->beforeNormalization()
+                                    ->ifArray()
+                                    ->then(function($v) { return array_filter(array_map('trim', $v)); })
+                                ->end()
+                                ->prototype('scalar')->end()
+                            ->end()
                             ->arrayNode('verbosity_levels') // console
                                 ->beforeNormalization()
                                     ->ifArray()
@@ -489,6 +506,21 @@ class Configuration implements ConfigurationInterface
                         ->validate()
                             ->ifTrue(function($v) { return 'amqp' === $v['type'] && empty($v['exchange']); })
                             ->thenInvalid('The exchange has to be specified to use a AmqpHandler')
+                        ->end()
+                        ->validate()
+                            ->ifTrue(function($v) { return 'loggly' === $v['type'] && empty($v['token']); })
+                            ->thenInvalid('The token has to be specified to use a LogglyHandler')
+                        ->end()
+                        ->validate()
+                            ->ifTrue(function($v) { return 'loggly' === $v['type'] && !empty($v['tags']); })
+                            ->then(function($v) {
+                                $invalidTags = preg_grep('/^[a-z0-9][a-z0-9\.\-_]*$/i', $v['tags'], PREG_GREP_INVERT);
+                                if (!empty($invalidTags)) {
+                                    throw new InvalidConfigurationException(sprintf('The following Loggly tags are invalid: %s.', implode(', ', $invalidTags)));
+                                }
+
+                                return $v;
+                            })
                         ->end()
                     ->end()
                     ->validate()
