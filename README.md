@@ -11,3 +11,8 @@ your current version of Symfony. The minimum version of Symfony2 for this workfl
 is 2.3.0.
 
 More information in the official [documentation](http://symfony.com/doc/current/cookbook/logging/index.html).
+
+License
+=======
+
+This bundle is released under the [MIT license](Resources/meta/LICENSE)
