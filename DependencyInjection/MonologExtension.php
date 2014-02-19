@@ -29,6 +29,8 @@ class MonologExtension extends Extension
 {
     private $nestedHandlers = array();
 
+    private $swiftMailerHandlers = array();
+
     /**
      * Loads the Monolog configuration.
      *
@@ -53,6 +55,11 @@ class MonologExtension extends Extension
                     'channels' => isset($handler['channels']) ? $handler['channels'] : null
                 );
             }
+
+            $container->setParameter(
+                'monolog.swift_mailer.handlers',
+                $this->swiftMailerHandlers
+            );
 
             ksort($handlers);
             $sortedHandlers = array();
@@ -315,7 +322,7 @@ class MonologExtension extends Extension
                 $handler['bubble'],
             ));
             if (!$oldHandler) {
-                $definition->addMethodCall('setTransport', array(new Reference('swiftmailer.transport.real')));
+                $this->swiftMailerHandlers[] = $handlerId;
                 $definition->addTag('kernel.event_listener', array('event' => 'kernel.terminate', 'method' => 'onKernelTerminate'));
             }
             break;
