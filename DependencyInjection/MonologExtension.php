@@ -300,12 +300,19 @@ class MonologExtension extends Extension
                 }
             } else {
                 $message = new Definition('Swift_Message');
-                $message->setFactoryService('mailer');
                 $message->setFactoryMethod('createMessage');
                 $message->setPublic(false);
                 $message->addMethodCall('setFrom', array($handler['from_email']));
                 $message->addMethodCall('setTo', array($handler['to_email']));
                 $message->addMethodCall('setSubject', array($handler['subject']));
+
+                if(isset($handler['mailer'])){ 
+                    $mailer = $handler['mailer'];
+                } else {
+                    $mailer = 'mailer';
+                }
+                $message->setFactoryService($mailer);
+
 
                 if (isset($handler['content_type'])) {
                     $message->addMethodCall('setContentType', array($handler['content_type']));
