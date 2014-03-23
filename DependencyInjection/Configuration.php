@@ -92,6 +92,14 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
  *
+ * - syslogudp:
+ *   - host: syslogd host name
+ *   - [port]: defaults to 514
+ *   - [facility]: defaults to LOG_USER
+ *   - [logopts]: defaults to LOG_PID
+ *   - [level]: level name or int value, defaults to DEBUG
+ *   - [bubble]: bool, defaults to true
+ *
  * - swift_mailer:
  *   - from_email: optional if email_prototype is given
  *   - to_email: optional if email_prototype is given
@@ -248,6 +256,8 @@ class Configuration implements ConfigurationInterface
                                 ->end()
                             ->end()
                             ->scalarNode('title')->defaultNull()->end() // pushover
+                            ->scalarNode('host')->end() // syslogudp
+                            ->scalarNode('port')->defaultValue(514)->end() // syslogudp
                             ->arrayNode('publisher')
                                 ->canBeUnset()
                                 ->beforeNormalization()
@@ -474,6 +484,10 @@ class Configuration implements ConfigurationInterface
                         ->validate()
                             ->ifTrue(function($v) { return 'service' === $v['type'] && !isset($v['id']); })
                             ->thenInvalid('The id has to be specified to use a service as handler')
+                        ->end()
+                        ->validate()
+                            ->ifTrue(function($v) { return 'syslogudp' === $v['type'] && !isset($v['host']); })
+                            ->thenInvalid('The host has to be specified to use a syslogudp as handler')
                         ->end()
                         ->validate()
                             ->ifTrue(function($v) { return 'gelf' === $v['type'] && !isset($v['publisher']); })
