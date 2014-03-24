@@ -283,6 +283,16 @@ class MonologExtension extends Extension
             ));
             break;
 
+        case 'syslogudp':
+            $definition->setArguments(array(
+                $handler['host'],
+                $handler['port'],
+                $handler['facility'],
+                $handler['level'],
+                $handler['bubble'],
+            ));
+            break;
+
         case 'swift_mailer':
             $oldHandler = false;
             // fallback for older symfony versions that don't have the new SwiftMailerHandler in the bridge
