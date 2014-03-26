@@ -316,7 +316,7 @@ class MonologExtension extends Extension
                 $message->addMethodCall('setTo', array($handler['to_email']));
                 $message->addMethodCall('setSubject', array($handler['subject']));
 
-                if(isset($handler['mailer'])){ 
+                if(isset($handler['mailer'])){
                     $mailer = $handler['mailer'];
                 } else {
                     $mailer = 'mailer';
@@ -341,6 +341,9 @@ class MonologExtension extends Extension
             if (!$oldHandler) {
                 $this->swiftMailerHandlers[] = $handlerId;
                 $definition->addTag('kernel.event_listener', array('event' => 'kernel.terminate', 'method' => 'onKernelTerminate'));
+                if (method_exists($newHandlerClass, 'onCliTerminate')) {
+                    $definition->addTag('kernel.event_listener', array('event' => 'console.terminate', 'method' => 'onCliTerminate'));
+                }
             }
             break;
 
