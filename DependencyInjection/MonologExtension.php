@@ -447,6 +447,15 @@ class MonologExtension extends Extension
             }
             break;
 
+        case 'logentries':
+            $definition->setArguments(array(
+                $handler['token'],
+                $handler['use_ssl'],
+                $handler['level'],
+                $handler['bubble'],
+            ));
+            break;
+
         // Handlers using the constructor of AbstractHandler without adding their own arguments
         case 'newrelic':
         case 'test':

@@ -182,6 +182,12 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
  *   - [bubble]: bool, defaults to true
  *   - [tags]: tag names
  *
+ * - logentries:
+ *   - token: logentries api token
+ *   - use_ssl: whether or not SSL encryption should be used.
+ *   - [level]: level name or int value, defaults to DEBUG
+ *   - [bubble]: bool, defaults to true
+ *
  * @author Jordi Boggiano <j.boggiano@seld.be>
  * @author Christophe Coevoet <stof@notk.org>
  */
@@ -246,7 +252,8 @@ class Configuration implements ConfigurationInterface
                             ->scalarNode('room')->end() // hipchat
                             ->scalarNode('notify')->defaultFalse()->end() // hipchat
                             ->scalarNode('nickname')->defaultValue('Monolog')->end() // hipchat
-                            ->scalarNode('token')->end() // pushover & hipchat & loggly
+                            ->scalarNode('token')->end() // pushover & hipchat & loggly & logentries
+                            ->booleanNode('use_ssl')->defaultTrue()->end() // logentries
                             ->variableNode('user') // pushover
                                 ->validate()
                                     ->ifTrue(function($v) {
@@ -535,6 +542,10 @@ class Configuration implements ConfigurationInterface
 
                                 return $v;
                             })
+                        ->end()
+                        ->validate()
+                            ->ifTrue(function($v) { return 'logentries' === $v['type'] && empty($v['token']); })
+                            ->thenInvalid('The token has to be specified to use a LogEntriesHandler')
                         ->end()
                     ->end()
                     ->validate()
