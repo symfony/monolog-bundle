@@ -184,7 +184,7 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
  *
  * - logentries:
  *   - token: logentries api token
- *   - use_ssl: whether or not SSL encryption should be used.
+ *   - [use_ssl]: whether or not SSL encryption should be used, defaults to true
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
  *
