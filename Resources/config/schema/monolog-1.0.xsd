@@ -41,7 +41,10 @@
         <xsd:attribute name="from-email" type="xsd:string" />
         <xsd:attribute name="to-email" type="xsd:string" />
         <xsd:attribute name="subject" type="xsd:string" />
-        <xsd:attribute name="formatter" type="xsd:string" />
+        <xsd:attribute name="notify" type="xsd:boolean" />
+        <xsd:attribute name="room" type="xsd:string" />
+        <xsd:attribute name="nickname" type="xsd:string" />
+        <xsd:attribute name="use-ssl" type="xsd:boolean" />
     </xsd:complexType>
 
     <xsd:simpleType name="level">
