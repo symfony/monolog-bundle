@@ -559,7 +559,6 @@ class Configuration implements ConfigurationInterface
                             'level' => 'ERROR',
                             'bubble' => 'false',
                             'formatter' => 'my_formatter',
-                            'processors' => array('some_callable')
                             ),
                         'main' => array(
                             'type' => 'fingers_crossed',
@@ -569,7 +568,7 @@ class Configuration implements ConfigurationInterface
                             ),
                         'custom' => array(
                             'type' => 'service',
-                            'id' => 'my_handler'
+                            'id' => 'my_handler',
                             )
                         ))
                 ->end()
