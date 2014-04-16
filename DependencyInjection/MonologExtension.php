@@ -156,7 +156,22 @@ class MonologExtension extends Extension
         case 'gelf':
             if (isset($handler['publisher']['id'])) {
                 $publisherId = $handler['publisher']['id'];
-            } else {
+            } elseif (class_exists('Gelf\Transport\UdpTransport')) {
+                $transport = new Definition("Gelf\Transport\UdpTransport", array(
+                    $handler['publisher']['hostname'],
+                    $handler['publisher']['port'],
+                    $handler['publisher']['chunk_size'],
+                ));
+                $transportId = uniqid('monolog.gelf.transport.');
+                $transport->setPublic(false);
+                $container->setDefinition($transportId, $transport);
+
+                $publisher = new Definition("%monolog.gelfphp.publisher.class%", array());
+                $publisher->addMethodCall('addTransport', array(new Reference($transportId)));
+                $publisherId = uniqid('monolog.gelf.publisher.');
+                $publisher->setPublic(false);
+                $container->setDefinition($publisherId, $publisher);
+            } elseif (class_exists('Gelf\MessagePublisher')) {
                 $publisher = new Definition("%monolog.gelf.publisher.class%", array(
                     $handler['publisher']['hostname'],
                     $handler['publisher']['port'],
@@ -166,6 +181,8 @@ class MonologExtension extends Extension
                 $publisherId = uniqid('monolog.gelf.publisher.');
                 $publisher->setPublic(false);
                 $container->setDefinition($publisherId, $publisher);
+            } else {
+                throw new \RuntimeException('The gelf handler requires the graylog2/gelf-php package to be installed');
             }
 
             $definition->setArguments(array(
