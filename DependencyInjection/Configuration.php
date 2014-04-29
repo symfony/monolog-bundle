@@ -133,7 +133,7 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
  *
  * - raven:
  *   - dsn: connection string
- *   - service_id: Raven client custom service id (optional)
+ *   - client_id: Raven client custom service id (optional)
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
  *
@@ -345,7 +345,7 @@ class Configuration implements ConfigurationInterface
                             ->scalarNode('connection_timeout')->end() // socket_handler
                             ->booleanNode('persistent')->end() // socket_handler
                             ->scalarNode('dsn')->end() // raven_handler
-                            ->scalarNode('service_id')->defaultNull()->end() // raven_handler
+                            ->scalarNode('client_id')->defaultNull()->end() // raven_handler
                             ->scalarNode('message_type')->defaultValue(0)->end() // error_log
                             ->arrayNode('tags') // loggly
                                 ->beforeNormalization()

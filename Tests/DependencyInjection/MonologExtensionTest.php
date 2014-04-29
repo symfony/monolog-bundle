@@ -195,7 +195,7 @@ class MonologExtensionTest extends DependencyInjectionTest
         $this->assertDICDefinitionClass($handler, '%monolog.handler.raven.class%');
 
         $container = $this->getContainer(array(array('handlers' => array('raven' => array(
-            'type' => 'raven', 'dsn' => $dsn, 'service_id' => 'raven.client')
+            'type' => 'raven', 'dsn' => $dsn, 'client_id' => 'raven.client')
         ))));
 
         $this->assertTrue($container->hasDefinition('raven.client'));
