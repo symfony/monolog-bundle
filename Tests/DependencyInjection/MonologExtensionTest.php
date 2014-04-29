@@ -181,7 +181,7 @@ class MonologExtensionTest extends DependencyInjectionTest
         }
 
         $container = $this->getContainer(array(array('handlers' => array('raven' => array(
-            'type' => 'raven', 'dsn' => $dsn )
+            'type' => 'raven', 'dsn' => $dsn)
         ))));
         $this->assertTrue($container->hasDefinition('monolog.logger'));
         $this->assertTrue($container->hasDefinition('monolog.handler.raven'));
@@ -189,8 +189,19 @@ class MonologExtensionTest extends DependencyInjectionTest
         $logger = $container->getDefinition('monolog.logger');
         $this->assertDICDefinitionMethodCallAt(0, $logger, 'pushHandler', array(new Reference('monolog.handler.raven')));
 
+        $this->assertTrue($container->hasDefinition('monolog.raven.client.'.sha1($dsn)));
+
         $handler = $container->getDefinition('monolog.handler.raven');
         $this->assertDICDefinitionClass($handler, '%monolog.handler.raven.class%');
+
+        $container = $this->getContainer(array(array('handlers' => array('raven' => array(
+            'type' => 'raven', 'dsn' => $dsn, 'client_id' => 'raven.client')
+        ))));
+
+        $this->assertTrue($container->hasDefinition('raven.client'));
+
+        $handler = $container->getDefinition('raven.client');
+        $this->assertDICDefinitionClass($handler, 'Raven_Client');
     }
 
     public function testLogglyHandler()
