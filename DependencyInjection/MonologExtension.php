@@ -31,6 +31,11 @@ class MonologExtension extends Extension
 
     private $swiftMailerHandlers = array();
 
+    private function levelToMonologConst($level)
+    {
+        return is_int($level) ? $level : constant('Monolog\Logger::'.strtoupper($level));
+    }
+
     /**
      * Loads the Monolog configuration.
      *
@@ -85,6 +90,7 @@ class MonologExtension extends Extension
                 'Monolog\\Handler\\AbstractProcessingHandler',
                 'Monolog\\Handler\\StreamHandler',
                 'Monolog\\Handler\\FingersCrossedHandler',
+                'Monolog\\Handler\\FilterHandler',
                 'Monolog\\Handler\\TestHandler',
                 'Monolog\\Logger',
                 'Symfony\\Bridge\\Monolog\\Logger',
@@ -116,7 +122,7 @@ class MonologExtension extends Extension
     {
         $handlerId = $this->getHandlerId($name);
         $definition = new Definition(sprintf('%%monolog.handler.%s.class%%', $handler['type']));
-        $handler['level'] = is_int($handler['level']) ? $handler['level'] : constant('Monolog\Logger::'.strtoupper($handler['level']));
+        $handler['level'] =  $this->levelToMonologConst($handler['level']);
 
         switch ($handler['type']) {
         case 'service':
@@ -240,7 +246,7 @@ class MonologExtension extends Extension
             break;
 
         case 'fingers_crossed':
-            $handler['action_level'] = is_int($handler['action_level']) ? $handler['action_level'] : constant('Monolog\Logger::'.strtoupper($handler['action_level']));
+            $handler['action_level'] = $this->levelToMonologConst($handler['action_level']);
             $nestedHandlerId = $this->getHandlerId($handler['handler']);
             $this->nestedHandlers[] = $nestedHandlerId;
 
@@ -261,6 +267,21 @@ class MonologExtension extends Extension
                 $handler['buffer_size'],
                 $handler['bubble'],
                 $handler['stop_buffering'],
+            ));
+            break;
+
+        case 'filter':
+            $handler['min_level'] = $this->levelToMonologConst($handler['min_level']);
+            $handler['max_level'] = $this->levelToMonologConst($handler['max_level']);
+            $nestedHandlerId = $this->getHandlerId($handler['handler']);
+            $this->nestedHandlers[] = $nestedHandlerId;
+            $minLevelOrList = isset($handler['level_list']) ? $handler['level_list'] : $handler['min_level'];
+
+            $definition->setArguments(array(
+                new Reference($nestedHandlerId),
+                $minLevelOrList,
+                $handler['max_level'],
+                $handler['bubble']
             ));
             break;
 

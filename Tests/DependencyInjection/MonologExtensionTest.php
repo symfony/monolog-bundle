@@ -73,6 +73,17 @@ class MonologExtensionTest extends DependencyInjectionTest
     /**
      * @expectedException Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
      */
+    public function testExceptionWhenUsingFilterWithoutHandler()
+    {
+        $container = new ContainerBuilder();
+        $loader = new MonologExtension();
+
+        $loader->load(array(array('handlers' => array('main' => array('type' => 'filter')))), $container);
+    }
+
+    /**
+     * @expectedException Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
+     */
     public function testExceptionWhenUsingBufferWithoutHandler()
     {
         $container = new ContainerBuilder();

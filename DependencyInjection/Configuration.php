@@ -75,6 +75,13 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
  *   - [stop_buffering]: bool to disable buffering once the handler has been activated, defaults to true
  *   - [bubble]: bool, defaults to true
  *
+ * - filter:
+ *   - handler: the wrapped handler's name
+ *   - [level_list]: list of levels to accept
+ *   - [min_level]: minimum level to accept (only use if level_list not specified)
+ *   - [max_level]: maximum level to accept (only use if level_list not specified)
+ *   - [bubble]: bool, defaults to true
+ *
  * - buffer:
  *   - handler: the wrapped handler's name
  *   - [buffer_size]: defaults to 0 (unlimited)
@@ -245,6 +252,12 @@ class Configuration implements ConfigurationInterface
                                 ->canBeUnset()
                                 ->prototype('scalar')->end()
                             ->end()
+                            ->arrayNode('level_list') // filter
+                                ->canBeUnset()
+                                ->prototype('scalar')->end()
+                            ->end()
+                            ->scalarNode('min_level')->defaultValue('DEBUG')->end() // filter
+                            ->scalarNode('max_level')->defaultValue('EMERGENCY')->end() //filter
                             ->scalarNode('buffer_size')->defaultValue(0)->end() // fingers_crossed and buffer
                             ->scalarNode('handler')->end() // fingers_crossed and buffer
                             ->scalarNode('url')->end() // cube
@@ -475,12 +488,20 @@ class Configuration implements ConfigurationInterface
                             ->thenInvalid('Service handlers can not have a formatter configured in the bundle, you must reconfigure the service itself instead')
                         ->end()
                         ->validate()
-                            ->ifTrue(function($v) { return ('fingers_crossed' === $v['type'] || 'buffer' === $v['type']) && 1 !== count($v['handler']); })
-                            ->thenInvalid('The handler has to be specified to use a FingersCrossedHandler or BufferHandler')
+                            ->ifTrue(function($v) { return ('fingers_crossed' === $v['type'] || 'buffer' === $v['type'] || 'filter' === $v['type']) && 1 !== count($v['handler']); })
+                            ->thenInvalid('The handler has to be specified to use a FingersCrossedHandler or BufferHandler or FilterHandler')
                         ->end()
                         ->validate()
                             ->ifTrue(function($v) { return 'fingers_crossed' === $v['type'] && !empty($v['excluded_404s']) && !empty($v['activation_strategy']); })
                             ->thenInvalid('You can not use excluded_404s together with a custom activation_strategy in a FingersCrossedHandler')
+                        ->end()
+                        ->validate()
+                            ->ifTrue(function($v) { return 'filter' === $v['type'] && !empty($v['min_level']) && !empty($v['level_list']); })
+                            ->thenInvalid('You can not use min_level together with level_list in a FilterHandler')
+                        ->end()
+                        ->validate()
+                            ->ifTrue(function($v) { return 'filter' === $v['type'] && !empty($v['max_level']) && !empty($v['level_list']); })
+                            ->thenInvalid('You can not use max_level together with level_list in a FilterHandler')
                         ->end()
                         ->validate()
                             ->ifTrue(function($v) { return 'swift_mailer' === $v['type'] && empty($v['email_prototype']) && (empty($v['from_email']) || empty($v['to_email']) || empty($v['subject'])); })
