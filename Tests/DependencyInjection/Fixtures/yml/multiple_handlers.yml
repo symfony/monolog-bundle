@@ -11,3 +11,9 @@ monolog:
             handler: nested
         nested:
             type: stream
+        filtered:
+            type: filter
+            level_list: [WARNING, ERROR]
+            handler: nested2
+        nested2:
+            type: stream

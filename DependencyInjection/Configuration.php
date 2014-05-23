@@ -256,8 +256,8 @@ class Configuration implements ConfigurationInterface
                                 ->canBeUnset()
                                 ->prototype('scalar')->end()
                             ->end()
-                            ->scalarNode('min_level')->defaultValue('DEBUG')->end() // filter
-                            ->scalarNode('max_level')->defaultValue('EMERGENCY')->end() //filter
+                            ->scalarNode('min_level')->defaultNull()->end() // filter
+                            ->scalarNode('max_level')->defaultNull()->end() //filter
                             ->scalarNode('buffer_size')->defaultValue(0)->end() // fingers_crossed and buffer
                             ->scalarNode('handler')->end() // fingers_crossed and buffer
                             ->scalarNode('url')->end() // cube

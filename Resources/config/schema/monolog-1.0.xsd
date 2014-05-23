@@ -22,6 +22,7 @@
             <xsd:element name="mongo" type="mongo" minOccurs="0" maxOccurs="1" />
             <xsd:element name="excluded-404" type="xsd:string" minOccurs="0" maxOccurs="unbounded" />
             <xsd:element name="tag" type="xsd:string" minOccurs="0" maxOccurs="unbounded" />
+            <xsd:element name="level-list" type="level" minOccurs="0" maxOccurs="unbounded" />
         </xsd:sequence>
         <xsd:attribute name="type" type="xsd:string" />
         <xsd:attribute name="priority" type="xsd:integer" />
@@ -35,6 +36,8 @@
         <xsd:attribute name="host" type="xsd:string" />
         <xsd:attribute name="port" type="xsd:integer" />
         <xsd:attribute name="action-level" type="level" />
+        <xsd:attribute name="min-level" type="level" />
+        <xsd:attribute name="max-level" type="level" />
         <xsd:attribute name="buffer-size" type="xsd:integer" />
         <xsd:attribute name="max-files" type="xsd:integer" />
         <xsd:attribute name="handler" type="xsd:string" />
