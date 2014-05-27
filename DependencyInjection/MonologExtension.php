@@ -247,6 +247,9 @@ class MonologExtension extends Extension
 
         case 'fingers_crossed':
             $handler['action_level'] = $this->levelToMonologConst($handler['action_level']);
+            if (null !== $handler['passthru_level']) {
+                $handler['passthru_level'] = $this->levelToMonologConst($handler['passthru_level']);
+            }
             $nestedHandlerId = $this->getHandlerId($handler['handler']);
             $this->nestedHandlers[] = $nestedHandlerId;
 
@@ -267,6 +270,7 @@ class MonologExtension extends Extension
                 $handler['buffer_size'],
                 $handler['bubble'],
                 $handler['stop_buffering'],
+                $handler['passthru_level']
             ));
             break;
 

@@ -73,6 +73,7 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
  *   - [excluded_404s]: if set, the strategy will be changed to one that excludes 404s coming from URLs matching any of those patterns
  *   - [buffer_size]: defaults to 0 (unlimited)
  *   - [stop_buffering]: bool to disable buffering once the handler has been activated, defaults to true
+ *   - [passthru_level]: level name or int value for messages to always flush, disabled by default
  *   - [bubble]: bool, defaults to true
  *
  * - filter:
@@ -249,6 +250,7 @@ class Configuration implements ConfigurationInterface
                             ->scalarNode('action_level')->defaultValue('WARNING')->end() // fingers_crossed
                             ->scalarNode('activation_strategy')->defaultNull()->end() // fingers_crossed
                             ->booleanNode('stop_buffering')->defaultTrue()->end()// fingers_crossed
+                            ->scalarNode('passthru_level')->defaultNull()->end() // fingers_crossed
                             ->arrayNode('excluded_404s') // fingers_crossed
                                 ->canBeUnset()
                                 ->prototype('scalar')->end()
