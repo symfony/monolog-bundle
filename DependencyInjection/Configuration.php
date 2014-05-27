@@ -77,9 +77,9 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
  *
  * - filter:
  *   - handler: the wrapped handler's name
- *   - [level_list]: list of levels to accept
- *   - [min_level]: minimum level to accept (only use if level_list not specified)
- *   - [max_level]: maximum level to accept (only use if level_list not specified)
+ *   - [accepted_levels]: list of levels to accept
+ *   - [min_level]: minimum level to accept (only use if accepted_levels not specified)
+ *   - [max_level]: maximum level to accept (only use if accepted_levels not specified)
  *   - [bubble]: bool, defaults to true
  *
  * - buffer:
@@ -226,6 +226,7 @@ class Configuration implements ConfigurationInterface
                         ->fixXmlConfig('member')
                         ->fixXmlConfig('excluded_404')
                         ->fixXmlConfig('tag')
+                        ->fixXmlConfig('accepted_level')
                         ->canBeUnset()
                         ->children()
                             ->scalarNode('type')
@@ -252,12 +253,12 @@ class Configuration implements ConfigurationInterface
                                 ->canBeUnset()
                                 ->prototype('scalar')->end()
                             ->end()
-                            ->arrayNode('level_list') // filter
+                            ->arrayNode('accepted_levels') // filter
                                 ->canBeUnset()
                                 ->prototype('scalar')->end()
                             ->end()
-                            ->scalarNode('min_level')->defaultNull()->end() // filter
-                            ->scalarNode('max_level')->defaultNull()->end() //filter
+                            ->scalarNode('min_level')->defaultValue('DEBUG')->end() // filter
+                            ->scalarNode('max_level')->defaultValue('EMERGENCY')->end() //filter
                             ->scalarNode('buffer_size')->defaultValue(0)->end() // fingers_crossed and buffer
                             ->scalarNode('handler')->end() // fingers_crossed and buffer
                             ->scalarNode('url')->end() // cube
@@ -496,12 +497,12 @@ class Configuration implements ConfigurationInterface
                             ->thenInvalid('You can not use excluded_404s together with a custom activation_strategy in a FingersCrossedHandler')
                         ->end()
                         ->validate()
-                            ->ifTrue(function($v) { return 'filter' === $v['type'] && !empty($v['min_level']) && !empty($v['level_list']); })
-                            ->thenInvalid('You can not use min_level together with level_list in a FilterHandler')
+                            ->ifTrue(function($v) { return 'filter' === $v['type'] && "DEBUG" !== $v['min_level'] && !empty($v['accepted_levels']); })
+                            ->thenInvalid('You can not use min_level together with accepted_levels in a FilterHandler')
                         ->end()
                         ->validate()
-                            ->ifTrue(function($v) { return 'filter' === $v['type'] && !empty($v['max_level']) && !empty($v['level_list']); })
-                            ->thenInvalid('You can not use max_level together with level_list in a FilterHandler')
+                            ->ifTrue(function($v) { return 'filter' === $v['type'] && "EMERGENCY" !== $v['max_level'] && !empty($v['accepted_levels']); })
+                            ->thenInvalid('You can not use max_level together with accepted_levels in a FilterHandler')
                         ->end()
                         ->validate()
                             ->ifTrue(function($v) { return 'swift_mailer' === $v['type'] && empty($v['email_prototype']) && (empty($v['from_email']) || empty($v['to_email']) || empty($v['subject'])); })

@@ -13,7 +13,7 @@ monolog:
             type: stream
         filtered:
             type: filter
-            level_list: [WARNING, ERROR]
+            accepted_levels: [WARNING, ERROR]
             handler: nested2
         nested2:
             type: stream

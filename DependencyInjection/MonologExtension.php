@@ -271,19 +271,15 @@ class MonologExtension extends Extension
             break;
 
         case 'filter':
-            if (is_null($handler['min_level'])) { $handler['min_level'] = 'DEBUG'; }
-            if (is_null($handler['max_level'])) { $handler['max_level'] = 'EMERGENCY'; }
-
             $handler['min_level'] = $this->levelToMonologConst($handler['min_level']);
             $handler['max_level'] = $this->levelToMonologConst($handler['max_level']);
-            $handler['level_list'] = array_map(
-                function ($level) { return $this->levelToMonologConst($level); },
-                $handler['level_list']
-            );
+            foreach (array_keys($handler['accepted_levels']) as $k) {
+                $handler['accepted_levels'][$k] = $this->levelToMonologConst($handler['accepted_levels'][$k]);
+            }
 
             $nestedHandlerId = $this->getHandlerId($handler['handler']);
             $this->nestedHandlers[] = $nestedHandlerId;
-            $minLevelOrList = !empty($handler['level_list']) ? $handler['level_list'] : $handler['min_level'];
+            $minLevelOrList = !empty($handler['accepted_levels']) ? $handler['accepted_levels'] : $handler['min_level'];
 
             $definition->setArguments(array(
                 new Reference($nestedHandlerId),
