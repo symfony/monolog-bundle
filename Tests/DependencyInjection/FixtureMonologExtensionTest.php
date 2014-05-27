@@ -43,7 +43,7 @@ abstract class FixtureMonologExtensionTest extends DependencyInjectionTest
 
         $handler = $container->getDefinition('monolog.handler.filtered');
         $this->assertDICDefinitionClass($handler, '%monolog.handler.filter.class%');
-        $this->assertDICConstructorArguments($handler, array(new Reference('monolog.handler.nested2'), [\Monolog\Logger::WARNING, \Monolog\Logger::ERROR], \Monolog\Logger::EMERGENCY, true));
+        $this->assertDICConstructorArguments($handler, array(new Reference('monolog.handler.nested2'), array(\Monolog\Logger::WARNING, \Monolog\Logger::ERROR), \Monolog\Logger::EMERGENCY, true));
     }
 
     public function testLoadWithOverwriting()
