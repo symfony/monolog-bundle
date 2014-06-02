@@ -78,8 +78,8 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
  * - filter:
  *   - handler: the wrapped handler's name
  *   - [accepted_levels]: list of levels to accept
- *   - [min_level]: minimum level to accept (only use if accepted_levels not specified)
- *   - [max_level]: maximum level to accept (only use if accepted_levels not specified)
+ *   - [min_level]: minimum level to accept (only used if accepted_levels not specified)
+ *   - [max_level]: maximum level to accept (only used if accepted_levels not specified)
  *   - [bubble]: bool, defaults to true
  *
  * - buffer:
