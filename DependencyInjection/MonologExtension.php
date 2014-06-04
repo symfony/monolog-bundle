@@ -506,6 +506,7 @@ class MonologExtension extends Extension
             break;
 
         // Handlers using the constructor of AbstractHandler without adding their own arguments
+        case 'browser_console':
         case 'newrelic':
         case 'test':
         case 'null':

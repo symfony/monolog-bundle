@@ -40,6 +40,10 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
  *
+ * - browser_console:
+ *   - [level]: level name or int value, defaults to DEBUG
+ *   - [bubble]: bool, defaults to true
+ *
  * - gelf:
  *   - publisher: {id: ...} or {hostname: ..., port: ..., chunk_size: ...}
  *   - [level]: level name or int value, defaults to DEBUG
