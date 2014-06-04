@@ -517,12 +517,33 @@ class MonologExtension extends Extension
                     $handler['source'],
                     $handler['from_email'],
                 ));
-                $formatterId = uniqid('monolog.flowdock.formatter.');
+                $formatterId = 'monolog.flowdock.formatter.'.sha1($handler['source'].'|'.$handler['from_email']);
                 $formatter->setPublic(false);
                 $container->setDefinition($formatterId, $formatter);
 
                 $definition->addMethodCall('setFormatter', array(new Reference($formatterId)));
             }
+            break;
+
+        case 'rollbar':
+            if (!empty($handler['id'])) {
+                $rollbarId = $handler['id'];
+            } else {
+                $config = $handler['config'] ?: array();
+                $config['access_token'] = $handler['token'];
+                $rollbar = new Definition("RollbarNotifier", array(
+                    $config,
+                ));
+                $rollbarId = 'monolog.rollbar.notifier.'.sha1(json_encode($config));
+                $rollbar->setPublic(false);
+                $container->setDefinition($rollbarId, $rollbar);
+            }
+
+            $definition->setArguments(array(
+                new Reference($rollbarId),
+                $handler['level'],
+                $handler['bubble'],
+            ));
             break;
 
         // Handlers using the constructor of AbstractHandler without adding their own arguments

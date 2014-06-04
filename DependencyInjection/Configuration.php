@@ -208,6 +208,13 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
  *
+ * - rollbar:
+ *   - id: RollbarNotifier service (mandatory if token is not provided)
+ *   - token: rollbar api token (skip if you provide a RollbarNotifier service id)
+ *   - [config]: config values from https://github.com/rollbar/rollbar-php#configuration-reference
+ *   - [level]: level name or int value, defaults to DEBUG
+ *   - [bubble]: bool, defaults to true
+ *
  * @author Jordi Boggiano <j.boggiano@seld.be>
  * @author Christophe Coevoet <stof@notk.org>
  */
@@ -249,7 +256,7 @@ class Configuration implements ConfigurationInterface
                                     ->then(function ($v) { return strtolower($v); })
                                 ->end()
                             ->end()
-                            ->scalarNode('id')->end()
+                            ->scalarNode('id')->end() // service & rollbar
                             ->scalarNode('priority')->defaultValue(0)->end()
                             ->scalarNode('level')->defaultValue('DEBUG')->end()
                             ->booleanNode('bubble')->defaultTrue()->end()
@@ -280,7 +287,7 @@ class Configuration implements ConfigurationInterface
                             ->scalarNode('room')->end() // hipchat
                             ->scalarNode('notify')->defaultFalse()->end() // hipchat
                             ->scalarNode('nickname')->defaultValue('Monolog')->end() // hipchat
-                            ->scalarNode('token')->end() // pushover & hipchat & loggly & logentries & flowdock
+                            ->scalarNode('token')->end() // pushover & hipchat & loggly & logentries & flowdock & rollbar
                             ->scalarNode('source')->end() // flowdock
                             ->booleanNode('use_ssl')->defaultTrue()->end() // logentries
                             ->variableNode('user') // pushover
@@ -341,6 +348,10 @@ class Configuration implements ConfigurationInterface
                                     ->thenInvalid('If you set user, you must provide a password.')
                                 ->end()
                             ->end() // mongo
+                            ->arrayNode('config')
+                                ->canBeUnset()
+                                ->prototype('scalar')->end()
+                            ->end() // rollbar
                             ->arrayNode('members') // group
                                 ->canBeUnset()
                                 ->performNoDeepMerging()
@@ -517,6 +528,14 @@ class Configuration implements ConfigurationInterface
                         ->validate()
                             ->ifTrue(function ($v) { return 'filter' === $v['type'] && "EMERGENCY" !== $v['max_level'] && !empty($v['accepted_levels']); })
                             ->thenInvalid('You can not use max_level together with accepted_levels in a FilterHandler')
+                        ->end()
+                        ->validate()
+                            ->ifTrue(function ($v) { return 'rollbar' === $v['type'] && !empty($v['id']) && !empty($v['token']); })
+                            ->thenInvalid('You can not use both an id and a token in a RollbarHandler')
+                        ->end()
+                        ->validate()
+                            ->ifTrue(function ($v) { return 'rollbar' === $v['type'] && empty($v['id']) && empty($v['token']); })
+                            ->thenInvalid('The id or the token has to be specified to use a RollbarHandler')
                         ->end()
                         ->validate()
                             ->ifTrue(function ($v) { return 'swift_mailer' === $v['type'] && empty($v['email_prototype']) && (empty($v['from_email']) || empty($v['to_email']) || empty($v['subject'])); })

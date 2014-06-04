@@ -152,6 +152,36 @@ class MonologExtensionTest extends DependencyInjectionTest
         $this->assertDICConstructorArguments($handler, array(false, 'user', \Monolog\Logger::DEBUG, true, LOG_CONS));
     }
 
+    public function testRollbarHandlerCreatesNotifier()
+    {
+        $container = $this->getContainer(array(array('handlers' => array('main' => array('type' => 'rollbar', 'token' => 'MY_TOKEN')))));
+
+        $this->assertTrue($container->hasDefinition('monolog.logger'));
+        $this->assertTrue($container->hasDefinition('monolog.handler.main'));
+
+        $logger = $container->getDefinition('monolog.logger');
+        $this->assertDICDefinitionMethodCallAt(0, $logger, 'pushHandler', array(new Reference('monolog.handler.main')));
+
+        $handler = $container->getDefinition('monolog.handler.main');
+        $this->assertDICDefinitionClass($handler, '%monolog.handler.rollbar.class%');
+        $this->assertDICConstructorArguments($handler, array(new Reference('monolog.rollbar.notifier.1c8e6a67728dff6a209f828427128dd8b3c2b746'), \Monolog\Logger::DEBUG, true));
+    }
+
+    public function testRollbarHandlerReusesNotifier()
+    {
+        $container = $this->getContainer(array(array('handlers' => array('main' => array('type' => 'rollbar', 'id' => 'my_rollbar_id')))));
+
+        $this->assertTrue($container->hasDefinition('monolog.logger'));
+        $this->assertTrue($container->hasDefinition('monolog.handler.main'));
+
+        $logger = $container->getDefinition('monolog.logger');
+        $this->assertDICDefinitionMethodCallAt(0, $logger, 'pushHandler', array(new Reference('monolog.handler.main')));
+
+        $handler = $container->getDefinition('monolog.handler.main');
+        $this->assertDICDefinitionClass($handler, '%monolog.handler.rollbar.class%');
+        $this->assertDICConstructorArguments($handler, array(new Reference('my_rollbar_id'), \Monolog\Logger::DEBUG, true));
+    }
+
     public function testSocketHandler()
     {
         try {
