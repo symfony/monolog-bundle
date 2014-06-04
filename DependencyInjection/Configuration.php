@@ -201,6 +201,13 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
  *
+ * - flowdock:
+ *   - token: flowdock api token
+ *   - source: human readable identifier of the application
+ *   - from_email: email address of the message sender
+ *   - [level]: level name or int value, defaults to DEBUG
+ *   - [bubble]: bool, defaults to true
+ *
  * @author Jordi Boggiano <j.boggiano@seld.be>
  * @author Christophe Coevoet <stof@notk.org>
  */
@@ -273,7 +280,8 @@ class Configuration implements ConfigurationInterface
                             ->scalarNode('room')->end() // hipchat
                             ->scalarNode('notify')->defaultFalse()->end() // hipchat
                             ->scalarNode('nickname')->defaultValue('Monolog')->end() // hipchat
-                            ->scalarNode('token')->end() // pushover & hipchat & loggly & logentries
+                            ->scalarNode('token')->end() // pushover & hipchat & loggly & logentries & flowdock
+                            ->scalarNode('source')->end() // flowdock
                             ->booleanNode('use_ssl')->defaultTrue()->end() // logentries
                             ->variableNode('user') // pushover
                                 ->validate()
@@ -338,7 +346,7 @@ class Configuration implements ConfigurationInterface
                                 ->performNoDeepMerging()
                                 ->prototype('scalar')->end()
                             ->end()
-                            ->scalarNode('from_email')->end() // swift_mailer and native_mailer
+                            ->scalarNode('from_email')->end() // swift_mailer, native_mailer and flowdock
                             ->arrayNode('to_email') // swift_mailer and native_mailer
                                 ->prototype('scalar')->end()
                                 ->beforeNormalization()
@@ -576,6 +584,18 @@ class Configuration implements ConfigurationInterface
                         ->validate()
                             ->ifTrue(function ($v) { return 'logentries' === $v['type'] && empty($v['token']); })
                             ->thenInvalid('The token has to be specified to use a LogEntriesHandler')
+                        ->end()
+                        ->validate()
+                            ->ifTrue(function ($v) { return 'flowdock' === $v['type'] && empty($v['token']); })
+                            ->thenInvalid('The token has to be specified to use a FlowdockHandler')
+                        ->end()
+                        ->validate()
+                            ->ifTrue(function ($v) { return 'flowdock' === $v['type'] && empty($v['from_email']); })
+                            ->thenInvalid('The from_email has to be specified to use a FlowdockHandler')
+                        ->end()
+                        ->validate()
+                            ->ifTrue(function ($v) { return 'flowdock' === $v['type'] && empty($v['source']); })
+                            ->thenInvalid('The source has to be specified to use a FlowdockHandler')
                         ->end()
                     ->end()
                     ->validate()

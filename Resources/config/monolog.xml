@@ -18,6 +18,7 @@
         <parameter key="monolog.handler.null.class">Monolog\Handler\NullHandler</parameter>
         <parameter key="monolog.handler.test.class">Monolog\Handler\TestHandler</parameter>
         <parameter key="monolog.handler.gelf.class">Monolog\Handler\GelfHandler</parameter>
+        <parameter key="monolog.handler.flowdock.class">Monolog\Handler\FlowdockHandler</parameter>
         <parameter key="monolog.handler.browser_console.class">Monolog\Handler\BrowserConsoleHandler</parameter>
         <parameter key="monolog.handler.firephp.class">Symfony\Bridge\Monolog\Handler\FirePHPHandler</parameter>
         <parameter key="monolog.handler.chromephp.class">Symfony\Bridge\Monolog\Handler\ChromePhpHandler</parameter>

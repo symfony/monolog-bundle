@@ -505,6 +505,26 @@ class MonologExtension extends Extension
             ));
             break;
 
+        case 'flowdock':
+            $definition->setArguments(array(
+                $handler['token'],
+                $handler['level'],
+                $handler['bubble'],
+            ));
+
+            if (empty($handler['formatter'])) {
+                $formatter = new Definition("Monolog\Formatter\FlowdockFormatter", array(
+                    $handler['source'],
+                    $handler['from_email'],
+                ));
+                $formatterId = uniqid('monolog.flowdock.formatter.');
+                $formatter->setPublic(false);
+                $container->setDefinition($formatterId, $formatter);
+
+                $definition->addMethodCall('setFormatter', array(new Reference($formatterId)));
+            }
+            break;
+
         // Handlers using the constructor of AbstractHandler without adding their own arguments
         case 'browser_console':
         case 'newrelic':
