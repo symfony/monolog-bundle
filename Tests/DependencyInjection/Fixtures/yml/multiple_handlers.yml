@@ -8,6 +8,7 @@ monolog:
         main:
             type: fingers_crossed
             action_level: ERROR
+            passthru_level: NOTICE
             handler: nested
         nested:
             type: stream
