@@ -204,7 +204,7 @@ class MonologExtension extends Extension
             } else {
                 $server = 'mongodb://';
 
-                if(isset($handler['mongo']['user'])) {
+                if (isset($handler['mongo']['user'])) {
                     $server .= $handler['mongo']['user'] . ':' . $handler['mongo']['pass'] . '@';
                 }
 
@@ -362,7 +362,7 @@ class MonologExtension extends Extension
                 $message->addMethodCall('setTo', array($handler['to_email']));
                 $message->addMethodCall('setSubject', array($handler['subject']));
 
-                if(isset($handler['mailer'])){
+                if (isset($handler['mailer'])) {
                     $mailer = $handler['mailer'];
                 } else {
                     $mailer = 'mailer';
