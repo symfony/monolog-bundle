@@ -10,5 +10,10 @@
         <handler name="custom" type="stream" path="/tmp/symfony.log" bubble="false" level="ERROR" />
         <handler name="main" type="fingers_crossed" action-level="ERROR" handler="nested" />
         <handler name="nested" type="stream" />
+        <handler name="filtered" type="filter" handler="nested2">
+            <accepted-level>WARNING</accepted-level>
+            <accepted-level>ERROR</accepted-level>
+        </handler>
+        <handler name="nested2" type="stream" />
     </config>
 </srv:container>
