@@ -28,9 +28,8 @@
         "symfony/console": "~2.3"
     },
     "autoload": {
-        "psr-0": { "Symfony\\Bundle\\MonologBundle": "" }
+        "psr-4": { "Symfony\\Bundle\\MonologBundle\\": "" }
     },
-    "target-dir": "Symfony/Bundle/MonologBundle",
     "extra": {
         "branch-alias": {
             "dev-master": "2.6.x-dev"
