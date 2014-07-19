@@ -10,6 +10,7 @@
     <xsd:complexType name="config">
         <xsd:choice minOccurs="0" maxOccurs="unbounded">
             <xsd:element name="handler" type="handler" />
+            <xsd:element name="channel" type="xsd:string" />
         </xsd:choice>
     </xsd:complexType>
 
