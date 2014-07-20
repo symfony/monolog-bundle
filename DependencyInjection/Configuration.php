@@ -492,6 +492,10 @@ class Configuration implements ConfigurationInterface
                                             }
                                         }
 
+                                        if (!count($elements)) {
+                                            return null;
+                                        }
+
                                         return array('type' => $isExclusive ? 'exclusive' : 'inclusive', 'elements' => $elements);
                                     })
                                 ->end()

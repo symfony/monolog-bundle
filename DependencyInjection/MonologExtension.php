@@ -57,7 +57,7 @@ class MonologExtension extends Extension
             foreach ($config['handlers'] as $name => $handler) {
                 $handlers[$handler['priority']][] = array(
                     'id'       => $this->buildHandler($container, $name, $handler),
-                    'channels' => isset($handler['channels']) ? $handler['channels'] : null
+                    'channels' => empty($handler['channels']) ? null : $handler['channels'] : null
                 );
             }
 
