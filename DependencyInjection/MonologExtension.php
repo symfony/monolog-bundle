@@ -148,7 +148,8 @@ class MonologExtension extends Extension
                 $handler['bubble'],
                 isset($handler['verbosity_levels']) ? $handler['verbosity_levels'] : array()
             ));
-            $definition->addTag('kernel.event_subscriber');
+            $definition->addTag('kernel.event_listener', array('event' => 'console.command', 'method' => 'onCommand', 'priority' => 255));
+            $definition->addTag('kernel.event_listener', array('event' => 'console.terminate', 'method' => 'onTerminate', 'priority' => -255));
             break;
 
         case 'firephp':
