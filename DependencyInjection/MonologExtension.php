@@ -303,6 +303,7 @@ class MonologExtension extends Extension
                 $handler['buffer_size'],
                 $handler['level'],
                 $handler['bubble'],
+                $handler['flush_on_overflow'],
             ));
             break;
 
