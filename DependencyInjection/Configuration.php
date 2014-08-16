@@ -92,6 +92,7 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
  *   - [buffer_size]: defaults to 0 (unlimited)
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
+ *   - [flush_on_overflow]: bool, defaults to false
  *
  * - group:
  *   - members: the wrapped handlers by name
@@ -280,6 +281,7 @@ class Configuration implements ConfigurationInterface
                             ->scalarNode('min_level')->defaultValue('DEBUG')->end() // filter
                             ->scalarNode('max_level')->defaultValue('EMERGENCY')->end() //filter
                             ->scalarNode('buffer_size')->defaultValue(0)->end() // fingers_crossed and buffer
+                            ->scalarNode('flush_on_overflow')->defaultValue(false)->end() // buffer
                             ->scalarNode('handler')->end() // fingers_crossed and buffer
                             ->scalarNode('url')->end() // cube
                             ->scalarNode('exchange')->end() // amqp
