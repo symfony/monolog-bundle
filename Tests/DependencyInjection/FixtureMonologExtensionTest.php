@@ -136,6 +136,28 @@ abstract class FixtureMonologExtensionTest extends DependencyInjectionTest
         );
     }
 
+    public function testSingleEmailRecipient()
+    {
+        $container = $this->getContainer('single_email_recipient');
+
+        $this->assertSame(array(
+            array('setFrom', array('error@example.com')),
+            array('setTo', array(array('error@example.com'))),
+            array('setSubject', array('An Error Occurred!')),
+        ), $container->getDefinition('monolog.handler.swift.mail_prototype')->getMethodCalls());
+    }
+
+    public function testMultipleEmailRecipients()
+    {
+        $container = $this->getContainer('multiple_email_recipients');
+
+        $this->assertSame(array(
+            array('setFrom', array('error@example.com')),
+            array('setTo', array(array('dev1@example.com', 'dev2@example.com'))),
+            array('setSubject', array('An Error Occurred!')),
+        ), $container->getDefinition('monolog.handler.swift.mail_prototype')->getMethodCalls());
+    }
+
     protected function getContainer($fixture)
     {
         $container = new ContainerBuilder();
