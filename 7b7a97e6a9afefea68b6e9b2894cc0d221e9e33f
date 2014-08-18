@@ -1,0 +1,11 @@
+---------------------------------------------------------------------------
+
+by stof at 2014-08-18T12:37:53Z
+
+Can you add a test covering the configuration of multiple recipient emails in XML and YAML to avoid regressions here ?
+
+---------------------------------------------------------------------------
+
+by xabbuh at 2014-08-18T22:54:34Z
+
+@stof Added tests for it.
