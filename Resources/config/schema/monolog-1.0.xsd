@@ -55,6 +55,11 @@
         <xsd:attribute name="dsn" type="xsd:string" />
         <xsd:attribute name="client-id" type="xsd:string" />
         <xsd:attribute name="use-ssl" type="xsd:boolean" />
+        <xsd:attribute name="username" type="xsd:string" />
+        <xsd:attribute name="channel" type="xsd:string" />
+        <xsd:attribute name="bot-name" type="xsd:string" />
+        <xsd:attribute name="use-attachment" type="xsd:boolean" />
+        <xsd:attribute name="icon-emoji" type="xsd:string" />
     </xsd:complexType>
 
     <xsd:simpleType name="level">
