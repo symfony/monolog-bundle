@@ -165,7 +165,7 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
  *   - token: slack api token
  *   - channel: channel name
  *   - [bot_name]: defaults to Monolog
- *   - [icon_emoji]: defaults to 'alien'
+ *   - [icon_emoji]: defaults to null
  *   - [use_attachment]: bool, defaults to true
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
@@ -297,7 +297,7 @@ class Configuration implements ConfigurationInterface
                             ->scalarNode('channel')->end() // slack
                             ->scalarNode('bot_name')->defaultValue('Monolog')->end() // slack
                             ->scalarNode('use_attachment')->defaultTrue()->end() // slack
-                            ->scalarNode('icon_emoji')->defaultValue('alien')->end() // slack
+                            ->scalarNode('icon_emoji')->defaultNull()->end() // slack
                             ->scalarNode('notify')->defaultFalse()->end() // hipchat
                             ->scalarNode('nickname')->defaultValue('Monolog')->end() // hipchat
                             ->scalarNode('token')->end() // pushover & hipchat & loggly & logentries & flowdock & rollbar & slack
