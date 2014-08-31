@@ -1,0 +1,11 @@
+---------------------------------------------------------------------------
+
+by xabbuh at 2014-08-31T05:54:19Z
+
+@fabpot Does it make sense to add a note to the upgrade guide? Just for the very rare case that someone used the class outside Symfony (this doesn't make make much sense but who knows). Since nothing forbids someone to do that.
+
+---------------------------------------------------------------------------
+
+by fabpot at 2014-08-31T05:55:09Z
+
+This is a purely internal class. As you said, using it outside of the context of our tests would not make sense.
