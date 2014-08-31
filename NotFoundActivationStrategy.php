@@ -11,55 +11,11 @@
 
 namespace Symfony\Bundle\MonologBundle;
 
-use Monolog\Handler\FingersCrossed\ErrorLevelActivationStrategy;
-use Symfony\Component\HttpKernel\Exception\HttpException;
-use Symfony\Component\HttpFoundation\Request;
+use Symfony\Bridge\Monolog\Handler\FingersCrossed\NotFoundActivationStrategy as BridgeNotFoundActivationStrategy;
 
 /**
- * Activation strategy that ignores 404s for certain URLs
- *
- * Configure with:
- *
- *   monolog:
- *       handlers:
- *           main:
- *               type:         fingers_crossed
- *               action_level: error
- *               handler:      nested
- *               excluded_404s:
- *                   - ^/foo/
- *
- * @author Jordi Boggiano <j.boggiano@seld.be>
+ * @deprecated
  */
-class NotFoundActivationStrategy extends ErrorLevelActivationStrategy
+class NotFoundActivationStrategy extends BridgeNotFoundActivationStrategy
 {
-    private $blacklist;
-    private $request;
-
-    public function __construct(array $excludedUrls, $actionLevel)
-    {
-        parent::__construct($actionLevel);
-        $this->blacklist = '{('.implode('|', $excludedUrls).')}i';
-    }
-
-    public function isHandlerActivated(array $record)
-    {
-        $isActivated = parent::isHandlerActivated($record);
-        if (
-            $isActivated
-            && $this->request
-            && isset($record['context']['exception'])
-            && $record['context']['exception'] instanceof HttpException
-            && $record['context']['exception']->getStatusCode() == 404
-        ) {
-            return !preg_match($this->blacklist, $this->request->getPathInfo());
-        }
-
-        return $isActivated;
-    }
-
-    public function setRequest(Request $req = null)
-    {
-        $this->request = $req;
-    }
 }
