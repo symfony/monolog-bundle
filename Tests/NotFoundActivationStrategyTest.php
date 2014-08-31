@@ -16,7 +16,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Monolog\Logger;
 
-class NotFoundActivationStrategyTest extends TestCase
+class NotFoundActivationStrategyTest extends \PHPUnit_Framework_TestCase
 {
     /**
      * @dataProvider isActivatedProvider

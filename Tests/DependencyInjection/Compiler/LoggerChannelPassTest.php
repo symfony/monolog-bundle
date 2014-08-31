@@ -19,7 +19,7 @@ use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\LoggerChannelPass;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 
-class LoggerChannelPassTest extends TestCase
+class LoggerChannelPassTest extends \PHPUnit_Framework_TestCase
 {
     public function testProcess()
     {

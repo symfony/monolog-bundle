@@ -19,7 +19,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 
-class AddProcessorsPassTest extends TestCase
+class AddProcessorsPassTest extends \PHPUnit_Framework_TestCase
 {
     public function testHandlerProcessors()
     {
