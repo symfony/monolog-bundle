@@ -56,6 +56,7 @@
         <xsd:attribute name="client-id" type="xsd:string" />
         <xsd:attribute name="use-ssl" type="xsd:boolean" />
         <xsd:attribute name="formatter" type="xsd:string" />
+        <xsd:attribute name="token" type="xsd:string" />
     </xsd:complexType>
 
     <xsd:simpleType name="level">
