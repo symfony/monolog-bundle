@@ -468,15 +468,14 @@ class MonologExtension extends Extension
             break;
 
         case 'raven':
-            $clientId = 'monolog.raven.client.' . sha1($handler['dsn']);
             if (null !== $handler['client_id']) {
                 $clientId = $handler['client_id'];
-            }
-            if (!$container->hasDefinition($clientId)) {
+            } else {
                 $client = new Definition("Raven_Client", array(
                     $handler['dsn']
                 ));
                 $client->setPublic(false);
+                $clientId = 'monolog.raven.client.'.sha1($handler['dsn']);
                 $container->setDefinition($clientId, $client);
             }
             $definition->setArguments(array(

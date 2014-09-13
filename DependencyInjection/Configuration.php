@@ -570,7 +570,7 @@ class Configuration implements ConfigurationInterface
                             ->thenInvalid('The token and user have to be specified to use a PushoverHandler')
                         ->end()
                         ->validate()
-                            ->ifTrue(function ($v) { return 'raven' === $v['type'] && !array_key_exists('dsn', $v); })
+                            ->ifTrue(function ($v) { return 'raven' === $v['type'] && !array_key_exists('dsn', $v) && null === $v['client_id']; })
                             ->thenInvalid('The DSN has to be specified to use a RavenHandler')
                         ->end()
                         ->validate()
