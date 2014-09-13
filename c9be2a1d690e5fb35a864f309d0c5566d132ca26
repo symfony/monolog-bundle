@@ -1,0 +1,77 @@
+---------------------------------------------------------------------------
+
+by stof at 2014-09-08T22:19:43Z
+
+tests are broken
+
+---------------------------------------------------------------------------
+
+by stof at 2014-09-08T22:20:20Z
+
+And the right target branch is master. Older branches are not maintained (as the master branch supports Symfony 2.3+)
+
+---------------------------------------------------------------------------
+
+by lyrixx at 2014-09-09T08:45:48Z
+
+> And the right target branch is master. Older branches are not maintained (as the master branch supports Symfony 2.3+)
+
+I'm not sure to understand this comment. the target branch is master.
+
+---------------------------------------------------------------------------
+
+by stof at 2014-09-09T08:46:58Z
+
+> I'm not sure to understand this comment. the target branch is master.
+
+It was an answer to your comment ``BTW, I don't know the target branch of this PR.``.
+It is indeed right currently
+
+---------------------------------------------------------------------------
+
+by lyrixx at 2014-09-09T08:48:03Z
+
+Oh ;) I forgot that ;) Thanks.
+
+---------------------------------------------------------------------------
+
+by lyrixx at 2014-09-09T09:02:30Z
+
+I fixed tests.
+
+---------------------------------------------------------------------------
+
+by stof at 2014-09-09T09:30:34Z
+
+Can you add a new test to cover this behavior (should go near https://github.com/symfony/MonologBundle/blob/1a34465d5f33a2b559dcae7eddd1ef838114994e/Tests/DependencyInjection/MonologExtensionTest.php#L213)
+
+---------------------------------------------------------------------------
+
+by lyrixx at 2014-09-09T10:04:37Z
+
+Hm, now I understand why I did that before. (remove the if  not service-exist).
+
+1. If I keep the code like that (like in master), it's not possible to change the client service because the `ContainerBuilder` in the empty in this method. So the service will never exist. **BUT** if you register your bundle **after** MonologBundle, the definition in your bundle will override the definition created by monolog.
+
+2. If I change the monolog extension, like I did when I opened the PR (I changed the code), This is a very minor BC break, because monolog will no longer create a client definition with the specified service id. Any way, this behavior was wrong and not documented in this way.
+
+So I think, I should update the code to focus on the second point. WDYT?
+
+---------------------------------------------------------------------------
+
+by lyrixx at 2014-09-09T10:16:02Z
+
+OK,  I just implemented the solution N°2
+
+---------------------------------------------------------------------------
+
+by stof at 2014-09-09T10:47:12Z
+
+Removing the service definition check is indeed the right thing to do. DI extensions cannot check services defined by others. Currently, ``client_id`` is unusable.
+If you pass a ``client_id`` and you don't create the service, you will get an exception later saying the service is missing. It is fine IMO
+
+---------------------------------------------------------------------------
+
+by lyrixx at 2014-09-09T11:40:38Z
+
+So it's a +1 ?
