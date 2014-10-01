@@ -448,9 +448,9 @@ class MonologExtension extends Extension
                 $handler['channel'],
                 $handler['bot_name'],
                 $handler['use_attachment'],
+                $handler['icon_emoji'],
                 $handler['level'],
                 $handler['bubble'],
-                $handler['icon_emoji'],
             ));
             break;
 
