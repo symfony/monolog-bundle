@@ -160,6 +160,15 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
  *   - [nickname]: defaults to Monolog
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
+ *   
+ * - slack:
+ *   - token: slack api token
+ *   - channel: channel name
+ *   - [bot_name]: defaults to Monolog
+ *   - [icon_emoji]: defaults to null
+ *   - [use_attachment]: bool, defaults to true
+ *   - [level]: level name or int value, defaults to DEBUG
+ *   - [bubble]: bool, defaults to true
  *
  * - cube:
  *   - url: http/udp url to the cube server
@@ -285,9 +294,13 @@ class Configuration implements ConfigurationInterface
                             ->scalarNode('exchange')->end() // amqp
                             ->scalarNode('exchange_name')->defaultValue('log')->end() // amqp
                             ->scalarNode('room')->end() // hipchat
+                            ->scalarNode('channel')->end() // slack
+                            ->scalarNode('bot_name')->defaultValue('Monolog')->end() // slack
+                            ->scalarNode('use_attachment')->defaultTrue()->end() // slack
+                            ->scalarNode('icon_emoji')->defaultNull()->end() // slack
                             ->scalarNode('notify')->defaultFalse()->end() // hipchat
                             ->scalarNode('nickname')->defaultValue('Monolog')->end() // hipchat
-                            ->scalarNode('token')->end() // pushover & hipchat & loggly & logentries & flowdock & rollbar
+                            ->scalarNode('token')->end() // pushover & hipchat & loggly & logentries & flowdock & rollbar & slack
                             ->scalarNode('source')->end() // flowdock
                             ->booleanNode('use_ssl')->defaultTrue()->end() // logentries
                             ->variableNode('user') // pushover
@@ -576,6 +589,10 @@ class Configuration implements ConfigurationInterface
                         ->validate()
                             ->ifTrue(function ($v) { return 'hipchat' === $v['type'] && (empty($v['token']) || empty($v['room'])); })
                             ->thenInvalid('The token and room have to be specified to use a HipChatHandler')
+                        ->end()
+                        ->validate()
+                            ->ifTrue(function ($v) { return 'slack' === $v['type'] && (empty($v['token']) || empty($v['channel'])); })
+                            ->thenInvalid('The token and channel have to be specified to use a SlackHandler')
                         ->end()
                         ->validate()
                             ->ifTrue(function ($v) { return 'cube' === $v['type'] && empty($v['url']); })

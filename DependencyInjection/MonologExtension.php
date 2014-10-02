@@ -440,6 +440,18 @@ class MonologExtension extends Extension
                 $handler['bubble'],
             ));
             break;
+            
+        case 'slack':
+            $definition->setArguments(array(
+                $handler['token'],
+                $handler['channel'],
+                $handler['bot_name'],
+                $handler['use_attachment'],
+                $handler['icon_emoji'],
+                $handler['level'],
+                $handler['bubble'],
+            ));
+            break;
 
         case 'cube':
             $definition->setArguments(array(
