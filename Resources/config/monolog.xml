@@ -44,7 +44,6 @@
         <parameter key="monolog.handler.filter.class">Monolog\Handler\FilterHandler</parameter>
         <parameter key="monolog.handler.mongo.class">Monolog\Handler\MongoDBHandler</parameter>
         <parameter key="monolog.mongo.client.class">MongoClient</parameter>
-
     </parameters>
 
     <services>
@@ -57,5 +56,16 @@
         <service id="monolog.logger_prototype" class="%monolog.logger.class%" abstract="true">
             <argument /><!-- Channel -->
         </service>
+
+        <!-- Formatters -->
+        <service id="monolog.formatter.chrome_php" class="Monolog\Formatter\ChromePHPFormatter" public="false" />
+        <service id="monolog.formatter.gelf_message" class="Monolog\Formatter\GelfMessageFormatter" public="false" />
+        <service id="monolog.formatter.html" class="Monolog\Formatter\HtmlFormatter" public="false" />
+        <service id="monolog.formatter.json" class="Monolog\Formatter\JsonFormatter" public="false" />
+        <service id="monolog.formatter.line" class="Monolog\Formatter\LineFormatter" public="false" />
+        <service id="monolog.formatter.loggly" class="Monolog\Formatter\LogglyFormatter" public="false" />
+        <service id="monolog.formatter.normalizer" class="Monolog\Formatter\NormalizerFormatter" public="false" />
+        <service id="monolog.formatter.scalar" class="Monolog\Formatter\ScalarFormatter" public="false" />
+        <service id="monolog.formatter.wildfire" class="Monolog\Formatter\WildfireFormatter" public="false" />
     </services>
 </container>
