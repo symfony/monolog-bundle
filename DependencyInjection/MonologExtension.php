@@ -369,7 +369,6 @@ class MonologExtension extends Extension
                 }
                 $message->setFactoryService($mailer);
 
-
                 if (isset($handler['content_type'])) {
                     $message->addMethodCall('setContentType', array($handler['content_type']));
                 }
@@ -440,7 +439,7 @@ class MonologExtension extends Extension
                 $handler['bubble'],
             ));
             break;
-            
+
         case 'slack':
             $definition->setArguments(array(
                 $handler['token'],

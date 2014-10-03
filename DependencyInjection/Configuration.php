@@ -160,7 +160,7 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
  *   - [nickname]: defaults to Monolog
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
- *   
+ *
  * - slack:
  *   - token: slack api token
  *   - channel: channel name
