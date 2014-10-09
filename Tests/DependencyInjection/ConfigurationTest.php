@@ -271,6 +271,31 @@ class ConfigurationTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('B', $config['handlers']['foo']['channels']['elements'][1]);
     }
 
+    public function testWithFilePermission()
+    {
+        $configs = array(
+            array(
+                'handlers' => array(
+                    'foo' => array(
+                        'type' => 'stream',
+                        'path' => '/foo',
+                        'file_permission' => '0666',
+                    ),
+                    'bar' => array(
+                        'type' => 'stream',
+                        'path' => '/bar',
+                        'file_permission' => 0777
+                    )
+                )
+            )
+        );
+
+        $config = $this->process($configs);
+
+        $this->assertSame(0666, $config['handlers']['foo']['file_permission']);
+        $this->assertSame(0777, $config['handlers']['bar']['file_permission']);
+    }
+
     /**
      * Processes an array of configurations and returns a compiled version.
      *
