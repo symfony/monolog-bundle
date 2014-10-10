@@ -5,6 +5,7 @@ monolog:
             path: /tmp/symfony.log
             bubble: false
             level: ERROR
+            file_permission: 0666
         main:
             type: fingers_crossed
             action_level: ERROR

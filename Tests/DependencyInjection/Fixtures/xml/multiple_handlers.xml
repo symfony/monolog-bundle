@@ -7,7 +7,7 @@
                         http://symfony.com/schema/dic/monolog http://symfony.com/schema/dic/monolog/monolog-1.0.xsd">
 
     <config>
-        <handler name="custom" type="stream" path="/tmp/symfony.log" bubble="false" level="ERROR" />
+        <handler name="custom" type="stream" path="/tmp/symfony.log" bubble="false" level="ERROR" file-permission="0666" />
         <handler name="main" type="fingers_crossed" action-level="ERROR" passthru-level="NOTICE" handler="nested" />
         <handler name="nested" type="stream" />
         <handler name="filtered" type="filter" handler="nested2">

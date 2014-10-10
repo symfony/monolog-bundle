@@ -270,6 +270,19 @@ class Configuration implements ConfigurationInterface
                             ->scalarNode('level')->defaultValue('DEBUG')->end()
                             ->booleanNode('bubble')->defaultTrue()->end()
                             ->scalarNode('path')->defaultValue('%kernel.logs_dir%/%kernel.environment%.log')->end() // stream and rotating
+                            ->scalarNode('file_permission')  // stream and rotating
+                                ->defaultNull()
+                                ->beforeNormalization()
+                                    ->ifString()
+                                    ->then(function ($v) {
+                                        if (substr($v, 0, 1) === '0') {
+                                            return octdec($v);
+                                        }
+
+                                        return (int) $v;
+                                    })
+                                ->end()
+                            ->end()
                             ->scalarNode('ident')->defaultFalse()->end() // syslog
                             ->scalarNode('logopts')->defaultValue(LOG_PID)->end() // syslog
                             ->scalarNode('facility')->defaultValue('user')->end() // syslog

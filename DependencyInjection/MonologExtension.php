@@ -135,6 +135,7 @@ class MonologExtension extends Extension
                 $handler['path'],
                 $handler['level'],
                 $handler['bubble'],
+                $handler['file_permission'],
             ));
             break;
 
@@ -242,6 +243,7 @@ class MonologExtension extends Extension
                 $handler['max_files'],
                 $handler['level'],
                 $handler['bubble'],
+                $handler['file_permission'],
             ));
             break;
 
