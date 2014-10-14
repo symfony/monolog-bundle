@@ -167,6 +167,8 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
  *   - [bot_name]: defaults to Monolog
  *   - [icon_emoji]: defaults to null
  *   - [use_attachment]: bool, defaults to true
+ *   - [use_short_attachment]: bool, defaults to false
+ *   - [include_extra]: bool, defaults to false
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
  *
@@ -310,6 +312,8 @@ class Configuration implements ConfigurationInterface
                             ->scalarNode('channel')->end() // slack
                             ->scalarNode('bot_name')->defaultValue('Monolog')->end() // slack
                             ->scalarNode('use_attachment')->defaultTrue()->end() // slack
+                            ->scalarNode('use_short_attachment')->defaultFalse()->end() // slack
+                            ->scalarNode('include_extra')->defaultFalse()->end() // slack
                             ->scalarNode('icon_emoji')->defaultNull()->end() // slack
                             ->scalarNode('notify')->defaultFalse()->end() // hipchat
                             ->scalarNode('nickname')->defaultValue('Monolog')->end() // hipchat

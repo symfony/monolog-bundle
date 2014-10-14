@@ -451,6 +451,8 @@ class MonologExtension extends Extension
                 $handler['icon_emoji'],
                 $handler['level'],
                 $handler['bubble'],
+                $handler['use_short_attachment'],
+                $handler['include_extra'],
             ));
             break;
 
