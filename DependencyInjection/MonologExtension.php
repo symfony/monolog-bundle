@@ -308,6 +308,7 @@ class MonologExtension extends Extension
             break;
 
         case 'group':
+        case 'whatfailuregroup':
             $references = array();
             foreach ($handler['members'] as $nestedHandler) {
                 $nestedHandlerId = $this->getHandlerId($nestedHandler);

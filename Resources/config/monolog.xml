@@ -37,6 +37,7 @@
         <parameter key="monolog.handler.error_log.class">Monolog\Handler\ErrorLogHandler</parameter>
         <parameter key="monolog.handler.loggly.class">Monolog\Handler\LogglyHandler</parameter>
         <parameter key="monolog.handler.logentries.class">Monolog\Handler\LogEntriesHandler</parameter>
+        <parameter key="monolog.handler.whatfailuregroup.class">Monolog\Handler\WhatFailureGroupHandler</parameter>
         <parameter key="monolog.activation_strategy.not_found.class">Symfony\Bundle\MonologBundle\NotFoundActivationStrategy</parameter>
 
         <parameter key="monolog.handler.fingers_crossed.class">Monolog\Handler\FingersCrossedHandler</parameter>
