@@ -131,4 +131,11 @@
         <xsd:attribute name="collection" type="xsd:string" />
     </xsd:complexType>
 
+    <xsd:complexType name="elasticsearch">
+        <xsd:attribute name="host" type="xsd:string" />
+        <xsd:attribute name="port" type="xsd:integer" />
+        <xsd:attribute name="index" type="xsd:string" />
+        <xsd:attribute name="index_type" type="xsd:string" />
+    </xsd:complexType>
+
 </xsd:schema>

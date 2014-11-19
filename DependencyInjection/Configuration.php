@@ -374,6 +374,21 @@ class Configuration implements ConfigurationInterface
                                     ->thenInvalid('If you set user, you must provide a password.')
                                 ->end()
                             ->end() // mongo
+                            ->arrayNode('elasticsearch')
+                                ->canBeUnset()
+                                ->children()
+                                    ->scalarNode('host')->end()
+                                    ->scalarNode('port')->defaultValue(9200)->end()
+                                    ->scalarNode('index')->defaultValue('monolog')->end()
+                                    ->scalarNode('index_type')->defaultValue('logs')->end()
+                                ->end()
+                                ->validate()
+                                    ->ifTrue(function ($v) {
+                                        return !isset($v['host']);
+                                    })
+                                    ->thenInvalid('What must be set is host.')
+                                ->end()
+                            ->end() // elasticsearch
                             ->arrayNode('config')
                                 ->canBeUnset()
                                 ->prototype('scalar')->end()
