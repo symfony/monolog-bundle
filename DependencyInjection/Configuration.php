@@ -107,6 +107,10 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
  *   - members: the wrapped handlers by name
  *   - [bubble]: bool, defaults to true
  *
+ * - whatfailuregroup:
+ *   - members: the wrapped handlers by name
+ *   - [bubble]: bool, defaults to true
+ *
  * - syslog:
  *   - ident: string
  *   - [facility]: defaults to LOG_USER
