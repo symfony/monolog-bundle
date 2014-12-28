@@ -233,34 +233,29 @@ class MonologExtension extends Extension
             break;
 
         case 'elasticsearch':
-            // elastica client new definition
-            $elasticaClient = new Definition('%monolog.elastica.client.class%');
-            $elasticaClient->setArguments(array(
+            if (isset($handler['elasticsearch']['id'])) {
+                $clientId = $handler['elasticsearch']['id'];
+            } else {
+                // elastica client new definition
+                $elasticaClient = new Definition('%monolog.elastica.client.class%');
+                $elasticaClient->setArguments(array(
                     array(
                         'host' => $handler['elasticsearch']['host'],
                         'port' => $handler['elasticsearch']['port']
                     )
-                )
-            );
-            $container->setDefinition('monolog.elastica.client', $elasticaClient);
+                ));
 
-            // set parameters for monolog.formatter.elastica service check monolog.xml
-            $container->setParameter('monolog.elasticsearch.index', $handler['elasticsearch']['index']);
-            $container->setParameter('monolog.elasticsearch.index_type', $handler['elasticsearch']['index_type']);
-
-            // apply tags in case we want to use channels
-            if (!empty($handler['tags'])) {
-                foreach ($handler['tags'] as $tag) {
-                    $definition->addTag($tag);
-                }
+                $clientId = uniqid('monolog.elastica.client.');
+                $elasticaClient->setPublic(false);
+                $container->setDefinition($clientId, $elasticaClient);
             }
 
             // elastica handler definition
             $definition->setArguments(array(
-                new Reference('monolog.elastica.client'),
+                new Reference($clientId),
                 array(
-                    'index' => $handler['elasticsearch']['index'],
-                    'type'  => $handler['elasticsearch']['index_type'],
+                    'index' => $handler['index'],
+                    'type'  => $handler['document_type'],
                 ),
                 $handler['level'],
                 $handler['bubble']

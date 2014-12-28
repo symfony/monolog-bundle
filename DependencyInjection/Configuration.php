@@ -73,10 +73,11 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
  *
  * - elasticsearch:
  *   - elasticsearch:
+ *      - id: optional if host is given
  *      - host: elastic search host name
  *      - [port]: defaults to 9200
- *      - [index]: index name, defaults to monolog
- *      - [index_type]: index_type name, defaults to logs
+ *   - [index]: index name, defaults to monolog
+ *   - [document_type]: document_type, defaults to logs
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
  *
@@ -385,19 +386,24 @@ class Configuration implements ConfigurationInterface
                             ->end() // mongo
                             ->arrayNode('elasticsearch')
                                 ->canBeUnset()
+                                ->beforeNormalization()
+                                    ->ifString()
+                                    ->then(function ($v) { return array('id'=> $v); })
+                                ->end()
                                 ->children()
+                                    ->scalarNode('id')->end()
                                     ->scalarNode('host')->end()
                                     ->scalarNode('port')->defaultValue(9200)->end()
-                                    ->scalarNode('index')->defaultValue('monolog')->end()
-                                    ->scalarNode('index_type')->defaultValue('logs')->end()
                                 ->end()
                                 ->validate()
                                     ->ifTrue(function ($v) {
-                                        return !isset($v['host']);
+                                        return !isset($v['id']) && !isset($v['host']);
                                     })
-                                    ->thenInvalid('What must be set is host.')
+                                    ->thenInvalid('What must be set is either the host or the id.')
                                 ->end()
                             ->end() // elasticsearch
+                            ->scalarNode('index')->defaultValue('monolog')->end() // elasticsearch
+                            ->scalarNode('document_type')->defaultValue('logs')->end() // elasticsearch
                             ->arrayNode('config')
                                 ->canBeUnset()
                                 ->prototype('scalar')->end()
