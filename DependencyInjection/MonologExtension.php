@@ -11,6 +11,8 @@
 
 namespace Symfony\Bundle\MonologBundle\DependencyInjection;
 
+use Monolog\Formatter\ElasticaFormatter;
+use Monolog\Logger;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -18,6 +20,7 @@ use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Elastica\Client;
 
 /**
  * MonologExtension is an extension for the Monolog library.
@@ -226,6 +229,41 @@ class MonologExtension extends Extension
                 $handler['mongo']['collection'],
                 $handler['level'],
                 $handler['bubble'],
+            ));
+            break;
+
+        case 'elasticsearch':
+            // elastica client new definition
+            $elasticaClient = new Definition('%monolog.elastica.client.class%');
+            $elasticaClient->setArguments(array(
+                    array(
+                        'host' => $handler['elasticsearch']['host'],
+                        'port' => $handler['elasticsearch']['port']
+                    )
+                )
+            );
+            $container->setDefinition('monolog.elastica.client', $elasticaClient);
+
+            // set parameters for monolog.formatter.elastica service check monolog.xml
+            $container->setParameter('monolog.elasticsearch.index', $handler['elasticsearch']['index']);
+            $container->setParameter('monolog.elasticsearch.index_type', $handler['elasticsearch']['index_type']);
+
+            // apply tags in case we want to use channels
+            if (!empty($handler['tags'])) {
+                foreach ($handler['tags'] as $tag) {
+                    $definition->addTag($tag);
+                }
+            }
+
+            // elastica handler definition
+            $definition->setArguments(array(
+                new Reference('monolog.elastica.client'),
+                array(
+                    'index' => $handler['elasticsearch']['index'],
+                    'type'  => $handler['elasticsearch']['index_type'],
+                ),
+                $handler['level'],
+                $handler['bubble']
             ));
             break;
 

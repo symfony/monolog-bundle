@@ -44,6 +44,9 @@
         <parameter key="monolog.handler.filter.class">Monolog\Handler\FilterHandler</parameter>
         <parameter key="monolog.handler.mongo.class">Monolog\Handler\MongoDBHandler</parameter>
         <parameter key="monolog.mongo.client.class">MongoClient</parameter>
+
+        <parameter key="monolog.handler.elasticsearch.class">Monolog\Handler\ElasticSearchHandler</parameter>
+        <parameter key="monolog.elastica.client.class">Elastica\Client</parameter>
     </parameters>
 
     <services>
@@ -67,5 +70,9 @@
         <service id="monolog.formatter.normalizer" class="Monolog\Formatter\NormalizerFormatter" public="false" />
         <service id="monolog.formatter.scalar" class="Monolog\Formatter\ScalarFormatter" public="false" />
         <service id="monolog.formatter.wildfire" class="Monolog\Formatter\WildfireFormatter" public="false" />
+        <service id="monolog.formatter.elastica" class="Monolog\Formatter\ElasticaFormatter" public="false">
+            <argument index="0">%monolog.elasticsearch.index%</argument>
+            <argument index="1">%monolog.elasticsearch.index_type%</argument>
+        </service>
     </services>
 </container>

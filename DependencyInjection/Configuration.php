@@ -71,6 +71,15 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
  *
+ * - elasticsearch:
+ *   - elasticsearch:
+ *      - host: elastic search host name
+ *      - [port]: defaults to 9200
+ *      - [index]: index name, defaults to monolog
+ *      - [index_type]: index_type name, defaults to logs
+ *   - [level]: level name or int value, defaults to DEBUG
+ *   - [bubble]: bool, defaults to true
+ *
  * - fingers_crossed:
  *   - handler: the wrapped handler's name
  *   - [action_level|activation_strategy]: minimum level or service id to activate the handler, defaults to WARNING
@@ -374,6 +383,21 @@ class Configuration implements ConfigurationInterface
                                     ->thenInvalid('If you set user, you must provide a password.')
                                 ->end()
                             ->end() // mongo
+                            ->arrayNode('elasticsearch')
+                                ->canBeUnset()
+                                ->children()
+                                    ->scalarNode('host')->end()
+                                    ->scalarNode('port')->defaultValue(9200)->end()
+                                    ->scalarNode('index')->defaultValue('monolog')->end()
+                                    ->scalarNode('index_type')->defaultValue('logs')->end()
+                                ->end()
+                                ->validate()
+                                    ->ifTrue(function ($v) {
+                                        return !isset($v['host']);
+                                    })
+                                    ->thenInvalid('What must be set is host.')
+                                ->end()
+                            ->end() // elasticsearch
                             ->arrayNode('config')
                                 ->canBeUnset()
                                 ->prototype('scalar')->end()
