@@ -412,7 +412,7 @@ class Configuration implements ConfigurationInterface
                                 ->canBeUnset()
                                 ->prototype('scalar')->end()
                             ->end() // rollbar
-                            ->arrayNode('members') // group
+                            ->arrayNode('members') // group, whatfailuregroup
                                 ->canBeUnset()
                                 ->performNoDeepMerging()
                                 ->prototype('scalar')->end()
