@@ -38,8 +38,7 @@ class DebugHandlerPass implements CompilerPassInterface
             return;
         }
 
-
-        if(false == $container->getParameter('kernel.debug')){
+        if (!$container->getParameter('kernel.debug')) {
             return;
         }
 
