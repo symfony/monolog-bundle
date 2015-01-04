@@ -18,7 +18,7 @@ use Symfony\Component\DependencyInjection\Definition;
 use Monolog\Logger;
 
 /**
- * Adds the DebugHandler when the profiler is enabled or when kernel.debug is not false
+ * Adds the DebugHandler when the profiler is enabled or when kernel.debug is not false.
  *
  * @author Christophe Coevoet <stof@notk.org>
  * @author Jordi Boggiano <j.boggiano@seld.be>
