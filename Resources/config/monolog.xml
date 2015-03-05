@@ -71,6 +71,8 @@
         <service id="monolog.formatter.normalizer" class="Monolog\Formatter\NormalizerFormatter" public="false" />
         <service id="monolog.formatter.scalar" class="Monolog\Formatter\ScalarFormatter" public="false" />
         <service id="monolog.formatter.wildfire" class="Monolog\Formatter\WildfireFormatter" public="false" />
-        <service id="monolog.formatter.logstash" class="Monolog\Formatter\LogstashFormatter" public="false" />
+        <service id="monolog.formatter.logstash" class="Monolog\Formatter\LogstashFormatter" public="false">
+            <argument index="0">app</argument>
+        </service>
     </services>
 </container>
