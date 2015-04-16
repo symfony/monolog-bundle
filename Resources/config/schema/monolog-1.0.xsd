@@ -45,6 +45,7 @@
         <xsd:attribute name="min-level" type="level" />
         <xsd:attribute name="max-level" type="level" />
         <xsd:attribute name="buffer-size" type="xsd:integer" />
+        <xsd:attribute name="flush-on-overflow" type="xsd:boolean" />
         <xsd:attribute name="max-files" type="xsd:integer" />
         <xsd:attribute name="handler" type="xsd:string" />
         <xsd:attribute name="from-email" type="xsd:string" />
