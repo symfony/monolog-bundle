@@ -319,7 +319,7 @@ class Configuration implements ConfigurationInterface
                             ->scalarNode('min_level')->defaultValue('DEBUG')->end() // filter
                             ->scalarNode('max_level')->defaultValue('EMERGENCY')->end() //filter
                             ->scalarNode('buffer_size')->defaultValue(0)->end() // fingers_crossed and buffer
-                            ->scalarNode('flush_on_overflow')->defaultValue(false)->end() // buffer
+                            ->booleanNode('flush_on_overflow')->defaultFalse()->end() // buffer
                             ->scalarNode('handler')->end() // fingers_crossed and buffer
                             ->scalarNode('url')->end() // cube
                             ->scalarNode('exchange')->end() // amqp
