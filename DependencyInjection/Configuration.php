@@ -131,6 +131,7 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
  *   - to_email: optional if email_prototype is given
  *   - subject: optional if email_prototype is given
  *   - [email_prototype]: service id of a message, defaults to a default message with the three fields above
+ *   - [content_type]: optional if email_prototype is given, defaults to text/plain
  *   - [mailer]: mailer service, defaults to mailer
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
