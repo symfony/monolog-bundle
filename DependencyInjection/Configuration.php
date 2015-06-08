@@ -175,6 +175,8 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
  *   - [nickname]: defaults to Monolog
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
+ *   - [use_ssl]: bool, defaults to true
+ *   - [message_format]: text or html, defaults to text
  *
  * - slack:
  *   - token: slack api token
@@ -324,6 +326,7 @@ class Configuration implements ConfigurationInterface
                             ->scalarNode('exchange')->end() // amqp
                             ->scalarNode('exchange_name')->defaultValue('log')->end() // amqp
                             ->scalarNode('room')->end() // hipchat
+                            ->scalarNode('message_format')->defaultValue('text')->end() // hipchat
                             ->scalarNode('channel')->end() // slack
                             ->scalarNode('bot_name')->defaultValue('Monolog')->end() // slack
                             ->scalarNode('use_attachment')->defaultTrue()->end() // slack
@@ -334,7 +337,7 @@ class Configuration implements ConfigurationInterface
                             ->scalarNode('nickname')->defaultValue('Monolog')->end() // hipchat
                             ->scalarNode('token')->end() // pushover & hipchat & loggly & logentries & flowdock & rollbar & slack
                             ->scalarNode('source')->end() // flowdock
-                            ->booleanNode('use_ssl')->defaultTrue()->end() // logentries
+                            ->booleanNode('use_ssl')->defaultTrue()->end() // logentries & hipchat
                             ->variableNode('user') // pushover
                                 ->validate()
                                     ->ifTrue(function ($v) {
@@ -641,6 +644,10 @@ class Configuration implements ConfigurationInterface
                         ->validate()
                             ->ifTrue(function ($v) { return 'hipchat' === $v['type'] && (empty($v['token']) || empty($v['room'])); })
                             ->thenInvalid('The token and room have to be specified to use a HipChatHandler')
+                        ->end()
+                        ->validate()
+                            ->ifTrue(function ($v) { return 'hipchat' === $v['type'] && !in_array($v['message_format'], array('text', 'html')); })
+                            ->thenInvalid('The message_format has to be "text" or "html" in a HipChatHandler')
                         ->end()
                         ->validate()
                             ->ifTrue(function ($v) { return 'slack' === $v['type'] && (empty($v['token']) || empty($v['channel'])); })
