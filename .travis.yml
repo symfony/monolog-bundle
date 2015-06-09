@@ -1,14 +1,37 @@
+sudo: false
+
 language: php
+
+cache:
+    directories:
+        - $HOME/.composer/cache
 
 php:
   - 5.3
   - 5.4
   - 5.5
-  - 5.6
+  - 7.0
   - hhvm
 
-before_script:
+matrix:
+  fast_finish: true
+  include:
+    - 5.3
+      env: deps="low"
+    - php: 5.6
+      env: SYMFONY_VERSION="2.3.x"
+    - php: 5.6
+      env: SYMFONY_VERSION="2.6.x"
+    - php: 5.6
+      env: SYMFONY_VERSION="2.7.x"
+    - php: 5.6
+      env: SYMFONY_VERSION="2.8.x-dev"
+
+before_install:
+    - if [ "$SYMFONY_VERSION" != "" ]; then composer require --dev --no-update symfony/symfony:"$SYMFONY_VERSION"; fi
     - composer self-update
-    - composer install --prefer-source
+
+install:
+    - if [ "$deps" = "low" ]; composer update --prefer-lowest; else composer install --prefer-source; fi
 
 script: phpunit --coverage-text
