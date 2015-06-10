@@ -393,7 +393,6 @@ class MonologExtension extends Extension
             } else {
                 $message = new Definition('Swift_Message');
                 $message->setLazy(true);
-                $message->setFactoryMethod('createMessage');
                 $message->setPublic(false);
                 $message->addMethodCall('setFrom', array($handler['from_email']));
                 $message->addMethodCall('setTo', array($handler['to_email']));
@@ -404,7 +403,13 @@ class MonologExtension extends Extension
                 } else {
                     $mailer = 'mailer';
                 }
-                $message->setFactoryService($mailer);
+
+                if (method_exists('Symfony\Component\DependencyInjection\Definition', 'setFactory')) {
+                    $message->setFactory(array(new Reference($mailer), 'createMessage'));
+                } else {
+                    $message->setFactoryService($mailer);
+                    $message->setFactoryMethod('createMessage');
+                }
 
                 if (isset($handler['content_type'])) {
                     $message->addMethodCall('setContentType', array($handler['content_type']));
