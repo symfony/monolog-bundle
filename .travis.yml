@@ -32,6 +32,6 @@ before_install:
     - composer self-update
 
 install:
-    - if [ "$deps" = "low" ]; composer update --prefer-lowest; else composer install --prefer-source; fi
+    - if [ "$deps" = "low" ]; composer update --prefer-lowest --prefer-stable; else composer install; fi
 
 script: phpunit --coverage-text
