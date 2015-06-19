@@ -478,6 +478,8 @@ class MonologExtension extends Extension
                 $handler['notify'],
                 $handler['level'],
                 $handler['bubble'],
+                $handler['use_ssl'],
+                $handler['message_format'],
             ));
             break;
 
