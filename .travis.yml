@@ -16,7 +16,7 @@ php:
 matrix:
   fast_finish: true
   include:
-    - 5.3
+    - php: 5.3
       env: deps="low"
     - php: 5.6
       env: SYMFONY_VERSION="2.3.x"
@@ -32,6 +32,6 @@ before_install:
     - composer self-update
 
 install:
-    - if [ "$deps" = "low" ]; composer update --prefer-lowest --prefer-stable; else composer install; fi
+    - if [ "$deps" = "low" ]; then composer update --prefer-lowest --prefer-stable; else composer install; fi
 
 script: phpunit --coverage-text
