@@ -158,6 +158,18 @@ abstract class FixtureMonologExtensionTest extends DependencyInjectionTest
         ), $container->getDefinition('monolog.handler.swift.mail_prototype')->getMethodCalls());
     }
 
+    public function testChannelParametersResolved()
+    {
+        $container = $this->getContainer('parameterized_handlers');
+
+        $this->assertEquals(
+            array(
+                'monolog.handler.custom' => array('type' => 'inclusive', 'elements' => array('some_channel')),
+            ),
+            $container->getParameter('monolog.handlers_to_channels')
+        );
+    }
+
     protected function getContainer($fixture)
     {
         $container = new ContainerBuilder();
