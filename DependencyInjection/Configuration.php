@@ -136,6 +136,7 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
  *   - [mailer]: mailer service, defaults to mailer
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
+ *   - [lazy]: use service lazy loading, bool, defaults to true
  *
  * - native_mailer:
  *   - from_email: string
@@ -449,6 +450,7 @@ class Configuration implements ConfigurationInterface
                                     ->scalarNode('method')->defaultNull()->end()
                                 ->end()
                             ->end()
+                            ->scalarNode('lazy')->defaultValue(true)->end() // swift_mailer
                             ->scalarNode('connection_string')->end() // socket_handler
                             ->scalarNode('timeout')->end() // socket_handler
                             ->scalarNode('connection_timeout')->end() // socket_handler
