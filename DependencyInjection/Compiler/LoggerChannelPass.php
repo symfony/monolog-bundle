@@ -39,9 +39,11 @@ class LoggerChannelPass implements CompilerPassInterface
                     continue;
                 }
 
+                $resolvedChannel = $container->getParameterBag()->resolveValue($tag['channel']);
+
                 $definition = $container->getDefinition($id);
-                $loggerId = sprintf('monolog.logger.%s', $tag['channel']);
-                $this->createLogger($tag['channel'], $loggerId, $container);
+                $loggerId = sprintf('monolog.logger.%s', $resolvedChannel);
+                $this->createLogger($resolvedChannel, $loggerId, $container);
 
                 foreach ($definition->getArguments() as $index => $argument) {
                     if ($argument instanceof Reference && 'logger' === (string) $argument) {
