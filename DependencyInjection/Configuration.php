@@ -450,7 +450,7 @@ class Configuration implements ConfigurationInterface
                                     ->scalarNode('method')->defaultNull()->end()
                                 ->end()
                             ->end()
-                            ->scalarNode('lazy')->defaultValue(true)->end() // swift_mailer
+                            ->booleanNode('lazy')->defaultValue(true)->end() // swift_mailer
                             ->scalarNode('connection_string')->end() // socket_handler
                             ->scalarNode('timeout')->end() // socket_handler
                             ->scalarNode('connection_timeout')->end() // socket_handler
