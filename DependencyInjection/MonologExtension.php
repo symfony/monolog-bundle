@@ -391,7 +391,7 @@ class MonologExtension extends Extension
                 }
             } else {
                 $message = new Definition('Swift_Message');
-                $message->setLazy(true);
+                $message->setLazy($handler['lazy']);
                 $message->setPublic(false);
                 $message->addMethodCall('setFrom', array($handler['from_email']));
                 $message->addMethodCall('setTo', array($handler['to_email']));
