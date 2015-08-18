@@ -390,33 +390,21 @@ class MonologExtension extends Extension
                     $prototype = new Reference($handler['email_prototype']['id']);
                 }
             } else {
-                $message = new Definition('Swift_Message');
-                $message->setLazy($handler['lazy']);
-                $message->setPublic(false);
-                $message->addMethodCall('setFrom', array($handler['from_email']));
-                $message->addMethodCall('setTo', array($handler['to_email']));
-                $message->addMethodCall('setSubject', array($handler['subject']));
+                $messageFactory = new Definition('Symfony\Bundle\MonologBundle\SwiftMailer\MessageFactory');
+                $messageFactory->setLazy(true);
+                $messageFactory->setPublic(false);
+                $messageFactory->setArguments(array(
+                    new Reference($handler['mailer']),
+                    $handler['from_email'],
+                    $handler['to_email'],
+                    $handler['subject'],
+                    $handler['content_type']
+                ));
 
-                if (isset($handler['mailer'])) {
-                    $mailer = $handler['mailer'];
-                } else {
-                    $mailer = 'mailer';
-                }
-
-                if (method_exists('Symfony\Component\DependencyInjection\Definition', 'setFactory')) {
-                    $message->setFactory(array(new Reference($mailer), 'createMessage'));
-                } else {
-                    $message->setFactoryService($mailer);
-                    $message->setFactoryMethod('createMessage');
-                }
-
-                if (isset($handler['content_type'])) {
-                    $message->addMethodCall('setContentType', array($handler['content_type']));
-                }
-
-                $messageId = sprintf('%s.mail_prototype', $handlerId);
-                $container->setDefinition($messageId, $message);
-                $prototype = new Reference($messageId);
+                $messageFactoryId = sprintf('%s.mail_message_factory', $handlerId);
+                $container->setDefinition($messageFactoryId, $messageFactory);
+                // set the prototype as a callable
+                $prototype = array(new Reference($messageFactoryId), 'createMessage');
             }
             $definition->setArguments(array(
                 new Reference($handler['mailer']),
