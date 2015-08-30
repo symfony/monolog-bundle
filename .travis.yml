@@ -26,6 +26,10 @@ matrix:
       env: SYMFONY_VERSION="2.7.x"
     - php: 5.6
       env: SYMFONY_VERSION="2.8.x-dev"
+    - php: 5.6
+      env: SYMFONY_VERSION="3.0.x-dev"
+  allow_failures:
+    - env: SYMFONY_VERSION="3.0.x-dev"
 
 before_install:
     - if [ "$SYMFONY_VERSION" != "" ]; then composer require --dev --no-update symfony/symfony:"$SYMFONY_VERSION"; fi
