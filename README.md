@@ -15,4 +15,4 @@ More information in the official [documentation](http://symfony.com/doc/current/
 License
 =======
 
-This bundle is released under the [MIT license](Resources/meta/LICENSE)
+This bundle is released under the [MIT license](LICENSE)
