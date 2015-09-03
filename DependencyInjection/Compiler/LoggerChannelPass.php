@@ -71,18 +71,7 @@ class LoggerChannelPass implements CompilerPassInterface
         $container->getParameterBag()->remove('monolog.additional_channels');
 
         // wire handlers to channels
-        $handlersToChannels = $container->getParameter('monolog.handlers_to_channels');
-        foreach ($handlersToChannels as $handler => $channels) {
-            foreach ($this->processChannels($channels) as $channel) {
-                try {
-                    $logger = $container->getDefinition($channel === 'app' ? 'monolog.logger' : 'monolog.logger.'.$channel);
-                } catch (InvalidArgumentException $e) {
-                    $msg = 'Monolog configuration error: The logging channel "'.$channel.'" assigned to the "'.substr($handler, 16).'" handler does not exist.';
-                    throw new \InvalidArgumentException($msg, 0, $e);
-                }
-                $logger->addMethodCall('pushHandler', array(new Reference($handler)));
-            }
-        }
+        $this->wireHandlersToChannels($container);
     }
 
     public function getChannels()
@@ -110,6 +99,21 @@ class LoggerChannelPass implements CompilerPassInterface
             $logger->replaceArgument(0, $channel);
             $container->setDefinition($loggerId, $logger);
             $this->channels[] = $channel;
+        }
+    }
+
+    protected function wireHandlersToChannels(ContainerBuilder $container) {
+        $handlersToChannels = $container->getParameter('monolog.handlers_to_channels');
+        foreach ($handlersToChannels as $handler => $channels) {
+            foreach ($this->processChannels($channels) as $channel) {
+                try {
+                    $logger = $container->getDefinition($channel === 'app' ? 'monolog.logger' : 'monolog.logger.'.$channel);
+                } catch (InvalidArgumentException $e) {
+                    $msg = 'Monolog configuration error: The logging channel "'.$channel.'" assigned to the "'.substr($handler, 16).'" handler does not exist.';
+                    throw new \InvalidArgumentException($msg, 0, $e);
+                }
+                $logger->addMethodCall('pushHandler', array(new Reference($handler)));
+            }
         }
     }
 }
