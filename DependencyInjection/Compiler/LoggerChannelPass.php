@@ -47,7 +47,7 @@ class LoggerChannelPass implements CompilerPassInterface
 
                 foreach ($definition->getArguments() as $index => $argument) {
                     if ($argument instanceof Reference && 'logger' === (string) $argument) {
-                        $definition->replaceArgument($index, new Reference($loggerId, $argument->getInvalidBehavior(), $argument->isStrict()));
+                        $definition->replaceArgument($index, $this->changeReference($argument, $loggerId));
                     }
                 }
 
@@ -55,7 +55,7 @@ class LoggerChannelPass implements CompilerPassInterface
                 foreach ($calls as $i => $call) {
                     foreach ($call[1] as $index => $argument) {
                         if ($argument instanceof Reference && 'logger' === (string) $argument) {
-                            $calls[$i][1][$index] = new Reference($loggerId, $argument->getInvalidBehavior(), $argument->isStrict());
+                            $calls[$i][1][$index] = $this->changeReference($argument, $loggerId);
                         }
                     }
                 }
@@ -82,6 +82,24 @@ class LoggerChannelPass implements CompilerPassInterface
                 }
                 $logger->addMethodCall('pushHandler', array(new Reference($handler)));
             }
+        }
+    }
+
+    /**
+     * Creates a copy of a reference and alters the service ID.
+     *
+     * @param Reference $reference
+     * @param string    $serviceId
+     *
+     * @return Reference
+     */
+    private function changeReference(Reference $reference, $serviceId)
+    {
+        if (method_exists($reference, 'isStrict')) {
+            // Stay compatible with Symfony 2
+            return new Reference($serviceId, $reference->getInvalidBehavior(), $reference->isStrict());
+        } else {
+            return new Reference($serviceId, $reference->getInvalidBehavior());
         }
     }
 
