@@ -1,0 +1,23 @@
+---------------------------------------------------------------------------
+
+by derrabus at 2015-09-15T21:25:35Z
+
+The method was removed with PR symfony/symfony#15693.
+
+---------------------------------------------------------------------------
+
+by fabpot at 2015-09-16T07:26:37Z
+
+:+1:
+
+---------------------------------------------------------------------------
+
+by fabpot at 2015-09-16T07:33:30Z
+
+That's actually the only remaining patch to make the Symfony SE work for Symfony 3.0. At least, to make Composer happy :)
+
+---------------------------------------------------------------------------
+
+by derrabus at 2015-09-16T09:03:34Z
+
+@stof Thank you for your review. I've followed both of your suggestions.
