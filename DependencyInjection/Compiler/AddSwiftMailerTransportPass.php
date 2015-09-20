@@ -33,21 +33,23 @@ class AddSwiftMailerTransportPass implements CompilerPassInterface
         foreach ($handlers as $id) {
             $definition = $container->getDefinition($id);
 
+            $mailerId = $definition->getArgument(0)->_toString();
+
             if (
-                $container->hasAlias('swiftmailer.transport.real') ||
-                $container->hasDefinition('swiftmailer.transport.real')
+                $container->hasAlias($mailerId . '.transport.real') ||
+                $container->hasDefinition($mailerId . '.transport.real')
             ) {
                 $definition->addMethodCall(
                     'setTransport',
-                    array(new Reference('swiftmailer.transport.real'))
+                    array(new Reference($mailerId . '.transport.real'))
                 );
             } elseif (
-                $container->hasAlias('swiftmailer.transport') ||
-                $container->hasDefinition('swiftmailer.transport')
+                $container->hasAlias($mailerId . '.transport') ||
+                $container->hasDefinition($mailerId . '.transport')
             ) {
                 $definition->addMethodCall(
                     'setTransport',
-                    array(new Reference('swiftmailer.transport'))
+                    array(new Reference($mailerId . '.transport'))
                 );
             }
         }
