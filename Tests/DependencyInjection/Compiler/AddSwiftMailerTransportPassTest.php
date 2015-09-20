@@ -29,6 +29,10 @@ class AddSwiftMailerTransportPassTest extends \PHPUnit_Framework_TestCase
     {
         $this->compilerPass = new AddSwiftMailerTransportPass();
         $this->definition = $this->getMock('\Symfony\Component\DependencyInjection\Definition');
+        $this->definition->expects($this->any())
+            ->method('getArgument')
+            ->with(0)
+            ->will($this->returnValue(new Reference('swiftmailer')));
         $this->container = $this->getMock('\Symfony\Component\DependencyInjection\ContainerBuilder', array('getParameter', 'getDefinition', 'hasDefinition', 'addMethodCall'));
         $this->container->expects($this->any())
             ->method('getParameter')
