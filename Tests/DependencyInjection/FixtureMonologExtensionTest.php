@@ -140,22 +140,26 @@ abstract class FixtureMonologExtensionTest extends DependencyInjectionTest
     {
         $container = $this->getContainer('single_email_recipient');
 
-        $this->assertSame(array(
-            array('setFrom', array('error@example.com')),
-            array('setTo', array(array('error@example.com'))),
-            array('setSubject', array('An Error Occurred!')),
-        ), $container->getDefinition('monolog.handler.swift.mail_prototype')->getMethodCalls());
+        $this->assertEquals(array(
+            new Reference('mailer'),
+            'error@example.com', // from
+            array('error@example.com'), // to
+            'An Error Occurred!', // subject
+            null,
+        ), $container->getDefinition('monolog.handler.swift.mail_message_factory')->getArguments());
     }
 
     public function testMultipleEmailRecipients()
     {
         $container = $this->getContainer('multiple_email_recipients');
 
-        $this->assertSame(array(
-            array('setFrom', array('error@example.com')),
-            array('setTo', array(array('dev1@example.com', 'dev2@example.com'))),
-            array('setSubject', array('An Error Occurred!')),
-        ), $container->getDefinition('monolog.handler.swift.mail_prototype')->getMethodCalls());
+        $this->assertEquals (array(
+            new Reference('mailer'),
+            'error@example.com',
+            array('dev1@example.com', 'dev2@example.com'),
+            'An Error Occurred!',
+            null
+        ), $container->getDefinition('monolog.handler.swift.mail_message_factory')->getArguments());
     }
 
     public function testChannelParametersResolved()
