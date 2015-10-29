@@ -125,7 +125,7 @@ class LoggerChannelPass implements CompilerPassInterface
     {
         if (method_exists($reference, 'isStrict')) {
             // Stay compatible with Symfony 2
-            return new Reference($serviceId, $reference->getInvalidBehavior(), $reference->isStrict());
+            return new Reference($serviceId, $reference->getInvalidBehavior(), $reference->isStrict(false));
         }
 
         return new Reference($serviceId, $reference->getInvalidBehavior());
