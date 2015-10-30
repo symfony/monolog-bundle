@@ -236,11 +236,25 @@ class MonologExtension extends Extension
             } else {
                 // elastica client new definition
                 $elasticaClient = new Definition('%monolog.elastica.client.class%');
+                $elasticaClientArguments = array(
+                    'host' => $handler['elasticsearch']['host'],
+                    'port' => $handler['elasticsearch']['port'],
+                    'transport' => $handler['elasticsearch']['transport'],
+                );
+
+                if (isset($handler['elasticsearch']['user']) && isset($handler['elasticsearch']['password'])) {
+                    $elasticaClientArguments = array_merge(
+                        $elasticaClientArguments,
+                        array(
+                            'headers' => array(
+                                'Authorization ' =>  'Basic ' . base64_encode($handler['elasticsearch']['user'] . ':' . $handler['elasticsearch']['password'])
+                            )
+                        )
+                    );
+                }
+
                 $elasticaClient->setArguments(array(
-                    array(
-                        'host' => $handler['elasticsearch']['host'],
-                        'port' => $handler['elasticsearch']['port'],
-                    ),
+                    $elasticaClientArguments
                 ));
 
                 $clientId = uniqid('monolog.elastica.client.');
