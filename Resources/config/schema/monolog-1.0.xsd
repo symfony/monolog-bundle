@@ -141,5 +141,8 @@
         <xsd:attribute name="id" type="xsd:string" />
         <xsd:attribute name="host" type="xsd:string" />
         <xsd:attribute name="port" type="xsd:integer" />
+        <xsd:attribute name="transport" type="xsd:string" />
+        <xsd:attribute name="user" type="xsd:string" />
+        <xsd:attribute name="password" type="xsd:string" />
     </xsd:complexType>
 </xsd:schema>
