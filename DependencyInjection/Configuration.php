@@ -409,6 +409,9 @@ class Configuration implements ConfigurationInterface
                                     ->scalarNode('id')->end()
                                     ->scalarNode('host')->end()
                                     ->scalarNode('port')->defaultValue(9200)->end()
+                                    ->scalarNode('transport')->defaultValue('http')->end()
+                                    ->scalarNode('user')->defaultNull()->end()
+                                    ->scalarNode('password')->defaultNull()->end()
                                 ->end()
                                 ->validate()
                                     ->ifTrue(function ($v) {
