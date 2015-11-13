@@ -217,6 +217,31 @@ class ConfigurationTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('mailer', $config['handlers']['swift']['mailer']);
     }
 
+    public function testWithElasticsearchHandler() {
+        $configs = array(
+            array(
+                'handlers' => array(
+                    'elasticsearch' => array(
+                        'type' => 'elasticsearch',
+                        'elasticsearch' => array(
+                            'id' => 'elastica.client'
+                        ),
+                        'index' => 'my-index',
+                        'document_type' => 'my-record',
+                        'ignore_error' => true
+                    )
+                )
+            )
+        );
+
+        $config = $this->process($configs);
+
+        $this->assertEquals(true, $config['handlers']['elasticsearch']['ignore_error']);
+        $this->assertEquals('my-record', $config['handlers']['elasticsearch']['document_type']);
+        $this->assertEquals('my-index', $config['handlers']['elasticsearch']['index']);
+
+    }
+
     public function testWithConsoleHandler()
     {
         $configs = array(

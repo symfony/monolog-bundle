@@ -419,6 +419,7 @@ class Configuration implements ConfigurationInterface
                             ->end() // elasticsearch
                             ->scalarNode('index')->defaultValue('monolog')->end() // elasticsearch
                             ->scalarNode('document_type')->defaultValue('logs')->end() // elasticsearch
+                            ->scalarNode('ignore_error')->defaultValue(false)->end() // elasticsearch
                             ->arrayNode('config')
                                 ->canBeUnset()
                                 ->prototype('scalar')->end()
