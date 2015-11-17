@@ -468,6 +468,8 @@ class MonologExtension extends Extension
                 $handler['bubble'],
                 $handler['use_ssl'],
                 $handler['message_format'],
+                !empty($handler['host']) ? $handler['host'] : 'api.hipchat.com',
+                !empty($handler['api_version']) ? $handler['api_version'] : 'v1',
             ));
             break;
 
