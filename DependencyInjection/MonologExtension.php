@@ -53,6 +53,11 @@ class MonologExtension extends Extension
             $loader->load('monolog.xml');
             $container->setAlias('logger', 'monolog.logger');
 
+            // always autowire the main logger, require Symfony >= 2.8
+            if (method_exists('Symfony\Component\DependencyInjection\Definition', 'addAutowiringType')) {
+                $container->getDefinition('monolog.logger')->addAutowiringType('Psr\Log\LoggerInterface');
+            }
+
             $handlers = array();
 
             foreach ($config['handlers'] as $name => $handler) {
