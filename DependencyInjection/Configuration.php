@@ -114,7 +114,7 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
  *
  * - syslog:
  *   - ident: string
- *   - [facility]: defaults to LOG_USER
+ *   - [facility]: defaults to 'user', use any of the LOG_* facility constant but without LOG_ prefix, e.g. user for LOG_USER
  *   - [logopts]: defaults to LOG_PID
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
@@ -122,7 +122,7 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
  * - syslogudp:
  *   - host: syslogd host name
  *   - [port]: defaults to 514
- *   - [facility]: defaults to LOG_USER
+ *   - [facility]: defaults to 'user', use any of the LOG_* facility constant but without LOG_ prefix, e.g. user for LOG_USER
  *   - [logopts]: defaults to LOG_PID
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
