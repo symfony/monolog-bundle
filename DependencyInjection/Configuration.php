@@ -179,6 +179,8 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
  *   - [bubble]: bool, defaults to true
  *   - [use_ssl]: bool, defaults to true
  *   - [message_format]: text or html, defaults to text
+ *   - [host]: defaults to "api.hipchat.com"
+ *   - [api_version]: defaults to "v1"
  *
  * - slack:
  *   - token: slack api token
@@ -330,6 +332,7 @@ class Configuration implements ConfigurationInterface
                             ->scalarNode('exchange_name')->defaultValue('log')->end() // amqp
                             ->scalarNode('room')->end() // hipchat
                             ->scalarNode('message_format')->defaultValue('text')->end() // hipchat
+                            ->scalarNode('api_version')->defaultNull()->end() // hipchat
                             ->scalarNode('channel')->end() // slack
                             ->scalarNode('bot_name')->defaultValue('Monolog')->end() // slack
                             ->scalarNode('use_attachment')->defaultTrue()->end() // slack
@@ -350,7 +353,7 @@ class Configuration implements ConfigurationInterface
                                 ->end()
                             ->end()
                             ->scalarNode('title')->defaultNull()->end() // pushover
-                            ->scalarNode('host')->end() // syslogudp
+                            ->scalarNode('host')->defaultNull()->end() // syslogudp & hipchat
                             ->scalarNode('port')->defaultValue(514)->end() // syslogudp
                             ->arrayNode('publisher')
                                 ->canBeUnset()
@@ -653,6 +656,10 @@ class Configuration implements ConfigurationInterface
                         ->validate()
                             ->ifTrue(function ($v) { return 'hipchat' === $v['type'] && !in_array($v['message_format'], array('text', 'html')); })
                             ->thenInvalid('The message_format has to be "text" or "html" in a HipChatHandler')
+                        ->end()
+                        ->validate()
+                            ->ifTrue(function ($v) { return 'hipchat' === $v['type'] && null !== $v['api_version'] && !in_array($v['api_version'], array('v1', 'v2'), true); })
+                            ->thenInvalid('The api_version has to be "v1" or "v2" in a HipChatHandler')
                         ->end()
                         ->validate()
                             ->ifTrue(function ($v) { return 'slack' === $v['type'] && (empty($v['token']) || empty($v['channel'])); })
