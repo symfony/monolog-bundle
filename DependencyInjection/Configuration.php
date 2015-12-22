@@ -184,7 +184,7 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
  *
  * - slack:
  *   - token: slack api token
- *   - channel: channel name
+ *   - channel: channel name (with starting #)
  *   - [bot_name]: defaults to Monolog
  *   - [icon_emoji]: defaults to null
  *   - [use_attachment]: bool, defaults to true
