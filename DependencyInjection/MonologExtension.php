@@ -130,6 +130,10 @@ class MonologExtension extends Extension
         $definition = new Definition(sprintf('%%monolog.handler.%s.class%%', $handler['type']));
         $handler['level'] = $this->levelToMonologConst($handler['level']);
 
+        if ($handler['include_stacktraces']) {
+            $definition->setConfigurator(array('Symfony\\Bundle\\MonologBundle\\MonologBundle', 'includeStacktraces'));
+        }
+
         switch ($handler['type']) {
         case 'service':
             $container->setAlias($handlerId, $handler['id']);
