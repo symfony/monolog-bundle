@@ -169,6 +169,7 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
  * - newrelic:
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
+ *   - [app_name]: new relic app name, default null
  *
  * - hipchat:
  *   - token: hipchat api token
