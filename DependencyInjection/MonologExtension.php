@@ -618,7 +618,7 @@ class MonologExtension extends Extension
             $definition->setArguments(array(
                 $handler['level'],
                 $handler['bubble'],
-                $handler['app_name'],
+                $handler['app-name'],
             ));
             break;
 
