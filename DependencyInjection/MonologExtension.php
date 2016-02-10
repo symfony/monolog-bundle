@@ -308,7 +308,7 @@ class MonologExtension extends Extension
                 $handler['passthru_level'] = $this->levelToMonologConst($handler['passthru_level']);
             }
             $nestedHandlerId = $this->getHandlerId($handler['handler']);
-            $this->nestedHandlers[] = $nestedHandlerId;
+            $this->markNestedHandler($nestedHandlerId);
 
             if (isset($handler['activation_strategy'])) {
                 $activation = new Reference($handler['activation_strategy']);
@@ -339,7 +339,7 @@ class MonologExtension extends Extension
             }
 
             $nestedHandlerId = $this->getHandlerId($handler['handler']);
-            $this->nestedHandlers[] = $nestedHandlerId;
+            $this->markNestedHandler($nestedHandlerId);
             $minLevelOrList = !empty($handler['accepted_levels']) ? $handler['accepted_levels'] : $handler['min_level'];
 
             $definition->setArguments(array(
@@ -352,7 +352,7 @@ class MonologExtension extends Extension
 
         case 'buffer':
             $nestedHandlerId = $this->getHandlerId($handler['handler']);
-            $this->nestedHandlers[] = $nestedHandlerId;
+            $this->markNestedHandler($nestedHandlerId);
 
             $definition->setArguments(array(
                 new Reference($nestedHandlerId),
@@ -368,7 +368,7 @@ class MonologExtension extends Extension
             $references = array();
             foreach ($handler['members'] as $nestedHandler) {
                 $nestedHandlerId = $this->getHandlerId($nestedHandler);
-                $this->nestedHandlers[] = $nestedHandlerId;
+                $this->markNestedHandler($nestedHandlerId);
                 $references[] = new Reference($nestedHandlerId);
             }
 
@@ -631,12 +631,25 @@ class MonologExtension extends Extension
             throw new \InvalidArgumentException(sprintf('Invalid handler type "%s" given for handler "%s"', $handler['type'], $name));
         }
 
+        if (!empty($handler['nested']) && true === $handler['nested']) {
+            $this->markNestedHandler($handlerId);
+        }
+
         if (!empty($handler['formatter'])) {
             $definition->addMethodCall('setFormatter', array(new Reference($handler['formatter'])));
         }
         $container->setDefinition($handlerId, $definition);
 
         return $handlerId;
+    }
+
+    private function markNestedHandler($nestedHandlerId)
+    {
+        if (in_array($nestedHandlerId, $this->nestedHandlers)) {
+            return;
+        }
+
+        $this->nestedHandlers[] = $nestedHandlerId;
     }
 
     private function getHandlerId($name)

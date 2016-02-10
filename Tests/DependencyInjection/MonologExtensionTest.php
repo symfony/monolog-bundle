@@ -50,6 +50,25 @@ class MonologExtensionTest extends DependencyInjectionTest
         $this->assertDICConstructorArguments($handler, array('/tmp/symfony.log', \Monolog\Logger::ERROR, false, 0666));
     }
 
+    public function testLoadWithNestedHandler()
+    {
+        $container = $this->getContainer(array(array('handlers' => array(
+            'custom' => array('type' => 'stream', 'path' => '/tmp/symfony.log', 'bubble' => false, 'level' => 'ERROR', 'file_permission' => '0666'),
+            'nested' => array('type' => 'stream', 'path' => '/tmp/symfony.log', 'bubble' => false, 'level' => 'ERROR', 'file_permission' => '0666', 'nested' => true)
+        ))));
+        $this->assertTrue($container->hasDefinition('monolog.logger'));
+        $this->assertTrue($container->hasDefinition('monolog.handler.custom'));
+        $this->assertTrue($container->hasDefinition('monolog.handler.nested'));
+
+        $logger = $container->getDefinition('monolog.logger');
+        // Nested handler must not be pushed to logger
+        $this->assertDICDefinitionMethodCallAt(0, $logger, 'pushHandler', array(new Reference('monolog.handler.custom')));
+
+        $handler = $container->getDefinition('monolog.handler.custom');
+        $this->assertDICDefinitionClass($handler, '%monolog.handler.stream.class%');
+        $this->assertDICConstructorArguments($handler, array('/tmp/symfony.log', \Monolog\Logger::ERROR, false, 0666));
+    }
+
     /**
      * @expectedException InvalidArgumentException
      */
