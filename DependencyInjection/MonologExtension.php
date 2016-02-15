@@ -300,6 +300,10 @@ class MonologExtension extends Extension
                 $handler['bubble'],
                 $handler['file_permission'],
             ));
+            $definition->addMethodCall('setFilenameFormat', array(
+                $handler['filename_format'],
+                $handler['date_format'],
+            ));
             break;
 
         case 'fingers_crossed':
