@@ -232,6 +232,8 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
  *   - [use_ssl]: whether or not SSL encryption should be used, defaults to true
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
+ *   - [timeout]: float
+ *   - [connection_timeout]: float
  *
  * - flowdock:
  *   - token: flowdock api token
@@ -460,8 +462,8 @@ class Configuration implements ConfigurationInterface
                             ->end()
                             ->booleanNode('lazy')->defaultValue(true)->end() // swift_mailer
                             ->scalarNode('connection_string')->end() // socket_handler
-                            ->scalarNode('timeout')->end() // socket_handler
-                            ->scalarNode('connection_timeout')->end() // socket_handler
+                            ->scalarNode('timeout')->end() // socket_handler & logentries
+                            ->scalarNode('connection_timeout')->end() // socket_handler & logentries
                             ->booleanNode('persistent')->end() // socket_handler
                             ->scalarNode('dsn')->end() // raven_handler
                             ->scalarNode('client_id')->defaultNull()->end() // raven_handler
