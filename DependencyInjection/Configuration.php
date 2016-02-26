@@ -165,6 +165,7 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
  *   - client_id: Raven client custom service id (optional)
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
+ *   - [auto_stack_logs]: bool, defaults to false
  *
  * - newrelic:
  *   - [level]: level name or int value, defaults to DEBUG
@@ -465,6 +466,7 @@ class Configuration implements ConfigurationInterface
                             ->booleanNode('persistent')->end() // socket_handler
                             ->scalarNode('dsn')->end() // raven_handler
                             ->scalarNode('client_id')->defaultNull()->end() // raven_handler
+                            ->scalarNode('auto_log_stacks')->defaultFalse()->end() // raven_handler
                             ->scalarNode('message_type')->defaultValue(0)->end() // error_log
                             ->arrayNode('tags') // loggly
                                 ->beforeNormalization()
