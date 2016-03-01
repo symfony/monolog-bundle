@@ -58,6 +58,9 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
  *   - [max_files]: files to keep, defaults to zero (infinite)
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
+ *   - [file_permission]: string|null, defaults to null
+ *   - [filename_format]: string, defaults to '{filename}-{date}'
+ *   - [date_format]: string, defaults to 'Y-m-d'
  *
  * - mongo:
  *   - mongo:
@@ -307,6 +310,8 @@ class Configuration implements ConfigurationInterface
                                     })
                                 ->end()
                             ->end()
+                            ->scalarNode('filename_format')->defaultValue('{filename}-{date}')->end() //rotating
+                            ->scalarNode('date_format')->defaultValue('Y-m-d')->end() //rotating
                             ->scalarNode('ident')->defaultFalse()->end() // syslog
                             ->scalarNode('logopts')->defaultValue(LOG_PID)->end() // syslog
                             ->scalarNode('facility')->defaultValue('user')->end() // syslog

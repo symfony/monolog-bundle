@@ -66,6 +66,8 @@
         <xsd:attribute name="include-extra" type="xsd:boolean" />
         <xsd:attribute name="icon-emoji" type="xsd:string" />
         <xsd:attribute name="file-permission" type="xsd:string" />
+        <xsd:attribute name="filename-format" type="xsd:string" />
+        <xsd:attribute name="date-format" type="xsd:string" />
         <xsd:attribute name="index" type="xsd:string" />
         <xsd:attribute name="document_type" type="xsd:string" />
         <xsd:attribute name="document-type" type="xsd:string" />
