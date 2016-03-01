@@ -576,6 +576,12 @@ class MonologExtension extends Extension
                 $handler['level'],
                 $handler['bubble'],
             ));
+            if (isset($handler['timeout'])) {
+                $definition->addMethodCall('setTimeout', array($handler['timeout']));
+            }
+            if (isset($handler['connection_timeout'])) {
+                $definition->addMethodCall('setConnectionTimeout', array($handler['connection_timeout']));
+            }
             break;
 
         case 'flowdock':
