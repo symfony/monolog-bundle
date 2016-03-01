@@ -54,6 +54,9 @@
         <xsd:attribute name="notify" type="xsd:boolean" />
         <xsd:attribute name="room" type="xsd:string" />
         <xsd:attribute name="nickname" type="xsd:string" />
+        <xsd:attribute name="timeout" type="xsd:string" />
+        <xsd:attribute name="connection-timeout" type="xsd:string" />
+        <xsd:attribute name="persistent" type="xsd:boolean" />
         <xsd:attribute name="dsn" type="xsd:string" />
         <xsd:attribute name="client-id" type="xsd:string" />
         <xsd:attribute name="use-ssl" type="xsd:boolean" />
