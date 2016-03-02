@@ -546,6 +546,7 @@ class MonologExtension extends Extension
             } else {
                 $client = new Definition('Raven_Client', array(
                     $handler['dsn'],
+                    array('auto_log_stacks' => $handler['auto_log_stacks'])
                 ));
                 $client->setPublic(false);
                 $clientId = 'monolog.raven.client.'.sha1($handler['dsn']);
