@@ -25,7 +25,8 @@
     },
     "require-dev": {
         "symfony/yaml": "~2.3|~3.0",
-        "symfony/console": "~2.3|~3.0"
+        "symfony/console": "~2.3|~3.0",
+        "phpunit/phpunit": "^4.8"
     },
     "autoload": {
         "psr-4": { "Symfony\\Bundle\\MonologBundle\\": "" }
