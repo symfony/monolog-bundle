@@ -173,6 +173,7 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
  * - newrelic:
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
+ *   - [app-name]: new relic app name, default null
  *
  * - hipchat:
  *   - token: hipchat api token
@@ -298,6 +299,7 @@ class Configuration implements ConfigurationInterface
                             ->scalarNode('priority')->defaultValue(0)->end()
                             ->scalarNode('level')->defaultValue('DEBUG')->end()
                             ->booleanNode('bubble')->defaultTrue()->end()
+                            ->scalarNode('app-name')->defaultNull()->end()
                             ->booleanNode('include_stacktraces')->defaultFalse()->end()
                             ->scalarNode('path')->defaultValue('%kernel.logs_dir%/%kernel.environment%.log')->end() // stream and rotating
                             ->scalarNode('file_permission')  // stream and rotating

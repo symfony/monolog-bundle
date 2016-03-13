@@ -32,6 +32,7 @@
         <xsd:attribute name="priority" type="xsd:integer" />
         <xsd:attribute name="level" type="level" />
         <xsd:attribute name="bubble" type="xsd:boolean" />
+        <xsd:attribute name="app-name" type="xsd:string" />
         <xsd:attribute name="path" type="xsd:string" />
         <xsd:attribute name="id" type="xsd:string" />
         <xsd:attribute name="name" type="xsd:string" use="required" />

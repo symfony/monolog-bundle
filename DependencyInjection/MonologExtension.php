@@ -625,10 +625,16 @@ class MonologExtension extends Extension
                 $handler['bubble'],
             ));
             break;
+        case 'newrelic':
+            $definition->setArguments(array(
+                $handler['level'],
+                $handler['bubble'],
+                $handler['app-name'],
+            ));
+            break;
 
         // Handlers using the constructor of AbstractHandler without adding their own arguments
         case 'browser_console':
-        case 'newrelic':
         case 'test':
         case 'null':
         case 'debug':
