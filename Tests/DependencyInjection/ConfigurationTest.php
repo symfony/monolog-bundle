@@ -36,6 +36,7 @@ class ConfigurationTest extends \PHPUnit_Framework_TestCase
         $this->assertArrayHasKey('foobar', $config['handlers']);
         $this->assertEquals('stream', $config['handlers']['foobar']['type']);
         $this->assertEquals('/foo/bar', $config['handlers']['foobar']['path']);
+        $this->assertFalse($config['handlers']['foobar']['nested']);
     }
 
     public function provideProcessStringChannels()
@@ -319,6 +320,20 @@ class ConfigurationTest extends \PHPUnit_Framework_TestCase
 
         $this->assertSame(0666, $config['handlers']['foo']['file_permission']);
         $this->assertSame(0777, $config['handlers']['bar']['file_permission']);
+    }
+
+    public function testWithNestedHandler()
+    {
+        $configs = array(
+            array(
+                'handlers' => array('foobar' => array('type' => 'stream', 'path' => '/foo/bar', 'nested' => true))
+            )
+        );
+
+        $config = $this->process($configs);
+
+
+        $this->assertTrue($config['handlers']['foobar']['nested']);
     }
 
     /**

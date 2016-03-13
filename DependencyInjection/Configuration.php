@@ -601,6 +601,7 @@ class Configuration implements ConfigurationInterface
                                 ->end()
                             ->end()
                             ->scalarNode('formatter')->end()
+                            ->booleanNode('nested')->defaultFalse()->end()
                         ->end()
                         ->validate()
                             ->ifTrue(function ($v) { return 'service' === $v['type'] && !empty($v['formatter']); })
