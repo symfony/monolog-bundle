@@ -282,6 +282,7 @@ class Configuration implements ConfigurationInterface
             ->fixXmlConfig('channel')
             ->fixXmlConfig('handler')
             ->children()
+                ->scalarNode('use_microseconds')->defaultTrue()->end()
                 ->arrayNode('channels')
                     ->canBeUnset()
                     ->prototype('scalar')->end()
