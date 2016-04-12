@@ -174,6 +174,7 @@ use Monolog\Logger;
  * - raven:
  *   - dsn: connection string
  *   - client_id: Raven client custom service id (optional)
+ *   - [release]: release number of the application that will be attached to logs, defaults to null
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
  *   - [auto_stack_logs]: bool, defaults to false
@@ -481,12 +482,13 @@ class Configuration implements ConfigurationInterface
                             ->scalarNode('timeout')->end() // socket_handler & logentries
                             ->scalarNode('time')->defaultValue(60)->end() // deduplication
                             ->scalarNode('deduplication_level')->defaultValue(Logger::ERROR)->end() // deduplication
-                            ->scalarNode('store')->end() // deduplication
+                            ->scalarNode('store')->defaultNull()->end() // deduplication
                             ->scalarNode('connection_timeout')->end() // socket_handler & logentries
                             ->booleanNode('persistent')->end() // socket_handler
                             ->scalarNode('dsn')->end() // raven_handler
                             ->scalarNode('client_id')->defaultNull()->end() // raven_handler
                             ->scalarNode('auto_log_stacks')->defaultFalse()->end() // raven_handler
+                            ->scalarNode('release')->defaultNull()->end() // raven_handler
                             ->scalarNode('message_type')->defaultValue(0)->end() // error_log
                             ->arrayNode('tags') // loggly
                                 ->beforeNormalization()

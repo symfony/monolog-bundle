@@ -571,6 +571,9 @@ class MonologExtension extends Extension
                 $handler['level'],
                 $handler['bubble'],
             ));
+            if (!empty($handler['release'])) {
+                $definition->addMethodCall('setRelease', array($handler['release']));
+            }
             break;
 
         case 'loggly':
