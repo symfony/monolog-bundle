@@ -367,6 +367,20 @@ class MonologExtension extends Extension
             ));
             break;
 
+        case 'deduplication':
+            $nestedHandlerId = $this->getHandlerId($handler['handler']);
+            $this->markNestedHandler($nestedHandlerId);
+            $defaultStore = '%kernel.cache_dir%/monolog_dedup_'.sha1($handlerId);
+
+            $definition->setArguments(array(
+                new Reference($nestedHandlerId),
+                isset($handler['store']) ? $handler['store'] : $defaultStore,
+                $handler['deduplication_level'],
+                $handler['time'],
+                $handler['bubble'],
+            ));
+            break;
+
         case 'group':
         case 'whatfailuregroup':
             $references = array();
