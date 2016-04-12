@@ -27,7 +27,8 @@ class MonologExtensionTest extends DependencyInjectionTest
         $this->assertTrue($container->hasDefinition('monolog.handler.main'));
 
         $logger = $container->getDefinition('monolog.logger');
-        $this->assertDICDefinitionMethodCallAt(0, $logger, 'pushHandler', array(new Reference('monolog.handler.main')));
+        $this->assertDICDefinitionMethodCallAt(0, $logger, 'useMicrosecondTimestamps', array('%monolog.use_microseconds%'));
+        $this->assertDICDefinitionMethodCallAt(1, $logger, 'pushHandler', array(new Reference('monolog.handler.main')));
 
         $handler = $container->getDefinition('monolog.handler.main');
         $this->assertDICDefinitionClass($handler, '%monolog.handler.stream.class%');
@@ -43,7 +44,8 @@ class MonologExtensionTest extends DependencyInjectionTest
         $this->assertTrue($container->hasDefinition('monolog.handler.custom'));
 
         $logger = $container->getDefinition('monolog.logger');
-        $this->assertDICDefinitionMethodCallAt(0, $logger, 'pushHandler', array(new Reference('monolog.handler.custom')));
+        $this->assertDICDefinitionMethodCallAt(0, $logger, 'useMicrosecondTimestamps', array('%monolog.use_microseconds%'));
+        $this->assertDICDefinitionMethodCallAt(1, $logger, 'pushHandler', array(new Reference('monolog.handler.custom')));
 
         $handler = $container->getDefinition('monolog.handler.custom');
         $this->assertDICDefinitionClass($handler, '%monolog.handler.stream.class%');
@@ -62,7 +64,8 @@ class MonologExtensionTest extends DependencyInjectionTest
 
         $logger = $container->getDefinition('monolog.logger');
         // Nested handler must not be pushed to logger
-        $this->assertDICDefinitionMethodCallAt(0, $logger, 'pushHandler', array(new Reference('monolog.handler.custom')));
+        $this->assertDICDefinitionMethodCallAt(0, $logger, 'useMicrosecondTimestamps', array('%monolog.use_microseconds%'));
+        $this->assertDICDefinitionMethodCallAt(1, $logger, 'pushHandler', array(new Reference('monolog.handler.custom')));
 
         $handler = $container->getDefinition('monolog.handler.custom');
         $this->assertDICDefinitionClass($handler, '%monolog.handler.stream.class%');
@@ -166,7 +169,8 @@ class MonologExtensionTest extends DependencyInjectionTest
         $this->assertTrue($container->hasDefinition('monolog.handler.main'));
 
         $logger = $container->getDefinition('monolog.logger');
-        $this->assertDICDefinitionMethodCallAt(0, $logger, 'pushHandler', array(new Reference('monolog.handler.main')));
+        $this->assertDICDefinitionMethodCallAt(0, $logger, 'useMicrosecondTimestamps', array('%monolog.use_microseconds%'));
+        $this->assertDICDefinitionMethodCallAt(1, $logger, 'pushHandler', array(new Reference('monolog.handler.main')));
 
         $handler = $container->getDefinition('monolog.handler.main');
         $this->assertDICDefinitionClass($handler, '%monolog.handler.syslog.class%');
@@ -181,7 +185,8 @@ class MonologExtensionTest extends DependencyInjectionTest
         $this->assertTrue($container->hasDefinition('monolog.handler.main'));
 
         $logger = $container->getDefinition('monolog.logger');
-        $this->assertDICDefinitionMethodCallAt(0, $logger, 'pushHandler', array(new Reference('monolog.handler.main')));
+        $this->assertDICDefinitionMethodCallAt(0, $logger, 'useMicrosecondTimestamps', array('%monolog.use_microseconds%'));
+        $this->assertDICDefinitionMethodCallAt(1, $logger, 'pushHandler', array(new Reference('monolog.handler.main')));
 
         $handler = $container->getDefinition('monolog.handler.main');
         $this->assertDICDefinitionClass($handler, '%monolog.handler.rollbar.class%');
@@ -196,7 +201,8 @@ class MonologExtensionTest extends DependencyInjectionTest
         $this->assertTrue($container->hasDefinition('monolog.handler.main'));
 
         $logger = $container->getDefinition('monolog.logger');
-        $this->assertDICDefinitionMethodCallAt(0, $logger, 'pushHandler', array(new Reference('monolog.handler.main')));
+        $this->assertDICDefinitionMethodCallAt(0, $logger, 'useMicrosecondTimestamps', array('%monolog.use_microseconds%'));
+        $this->assertDICDefinitionMethodCallAt(1, $logger, 'pushHandler', array(new Reference('monolog.handler.main')));
 
         $handler = $container->getDefinition('monolog.handler.main');
         $this->assertDICDefinitionClass($handler, '%monolog.handler.rollbar.class%');
@@ -220,7 +226,8 @@ class MonologExtensionTest extends DependencyInjectionTest
         $this->assertTrue($container->hasDefinition('monolog.handler.socket'));
 
         $logger = $container->getDefinition('monolog.logger');
-        $this->assertDICDefinitionMethodCallAt(0, $logger, 'pushHandler', array(new Reference('monolog.handler.socket')));
+        $this->assertDICDefinitionMethodCallAt(0, $logger, 'useMicrosecondTimestamps', array('%monolog.use_microseconds%'));
+        $this->assertDICDefinitionMethodCallAt(1, $logger, 'pushHandler', array(new Reference('monolog.handler.socket')));
 
         $handler = $container->getDefinition('monolog.handler.socket');
         $this->assertDICDefinitionClass($handler, '%monolog.handler.socket.class%');
@@ -252,7 +259,8 @@ class MonologExtensionTest extends DependencyInjectionTest
         $this->assertTrue($container->hasDefinition('monolog.handler.raven'));
 
         $logger = $container->getDefinition('monolog.logger');
-        $this->assertDICDefinitionMethodCallAt(0, $logger, 'pushHandler', array(new Reference('monolog.handler.raven')));
+        $this->assertDICDefinitionMethodCallAt(0, $logger, 'useMicrosecondTimestamps', array('%monolog.use_microseconds%'));
+        $this->assertDICDefinitionMethodCallAt(1, $logger, 'pushHandler', array(new Reference('monolog.handler.raven')));
 
         $this->assertTrue($container->hasDefinition('monolog.raven.client.'.sha1($dsn)));
 
@@ -269,7 +277,8 @@ class MonologExtensionTest extends DependencyInjectionTest
         $this->assertFalse($container->hasDefinition('raven.client'));
 
         $logger = $container->getDefinition('monolog.logger');
-        $this->assertDICDefinitionMethodCallAt(0, $logger, 'pushHandler', array(new Reference('monolog.handler.raven')));
+        $this->assertDICDefinitionMethodCallAt(0, $logger, 'useMicrosecondTimestamps', array('%monolog.use_microseconds%'));
+        $this->assertDICDefinitionMethodCallAt(1, $logger, 'pushHandler', array(new Reference('monolog.handler.raven')));
 
         $handler = $container->getDefinition('monolog.handler.raven');
         $this->assertDICConstructorArguments($handler, array(new Reference('raven.client'), 100, true));
@@ -284,7 +293,8 @@ class MonologExtensionTest extends DependencyInjectionTest
         $this->assertFalse($container->hasDefinition('raven.client'));
 
         $logger = $container->getDefinition('monolog.logger');
-        $this->assertDICDefinitionMethodCallAt(0, $logger, 'pushHandler', array(new Reference('monolog.handler.raven')));
+        $this->assertDICDefinitionMethodCallAt(0, $logger, 'useMicrosecondTimestamps', array('%monolog.use_microseconds%'));
+        $this->assertDICDefinitionMethodCallAt(1, $logger, 'pushHandler', array(new Reference('monolog.handler.raven')));
 
         $handler = $container->getDefinition('monolog.handler.raven');
         $this->assertDICConstructorArguments($handler, array(new Reference('raven.client'), 100, true));
@@ -316,7 +326,8 @@ class MonologExtensionTest extends DependencyInjectionTest
         $this->assertTrue($container->hasDefinition('monolog.handler.loggly'));
 
         $logger = $container->getDefinition('monolog.logger');
-        $this->assertDICDefinitionMethodCallAt(0, $logger, 'pushHandler', array(new Reference('monolog.handler.loggly')));
+        $this->assertDICDefinitionMethodCallAt(0, $logger, 'useMicrosecondTimestamps', array('%monolog.use_microseconds%'));
+        $this->assertDICDefinitionMethodCallAt(1, $logger, 'pushHandler', array(new Reference('monolog.handler.loggly')));
         $handler = $container->getDefinition('monolog.handler.loggly');
         $this->assertDICDefinitionClass($handler, '%monolog.handler.loggly.class%');
         $this->assertDICConstructorArguments($handler, array($token, \Monolog\Logger::DEBUG, true));
