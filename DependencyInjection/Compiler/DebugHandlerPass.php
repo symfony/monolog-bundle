@@ -42,6 +42,11 @@ class DebugHandlerPass implements CompilerPassInterface
             return;
         }
 
+        // disable the DebugHandler in CLI as it tends to leak memory if people enable kernel.debug
+        if ('cli' === PHP_SAPI) {
+            return;
+        }
+
         $debugHandler = new Definition('%monolog.handler.debug.class%', array(Logger::DEBUG, true));
         $container->setDefinition('monolog.handler.debug', $debugHandler);
 
