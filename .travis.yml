@@ -20,8 +20,6 @@ matrix:
       env: COMPOSER_FLAGS="--prefer-lowest" SYMFONY_DEPRECATIONS_HELPER=weak
     # Test against Symfony LTS versions
     - php: 5.6
-      env: SYMFONY_VERSION="2.3.*"
-    - php: 5.6
       env: SYMFONY_VERSION="2.7.*"
     - php: 5.6
       env: SYMFONY_VERSION="2.8.*" DEPENDENCIES=dev
