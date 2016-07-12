@@ -130,7 +130,8 @@ class MonologExtension extends Extension
     private function buildHandler(ContainerBuilder $container, $name, array $handler)
     {
         $handlerId = $this->getHandlerId($name);
-        $definition = new Definition(sprintf('%%monolog.handler.%s.class%%', $handler['type']));
+        $defaultDefinition = $container->getDefinition(sprintf('monolog.handler.%s', $handler['type']));
+        $definition = new Definition($defaultDefinition->getClass());
         $handler['level'] = $this->levelToMonologConst($handler['level']);
 
         if ($handler['include_stacktraces']) {
@@ -186,13 +187,13 @@ class MonologExtension extends Extension
                 $transport->setPublic(false);
                 $container->setDefinition($transportId, $transport);
 
-                $publisher = new Definition('%monolog.gelfphp.publisher.class%', array());
+                $publisher = new Definition('Gelf\Publisher', array());
                 $publisher->addMethodCall('addTransport', array(new Reference($transportId)));
                 $publisherId = uniqid('monolog.gelf.publisher.');
                 $publisher->setPublic(false);
                 $container->setDefinition($publisherId, $publisher);
             } elseif (class_exists('Gelf\MessagePublisher')) {
-                $publisher = new Definition('%monolog.gelf.publisher.class%', array(
+                $publisher = new Definition('Gelf\MessagePublisher', array(
                     $handler['publisher']['hostname'],
                     $handler['publisher']['port'],
                     $handler['publisher']['chunk_size'],
@@ -224,7 +225,7 @@ class MonologExtension extends Extension
 
                 $server .= $handler['mongo']['host'].':'.$handler['mongo']['port'];
 
-                $client = new Definition('%monolog.mongo.client.class%', array(
+                $client = new Definition('MongoClient', array(
                     $server,
                 ));
 
@@ -247,7 +248,7 @@ class MonologExtension extends Extension
                 $clientId = $handler['elasticsearch']['id'];
             } else {
                 // elastica client new definition
-                $elasticaClient = new Definition('%monolog.elastica.client.class%');
+                $elasticaClient = new Definition('Elastica\Client');
                 $elasticaClientArguments = array(
                     'host' => $handler['elasticsearch']['host'],
                     'port' => $handler['elasticsearch']['port'],
@@ -320,7 +321,7 @@ class MonologExtension extends Extension
             if (isset($handler['activation_strategy'])) {
                 $activation = new Reference($handler['activation_strategy']);
             } elseif (!empty($handler['excluded_404s'])) {
-                $activationDef = new Definition('%monolog.activation_strategy.not_found.class%', array($handler['excluded_404s'], $handler['action_level']));
+                $activationDef = new Definition('Symfony\Bundle\MonologBundle\NotFoundActivationStrategy', array($handler['excluded_404s'], $handler['action_level']));
                 $activationDef->addMethodCall('setRequest', array(new Reference('request', ContainerInterface::NULL_ON_INVALID_REFERENCE, false)));
                 $container->setDefinition($handlerId.'.not_found_strategy', $activationDef);
                 $activation = new Reference($handlerId.'.not_found_strategy');
