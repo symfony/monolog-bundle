@@ -18,48 +18,8 @@
             <argument /><!-- Channel -->
         </service>
 
-        <service id="monolog.gelf.publisher" class="Gelf\MessagePublisher"/>
-        <service id="monolog.gelfphp.publisher" class="Gelf\Publisher"/>
-        <service id="monolog.handler.stream" class="Monolog\Handler\StreamHandler"/>
-        <service id="monolog.handler.console" class="Symfony\Bridge\Monolog\Handler\ConsoleHandler"/>
-        <service id="monolog.handler.group" class="Monolog\Handler\GroupHandler"/>
-        <service id="monolog.handler.buffer" class="Monolog\Handler\BufferHandler"/>
-        <service id="monolog.handler.deduplication" class="Monolog\Handler\DeduplicationHandler"/>
-        <service id="monolog.handler.rotating_file" class="Monolog\Handler\RotatingFileHandler"/>
-        <service id="monolog.handler.syslog" class="Monolog\Handler\SyslogHandler"/>
-        <service id="monolog.handler.syslogudp" class="Monolog\Handler\SyslogUdpHandler"/>
-        <service id="monolog.handler.null" class="Monolog\Handler\NullHandler"/>
-        <service id="monolog.handler.test" class="Monolog\Handler\TestHandler"/>
-        <service id="monolog.handler.gelf" class="Monolog\Handler\GelfHandler"/>
-        <service id="monolog.handler.rollbar" class="Monolog\Handler\RollbarHandler"/>
-        <service id="monolog.handler.flowdock" class="Monolog\Handler\FlowdockHandler"/>
-        <service id="monolog.handler.browser_console" class="Monolog\Handler\BrowserConsoleHandler"/>
-        <service id="monolog.handler.firephp" class="Symfony\Bridge\Monolog\Handler\FirePHPHandler"/>
-        <service id="monolog.handler.chromephp" class="Symfony\Bridge\Monolog\Handler\ChromePhpHandler"/>
-        <service id="monolog.handler.debug" class="Symfony\Bridge\Monolog\Handler\DebugHandler"/>
-        <service id="monolog.handler.swift_mailer" class="Symfony\Bridge\Monolog\Handler\SwiftMailerHandler"/>
-        <service id="monolog.handler.native_mailer" class="Monolog\Handler\NativeMailerHandler"/>
-        <service id="monolog.handler.socket" class="Monolog\Handler\SocketHandler"/>
-        <service id="monolog.handler.pushover" class="Monolog\Handler\PushoverHandler"/>
-        <service id="monolog.handler.raven" class="Monolog\Handler\RavenHandler"/>
-        <service id="monolog.handler.newrelic" class="Monolog\Handler\NewRelicHandler"/>
-        <service id="monolog.handler.hipchat" class="Monolog\Handler\HipChatHandler"/>
-        <service id="monolog.handler.slack" class="Monolog\Handler\SlackHandler"/>
-        <service id="monolog.handler.cube" class="Monolog\Handler\CubeHandler"/>
-        <service id="monolog.handler.amqp" class="Monolog\Handler\AmqpHandler"/>
-        <service id="monolog.handler.error_log" class="Monolog\Handler\ErrorLogHandler"/>
-        <service id="monolog.handler.loggly" class="Monolog\Handler\LogglyHandler"/>
-        <service id="monolog.handler.logentries" class="Monolog\Handler\LogEntriesHandler"/>
-        <service id="monolog.handler.whatfailuregroup" class="Monolog\Handler\WhatFailureGroupHandler"/>
         <service id="monolog.activation_strategy.not_found" class="Symfony\Bundle\MonologBundle\NotFoundActivationStrategy"/>
-
-        <service id="monolog.handler.fingers_crossed" class="Monolog\Handler\FingersCrossedHandler"/>
         <service id="monolog.handler.fingers_crossed.error_level_activation_strategy" class="Monolog\Handler\FingersCrossed\ErrorLevelActivationStrategy"/>
-        <service id="monolog.handler.filter" class="Monolog\Handler\FilterHandler"/>
-        <service id="monolog.handler.mongo" class="Monolog\Handler\MongoDBHandler"/>
-        <service id="monolog.mongo.client" class="MongoClient"/>
-
-        <service id="monolog.handler.elasticsearch" class="Monolog\Handler\ElasticSearchHandler"/>
 
         <!-- Formatters -->
         <service id="monolog.formatter.chrome_php" class="Monolog\Formatter\ChromePHPFormatter" public="false" />

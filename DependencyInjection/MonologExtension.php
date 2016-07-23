@@ -130,8 +130,8 @@ class MonologExtension extends Extension
     private function buildHandler(ContainerBuilder $container, $name, array $handler)
     {
         $handlerId = $this->getHandlerId($name);
-        $defaultDefinition = $container->getDefinition(sprintf('monolog.handler.%s', $handler['type']));
-        $definition = new Definition($defaultDefinition->getClass());
+        $definition = new Definition($this->getHandlerClassByType($handler['type']));
+
         $handler['level'] = $this->levelToMonologConst($handler['level']);
 
         if ($handler['include_stacktraces']) {
@@ -694,4 +694,52 @@ class MonologExtension extends Extension
     {
         return sprintf('monolog.handler.%s', $name);
     }
+
+    private function getHandlerClassByType($handlerType)
+    {
+        $typeToClassMapping = array(
+            'stream' => 'Monolog\Handler\StreamHandler',
+            'console' => 'Symfony\Bridge\Monolog\Handler\ConsoleHandler',
+            'group' => 'Monolog\Handler\GroupHandler',
+            'buffer' => 'Monolog\Handler\BufferHandler',
+            'deduplication' => 'Monolog\Handler\DeduplicationHandler',
+            'rotating_file' => 'Monolog\Handler\RotatingFileHandler',
+            'syslog' => 'Monolog\Handler\SyslogHandler',
+            'syslogudp' => 'Monolog\Handler\SyslogUdpHandler',
+            'null' => 'Monolog\Handler\NullHandler',
+            'test' => 'Monolog\Handler\TestHandler',
+            'gelf' => 'Monolog\Handler\GelfHandler',
+            'rollbar' => 'Monolog\Handler\RollbarHandler',
+            'flowdock' => 'Monolog\Handler\FlowdockHandler',
+            'browser_console' => 'Monolog\Handler\BrowserConsoleHandler',
+            'firephp' => 'Symfony\Bridge\Monolog\Handler\FirePHPHandler',
+            'chromephp' => 'Symfony\Bridge\Monolog\Handler\ChromePhpHandler',
+            'debug' => 'Symfony\Bridge\Monolog\Handler\DebugHandler',
+            'swift_mailer' => 'Symfony\Bridge\Monolog\Handler\SwiftMailerHandler',
+            'native_mailer' => 'Monolog\Handler\NativeMailerHandler',
+            'socket' => 'Monolog\Handler\SocketHandler',
+            'pushover' => 'Monolog\Handler\PushoverHandler',
+            'raven' => 'Monolog\Handler\RavenHandler',
+            'newrelic' => 'Monolog\Handler\NewRelicHandler',
+            'hipchat' => 'Monolog\Handler\HipChatHandler',
+            'slack' => 'Monolog\Handler\SlackHandler',
+            'cube' => 'Monolog\Handler\CubeHandler',
+            'amqp' => 'Monolog\Handler\AmqpHandler',
+            'error_log' => 'Monolog\Handler\ErrorLogHandler',
+            'loggly' => 'Monolog\Handler\LogglyHandler',
+            'logentries' => 'Monolog\Handler\LogEntriesHandler',
+            'whatfailuregroup' => 'Monolog\Handler\WhatFailureGroupHandler',
+            'fingers_crossed' => 'Monolog\Handler\FingersCrossedHandler',
+            'filter' => 'Monolog\Handler\FilterHandler',
+            'mongo' => 'Monolog\Handler\MongoDBHandler',
+            'elasticsearch' => 'Monolog\Handler\ElasticSearchHandler',
+        );
+
+        if (!isset($typeToClassMapping[$handlerType])) {
+            throw new \InvalidArgumentException(sprintf('There is no handler class defined for handler "%s".', $handlerType));
+        }
+
+        return $typeToClassMapping[$handlerType];
+    }
+
 }
