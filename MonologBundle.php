@@ -11,6 +11,7 @@
 
 namespace Symfony\Bundle\MonologBundle;
 
+use Monolog\Formatter\JsonFormatter;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\HandlerInterface;
 use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\AddSwiftMailerTransportPass;
@@ -43,7 +44,7 @@ class MonologBundle extends Bundle
     public static function includeStacktraces(HandlerInterface $handler)
     {
         $formatter = $handler->getFormatter();
-        if ($formatter instanceof LineFormatter) {
+        if ($formatter instanceof LineFormatter || $formatter instanceof JsonFormatter) {
             $formatter->includeStacktraces();
         }
     }
