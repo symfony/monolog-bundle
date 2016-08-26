@@ -82,6 +82,7 @@
         <xsd:attribute name="ignore-error" type="xsd:string" />
         <xsd:attribute name="api_version" type="xsd:string" />
         <xsd:attribute name="include-stacktraces" type="xsd:string" />
+        <xsd:attribute name="content-type" type="xsd:string" />
     </xsd:complexType>
 
     <xsd:simpleType name="level">
