@@ -138,6 +138,17 @@ class MonologExtension extends Extension
             $definition->setConfigurator(array('Symfony\\Bundle\\MonologBundle\\MonologBundle', 'includeStacktraces'));
         }
 
+        if ($handler['process_psr_3_messages']) {
+            $processorId = 'monolog.processor.psr_log_message';
+            if (!$container->hasDefinition($processorId)) {
+                $processor = new Definition('Monolog\\Processor\\PsrLogMessageProcessor');
+                $processor->setPublic(false);
+                $container->setDefinition($processorId, $processor);
+            }
+
+            $definition->addMethodCall('pushProcessor', array(new Reference($processorId)));
+        }
+
         switch ($handler['type']) {
         case 'service':
             $container->setAlias($handlerId, $handler['id']);
