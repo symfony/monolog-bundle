@@ -689,6 +689,17 @@ class MonologExtension extends Extension
             ));
             break;
 
+        case 'logmatic':
+            $definition->setArguments(array(
+                $handler['token'],
+                $handler['hostname'],
+                $handler['app_name'],
+                $handler['use_ssl'],
+                $handler['level'],
+                $handler['bubble'],
+            ));
+            break;
+
         // Handlers using the constructor of AbstractHandler without adding their own arguments
         case 'browser_console':
         case 'test':
@@ -770,6 +781,7 @@ class MonologExtension extends Extension
             'filter' => 'Monolog\Handler\FilterHandler',
             'mongo' => 'Monolog\Handler\MongoDBHandler',
             'elasticsearch' => 'Monolog\Handler\ElasticSearchHandler',
+            'logmatic' => 'Monolog\Handler\LogmaticHandler',
             'server_log' => 'Symfony\Bridge\Monolog\Handler\ServerLogHandler',
         );
 

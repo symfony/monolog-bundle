@@ -281,6 +281,14 @@ use Monolog\Logger;
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
  *
+ * - logmatic:
+ *   - token: Logmatic api token
+ *   - [hostname]: Host name supplied by Logmatic
+ *   - [app_name]: Application name supplied by Logmatic
+ *   - [use_ssl]: bool, defaults to true
+ *   - [level]: level name or int value, defaults to DEBUG
+ *   - [bubble]: bool, defaults to true
+ *
  * - server_log:
  *   - host: server log host. ex: 127.0.0.1:9911
  *   - [level]: level name or int value, defaults to DEBUG
@@ -332,7 +340,7 @@ class Configuration implements ConfigurationInterface
                             ->scalarNode('priority')->defaultValue(0)->end()
                             ->scalarNode('level')->defaultValue('DEBUG')->end()
                             ->booleanNode('bubble')->defaultTrue()->end()
-                            ->scalarNode('app_name')->defaultNull()->end()
+                            ->scalarNode('app_name')->defaultNull()->end() // newrelic & logmatic
                             ->booleanNode('include_stacktraces')->defaultFalse()->end()
                             ->booleanNode('process_psr_3_messages')->defaultTrue()->end()
                             ->scalarNode('path')->defaultValue('%kernel.logs_dir%/%kernel.environment%.log')->end() // stream and rotating
@@ -388,9 +396,9 @@ class Configuration implements ConfigurationInterface
                             ->scalarNode('team')->end() // slackbot
                             ->scalarNode('notify')->defaultFalse()->end() // hipchat
                             ->scalarNode('nickname')->defaultValue('Monolog')->end() // hipchat
-                            ->scalarNode('token')->end() // pushover & hipchat & loggly & logentries & flowdock & rollbar & slack & slackbot
+                            ->scalarNode('token')->end() // pushover & hipchat & loggly & logentries & flowdock & rollbar & slack & slackbot & logmatic
                             ->scalarNode('source')->end() // flowdock
-                            ->booleanNode('use_ssl')->defaultTrue()->end() // logentries & hipchat
+                            ->booleanNode('use_ssl')->defaultTrue()->end() // logentries & hipchat & logmatic
                             ->variableNode('user') // pushover
                                 ->validate()
                                     ->ifTrue(function ($v) {
@@ -528,6 +536,7 @@ class Configuration implements ConfigurationInterface
                                 ->end()
                                 ->prototype('scalar')->end()
                             ->end()
+                            ->scalarNode('hostname')->defaultNull()->end() // logmatic
                             ->arrayNode('verbosity_levels') // console
                                 ->beforeNormalization()
                                     ->ifArray()
@@ -772,6 +781,10 @@ class Configuration implements ConfigurationInterface
                         ->validate()
                             ->ifTrue(function ($v) { return 'flowdock' === $v['type'] && empty($v['source']); })
                             ->thenInvalid('The source has to be specified to use a FlowdockHandler')
+                        ->end()
+                        ->validate()
+                            ->ifTrue(function ($v) { return 'logmatic' === $v['type'] && empty($v['token']); })
+                            ->thenInvalid('The token has to be specified to use a LogmaticHandler')
                         ->end()
                         ->validate()
                             ->ifTrue(function ($v) { return 'server_log' === $v['type'] && empty($v['host']); })
