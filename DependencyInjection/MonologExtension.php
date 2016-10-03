@@ -182,13 +182,13 @@ class MonologExtension extends Extension
                     $handler['publisher']['port'],
                     $handler['publisher']['chunk_size'],
                 ));
-                $transportId = uniqid('monolog.gelf.transport.');
+                $transportId = uniqid('monolog.gelf.transport.', true);
                 $transport->setPublic(false);
                 $container->setDefinition($transportId, $transport);
 
                 $publisher = new Definition('%monolog.gelfphp.publisher.class%', array());
                 $publisher->addMethodCall('addTransport', array(new Reference($transportId)));
-                $publisherId = uniqid('monolog.gelf.publisher.');
+                $publisherId = uniqid('monolog.gelf.publisher.', true);
                 $publisher->setPublic(false);
                 $container->setDefinition($publisherId, $publisher);
             } elseif (class_exists('Gelf\MessagePublisher')) {
@@ -198,7 +198,7 @@ class MonologExtension extends Extension
                     $handler['publisher']['chunk_size'],
                 ));
 
-                $publisherId = uniqid('monolog.gelf.publisher.');
+                $publisherId = uniqid('monolog.gelf.publisher.', true);
                 $publisher->setPublic(false);
                 $container->setDefinition($publisherId, $publisher);
             } else {
@@ -228,7 +228,7 @@ class MonologExtension extends Extension
                     $server,
                 ));
 
-                $clientId = uniqid('monolog.mongo.client.');
+                $clientId = uniqid('monolog.mongo.client.', true);
                 $client->setPublic(false);
                 $container->setDefinition($clientId, $client);
             }
@@ -269,7 +269,7 @@ class MonologExtension extends Extension
                     $elasticaClientArguments
                 ));
 
-                $clientId = uniqid('monolog.elastica.client.');
+                $clientId = uniqid('monolog.elastica.client.', true);
                 $elasticaClient->setPublic(false);
                 $container->setDefinition($clientId, $elasticaClient);
             }
