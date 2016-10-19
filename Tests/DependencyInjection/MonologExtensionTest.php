@@ -338,7 +338,31 @@ class MonologExtensionTest extends DependencyInjectionTest
         ))));
         $handler = $container->getDefinition('monolog.handler.loggly');
         $this->assertDICDefinitionMethodCallAt(0, $handler, 'setTag', array('foo,bar'));
+    }
 
+    public function testFingersCrossedHandlerWhenExcluded404sAreSpecified()
+    {
+        $container = $this->getContainer(array(array('handlers' => array(
+            'main' => array('type' => 'fingers_crossed', 'handler' => 'nested', 'excluded_404s' => array('^/foo', '^/bar')),
+            'nested' => array('type' => 'stream', 'path' => '/tmp/symfony.log')
+        ))));
+
+        $this->assertTrue($container->hasDefinition('monolog.logger'));
+        $this->assertTrue($container->hasDefinition('monolog.handler.main'));
+        $this->assertTrue($container->hasDefinition('monolog.handler.nested'));
+        $this->assertTrue($container->hasDefinition('monolog.handler.main.not_found_strategy'));
+
+        $logger = $container->getDefinition('monolog.logger');
+        $this->assertDICDefinitionMethodCallAt(0, $logger, 'useMicrosecondTimestamps', array('%monolog.use_microseconds%'));
+        $this->assertDICDefinitionMethodCallAt(1, $logger, 'pushHandler', array(new Reference('monolog.handler.main')));
+
+        $strategy = $container->getDefinition('monolog.handler.main.not_found_strategy');
+        $this->assertDICDefinitionClass($strategy, '%monolog.activation_strategy.not_found.class%');
+        $this->assertDICConstructorArguments($strategy, array(new Reference('request_stack'), array('^/foo', '^/bar'), \Monolog\Logger::WARNING));
+
+        $handler = $container->getDefinition('monolog.handler.main');
+        $this->assertDICDefinitionClass($handler, '%monolog.handler.fingers_crossed.class%');
+        $this->assertDICConstructorArguments($handler, array(new Reference('monolog.handler.nested'), new Reference('monolog.handler.main.not_found_strategy'), 0, true, true, null));
     }
 
     protected function getContainer(array $config = array())
