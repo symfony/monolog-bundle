@@ -1,0 +1,11 @@
+---------------------------------------------------------------------------
+
+by javiereguiluz at 2016-10-11T08:51:44Z
+
+👍 this PR looks nice and it complies with the modern Symfony practices. I hope that bundle maintainers will consider to merge it. Thanks!
+
+---------------------------------------------------------------------------
+
+by stof at 2016-10-11T08:52:55Z
+
+this should be merged only when we decide to make a 3.0 version of the bundle, as it is a BC break
