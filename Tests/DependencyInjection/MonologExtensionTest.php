@@ -357,11 +357,11 @@ class MonologExtensionTest extends DependencyInjectionTest
         $this->assertDICDefinitionMethodCallAt(1, $logger, 'pushHandler', array(new Reference('monolog.handler.main')));
 
         $strategy = $container->getDefinition('monolog.handler.main.not_found_strategy');
-        $this->assertDICDefinitionClass($strategy, '%monolog.activation_strategy.not_found.class%');
+        $this->assertDICDefinitionClass($strategy, 'Symfony\Bridge\Monolog\Handler\FingersCrossed\NotFoundActivationStrategy');
         $this->assertDICConstructorArguments($strategy, array(new Reference('request_stack'), array('^/foo', '^/bar'), \Monolog\Logger::WARNING));
 
         $handler = $container->getDefinition('monolog.handler.main');
-        $this->assertDICDefinitionClass($handler, '%monolog.handler.fingers_crossed.class%');
+        $this->assertDICDefinitionClass($handler, 'Monolog\Handler\FingersCrossedHandler');
         $this->assertDICConstructorArguments($handler, array(new Reference('monolog.handler.nested'), new Reference('monolog.handler.main.not_found_strategy'), 0, true, true, null));
     }
 
