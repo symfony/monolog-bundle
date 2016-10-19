@@ -1,0 +1,132 @@
+---------------------------------------------------------------------------
+
+by BPScott at 2016-05-26T11:43:29Z
+
+Tests are failing as this is incompatible with Symfony 2.3, which Travis is currently testing. Given that Symfony 2.3 enters its security-fixes-only LTS phase this month, I don't think the extra effort to maintain that compatibility is worthwhile as it is non-trivial (as documented in #94).
+
+---------------------------------------------------------------------------
+
+by BPScott at 2016-06-05T14:34:15Z
+
+@Seldaek, any chance you could give this a review / provide any feedback?
+
+---------------------------------------------------------------------------
+
+by Seldaek at 2016-06-06T10:16:44Z
+
+I think we should just require symfony 2.7 and then I can merge this in the v3 of the bundle. 2.6 isn't LTS so it's kinda pointless.
+
+---------------------------------------------------------------------------
+
+by BPScott at 2016-06-06T11:20:49Z
+
+I'm not familiar with Symfony's process for specifying dependancies between bundles of varying versions and how that interacts with maintenance periods. What parts of the composer.json should I update?
+
+Currently the minimal version bumps for this code to work are:
+
+```
+"symfony/monolog-bridge": "~2.6|~3.0", // from ~2.3|~3.0
+"symfony/http-kernel": "~2.4|~3.0", // from ~2.3|~3.0
+```
+
+Should I update the definitions for both `monolog-bridge` and `http-kernel` to require `~2.7|~3.0`? as 2.4 and 2.6 are both out of maintenance? If this shall become v3 of the bundle should we drop support for Symfony 2.x (making the dependants all `~3.0`) or are non-core bundles (e.g. monolog-bundle) version numbers independent of Symfony version numbers?
+
+---------------------------------------------------------------------------
+
+by Seldaek at 2016-06-06T11:24:48Z
+
+Indeed we don't track symfony versions at all. And yes I'd say put everything symfony/* to require 2.7|3.0 :)
+
+---------------------------------------------------------------------------
+
+by BPScott at 2016-06-06T11:32:51Z
+
+> And yes I'd say put everything symfony/* to require 2.7|3.0
+
+We also depend upon `symfony/dependency-injection` and `symfony/config`, both at  `~2.3|~3.0`. These dependancies are unaffected by this change. Version bump them too for consistency's sake? (Pretty sure the answer to this is yes, but want to make absolutely sure you want to version bump unrelated dependancies :))
+
+I figure if I bump everything up to requiring 2.7 then I should also update the Travis config to not bother testing against 2.3.
+
+Oh also, I mimiced @fabpot's original PR in deprecating but not removing the `NotFoundActivationStrategy` class within this bundle. If we're going to target v3 for this, should I remove this class entirely rather than leaving it in for BC reasons?
+
+Would you prefer these changes in additional commits or should I squash them down into one?
+
+---------------------------------------------------------------------------
+
+by Seldaek at 2016-06-06T11:36:28Z
+
+Yes I'm thinking we might as well bump it all to 2.7 as the rest is EOL and we go for a major version. The class I would leave it in but maybe add a `@trigger_error('Use xxx instead', E_USER_DEPRECATED);` to make sure people migrate, because I suspect there might be some that implemented their own activaion strategy by extending this one, so if it suddenly stops working it isn't nice. Doens't cost us much to keep a few lines in.
+
+As for the commits, I don't really mind :)
+
+---------------------------------------------------------------------------
+
+by BPScott at 2016-06-06T12:37:16Z
+
+Added the version bumps to composer.json.
+
+I've just spotted something glaringly obvious that I missed... The constructor definitions are different for the `NotFoundActivationStrategy` in this bundle and in the bridge (the bridge version injects a RequestStack into the constructor as the first argument). For those people that have inherited from our `NotFoundActivationStrategy` emptying out the `NotFoundActivationStrategy` so the class continues to exist won't work as the constructor has changed. We'd have to put extra logic into the DI config to deal with how we build out two different sets of constructor args based upon the activation strategy's class hierarchy (`$requestStack, $actionLevel, $excludedUrls` in the new world, `$actionLevel, $excludedUrls`, with passing in $requestStack as a setter in the old), which I'm pretty sure we don't want to do if we're planning a major version bump anyway.
+
+So we've got two choices:
+
+* Add extra code to the DI config to deal with the two classes having different constructor args. This would leave us fully backwards compatible, and we wouldn't need a bump to v3.
+* Force a hard BC break by removing the our `NotFoundActivationStrategy` entirely. We could make the migration slightly more obvious by leaving in the class and adding a `trigger_error("", E_USER_ERROR)` in the constructor explaining that any not found activation strategies must now inherit from `Symfony\Bridge\Monolog\Handler\FingersCrossed\NotFoundActivationStrategy`.
+
+What do you reckon?
+
+---------------------------------------------------------------------------
+
+by Seldaek at 2016-06-06T12:41:01Z
+
+Oh right then I'd vote for remove it entirely, and we'll document it in
+the changelog.
+
+---------------------------------------------------------------------------
+
+by BPScott at 2016-06-06T12:51:27Z
+
+Cool, my vote would have been for dealing with that in the documentation too.
+
+Removed the class. No more questions from me, I think this is ready to roll.
+
+---------------------------------------------------------------------------
+
+by stof at 2016-06-06T13:40:53Z
+
+@Seldaek if you make a v3 of this bundle, it would be great to remove all ``*.class`` DIC parameters, to be consistent with the updated Symfony best practice.
+
+---------------------------------------------------------------------------
+
+by avant1 at 2016-07-11T14:04:01Z
+
+Are there any blocking issues/things-to-do preventing v3 (RC or beta) from being released?
+I'll be very happy to see this PR merged.
+
+---------------------------------------------------------------------------
+
+by Seldaek at 2016-07-12T13:55:57Z
+
+No blocker no, just I don't have any time at the moment, maybe @stof does or someone can help create a complete PR that cleans this up, the *.class params as mentioned by @stof above and upgrade whatever else needs upgrading, I haven't looked at this in a while sorry.
+
+---------------------------------------------------------------------------
+
+by StevendeVries at 2016-10-11T15:21:16Z
+
+@stof or @Seldaek does this PR still need more work (it's an old PR)? I'm kinda reluctant to add a workaround for this issue.
+
+---------------------------------------------------------------------------
+
+by fabpot at 2016-10-19T00:14:43Z
+
+I'm going to take care of version 3 of the bundle.
+
+---------------------------------------------------------------------------
+
+by fabpot at 2016-10-19T00:18:23Z
+
+Here is the plan:
+
+ * The new 2.x branch is still maintained;
+ * The master branch is now hosting the upcoming version 3 of the bundle.
+
+In the next coming hours, I'm going to merge some PR on 2.x and 3.
