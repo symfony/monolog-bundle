@@ -154,10 +154,6 @@ class MonologExtension extends Extension
             break;
 
         case 'console':
-            if (!class_exists('Symfony\Bridge\Monolog\Handler\ConsoleHandler')) {
-                throw new \RuntimeException('The console handler requires symfony/monolog-bridge 2.4+');
-            }
-
             $definition->setArguments(array(
                 null,
                 $handler['bubble'],
@@ -424,14 +420,6 @@ class MonologExtension extends Extension
             break;
 
         case 'swift_mailer':
-            $oldHandler = false;
-            // fallback for older symfony versions that don't have the new SwiftMailerHandler in the bridge
-            $newHandlerClass = $container->getParameterBag()->resolveValue($definition->getClass());
-            if (!class_exists($newHandlerClass)) {
-                $definition = new Definition('Monolog\Handler\SwiftMailerHandler');
-                $oldHandler = true;
-            }
-
             if (isset($handler['email_prototype'])) {
                 if (!empty($handler['email_prototype']['method'])) {
                     $prototype = array(new Reference($handler['email_prototype']['id']), $handler['email_prototype']['method']);
@@ -461,13 +449,10 @@ class MonologExtension extends Extension
                 $handler['level'],
                 $handler['bubble'],
             ));
-            if (!$oldHandler) {
-                $this->swiftMailerHandlers[] = $handlerId;
-                $definition->addTag('kernel.event_listener', array('event' => 'kernel.terminate', 'method' => 'onKernelTerminate'));
-                if (method_exists($newHandlerClass, 'onCliTerminate')) {
-                    $definition->addTag('kernel.event_listener', array('event' => 'console.terminate', 'method' => 'onCliTerminate'));
-                }
-            }
+
+            $this->swiftMailerHandlers[] = $handlerId;
+            $definition->addTag('kernel.event_listener', array('event' => 'kernel.terminate', 'method' => 'onKernelTerminate'));
+            $definition->addTag('kernel.event_listener', array('event' => 'console.terminate', 'method' => 'onCliTerminate'));
             break;
 
         case 'native_mailer':
