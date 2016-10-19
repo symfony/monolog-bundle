@@ -4,53 +4,6 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
 
-    <parameters>
-        <parameter key="monolog.logger.class">Symfony\Bridge\Monolog\Logger</parameter>
-        <parameter key="monolog.gelf.publisher.class">Gelf\MessagePublisher</parameter>
-        <parameter key="monolog.gelfphp.publisher.class">Gelf\Publisher</parameter>
-        <parameter key="monolog.handler.stream.class">Monolog\Handler\StreamHandler</parameter>
-        <parameter key="monolog.handler.console.class">Symfony\Bridge\Monolog\Handler\ConsoleHandler</parameter>
-        <parameter key="monolog.handler.group.class">Monolog\Handler\GroupHandler</parameter>
-        <parameter key="monolog.handler.buffer.class">Monolog\Handler\BufferHandler</parameter>
-        <parameter key="monolog.handler.deduplication.class">Monolog\Handler\DeduplicationHandler</parameter>
-        <parameter key="monolog.handler.rotating_file.class">Monolog\Handler\RotatingFileHandler</parameter>
-        <parameter key="monolog.handler.syslog.class">Monolog\Handler\SyslogHandler</parameter>
-        <parameter key="monolog.handler.syslogudp.class">Monolog\Handler\SyslogUdpHandler</parameter>
-        <parameter key="monolog.handler.null.class">Monolog\Handler\NullHandler</parameter>
-        <parameter key="monolog.handler.test.class">Monolog\Handler\TestHandler</parameter>
-        <parameter key="monolog.handler.gelf.class">Monolog\Handler\GelfHandler</parameter>
-        <parameter key="monolog.handler.rollbar.class">Monolog\Handler\RollbarHandler</parameter>
-        <parameter key="monolog.handler.flowdock.class">Monolog\Handler\FlowdockHandler</parameter>
-        <parameter key="monolog.handler.browser_console.class">Monolog\Handler\BrowserConsoleHandler</parameter>
-        <parameter key="monolog.handler.firephp.class">Symfony\Bridge\Monolog\Handler\FirePHPHandler</parameter>
-        <parameter key="monolog.handler.chromephp.class">Symfony\Bridge\Monolog\Handler\ChromePhpHandler</parameter>
-        <parameter key="monolog.handler.debug.class">Symfony\Bridge\Monolog\Handler\DebugHandler</parameter>
-        <parameter key="monolog.handler.swift_mailer.class">Symfony\Bridge\Monolog\Handler\SwiftMailerHandler</parameter>
-        <parameter key="monolog.handler.native_mailer.class">Monolog\Handler\NativeMailerHandler</parameter>
-        <parameter key="monolog.handler.socket.class">Monolog\Handler\SocketHandler</parameter>
-        <parameter key="monolog.handler.pushover.class">Monolog\Handler\PushoverHandler</parameter>
-        <parameter key="monolog.handler.raven.class">Monolog\Handler\RavenHandler</parameter>
-        <parameter key="monolog.handler.newrelic.class">Monolog\Handler\NewRelicHandler</parameter>
-        <parameter key="monolog.handler.hipchat.class">Monolog\Handler\HipChatHandler</parameter>
-        <parameter key="monolog.handler.slack.class">Monolog\Handler\SlackHandler</parameter>
-        <parameter key="monolog.handler.cube.class">Monolog\Handler\CubeHandler</parameter>
-        <parameter key="monolog.handler.amqp.class">Monolog\Handler\AmqpHandler</parameter>
-        <parameter key="monolog.handler.error_log.class">Monolog\Handler\ErrorLogHandler</parameter>
-        <parameter key="monolog.handler.loggly.class">Monolog\Handler\LogglyHandler</parameter>
-        <parameter key="monolog.handler.logentries.class">Monolog\Handler\LogEntriesHandler</parameter>
-        <parameter key="monolog.handler.whatfailuregroup.class">Monolog\Handler\WhatFailureGroupHandler</parameter>
-        <parameter key="monolog.activation_strategy.not_found.class">Symfony\Bridge\Monolog\Handler\FingersCrossed\NotFoundActivationStrategy</parameter>
-
-        <parameter key="monolog.handler.fingers_crossed.class">Monolog\Handler\FingersCrossedHandler</parameter>
-        <parameter key="monolog.handler.fingers_crossed.error_level_activation_strategy.class">Monolog\Handler\FingersCrossed\ErrorLevelActivationStrategy</parameter>
-        <parameter key="monolog.handler.filter.class">Monolog\Handler\FilterHandler</parameter>
-        <parameter key="monolog.handler.mongo.class">Monolog\Handler\MongoDBHandler</parameter>
-        <parameter key="monolog.mongo.client.class">MongoClient</parameter>
-
-        <parameter key="monolog.handler.elasticsearch.class">Monolog\Handler\ElasticSearchHandler</parameter>
-        <parameter key="monolog.elastica.client.class">Elastica\Client</parameter>
-    </parameters>
-
     <services>
         <service id="monolog.logger" parent="monolog.logger_prototype" public="false">
             <argument index="0">app</argument>
@@ -61,9 +14,12 @@
 
         <service id="logger" alias="monolog.logger" />
 
-        <service id="monolog.logger_prototype" class="%monolog.logger.class%" abstract="true">
+        <service id="monolog.logger_prototype" class="Symfony\Bridge\Monolog\Logger" abstract="true">
             <argument /><!-- Channel -->
         </service>
+
+        <service id="monolog.activation_strategy.not_found" class="Symfony\Bridge\Monolog\Handler\FingersCrossed\NotFoundActivationStrategy"/>
+        <service id="monolog.handler.fingers_crossed.error_level_activation_strategy" class="Monolog\Handler\FingersCrossed\ErrorLevelActivationStrategy"/>
 
         <!-- Formatters -->
         <service id="monolog.formatter.chrome_php" class="Monolog\Formatter\ChromePHPFormatter" public="false" />
