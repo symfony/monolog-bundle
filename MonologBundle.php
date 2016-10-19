@@ -20,6 +20,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\LoggerChannelPass;
 use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\DebugHandlerPass;
 use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\AddProcessorsPass;
+use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\FixEmptyLoggerPass;
 
 /**
  * Bundle.
@@ -34,6 +35,7 @@ class MonologBundle extends Bundle
 
         $container->addCompilerPass($channelPass = new LoggerChannelPass());
         $container->addCompilerPass(new DebugHandlerPass($channelPass));
+        $container->addCompilerPass(new FixEmptyLoggerPass($channelPass));
         $container->addCompilerPass(new AddProcessorsPass());
         $container->addCompilerPass(new AddSwiftMailerTransportPass());
     }
