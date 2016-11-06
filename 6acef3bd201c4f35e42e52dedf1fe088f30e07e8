@@ -1,0 +1,29 @@
+---------------------------------------------------------------------------
+
+by ged15 at 2016-09-28T19:39:16Z
+
+I thought about the design and I think it makes more sense to push the processor to each handler. That way, processing PSR-3 messages can be disabled per handler.
+
+---------------------------------------------------------------------------
+
+by ged15 at 2016-09-29T22:35:27Z
+
+Looks like this does not work for the `event` logger in Symfony. Will dig deeper to figure out why.
+
+---------------------------------------------------------------------------
+
+by fabpot at 2016-11-06T07:10:35Z
+
+I've just tested and it looks good to me. @ged15 Can you rebase?
+
+---------------------------------------------------------------------------
+
+by ged15 at 2016-11-06T12:26:53Z
+
+@fabpot rebased and seems to work for me properly now too. Was a bug in an earlier version of the bundle I think.
+
+---------------------------------------------------------------------------
+
+by fabpot at 2016-11-06T15:58:03Z
+
+Thanks, I'm going to merge this in the 2.x branch as this is both a new feature (BC) and a fix for the current behavior.
