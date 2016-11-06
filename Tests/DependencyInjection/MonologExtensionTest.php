@@ -14,6 +14,7 @@ namespace Symfony\Bundle\MonologBundle\Tests\DependencyInjection;
 use Symfony\Bundle\MonologBundle\DependencyInjection\MonologExtension;
 use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\LoggerChannelPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 
@@ -70,6 +71,21 @@ class MonologExtensionTest extends DependencyInjectionTest
         $handler = $container->getDefinition('monolog.handler.custom');
         $this->assertDICDefinitionClass($handler, 'Monolog\Handler\StreamHandler');
         $this->assertDICConstructorArguments($handler, array('/tmp/symfony.log', \Monolog\Logger::ERROR, false, 0666));
+    }
+
+    public function testLoadWithServiceHandler()
+    {
+        $container = $this->getContainer(
+            array(array('handlers' => array('custom' => array('type' => 'service', 'id' => 'some.service.id')))),
+            array('some.service.id' => new Definition('stdClass', array('foo', false)))
+        );
+
+        $this->assertTrue($container->hasDefinition('monolog.logger'));
+        $this->assertTrue($container->hasAlias('monolog.handler.custom'));
+
+        $handler = $container->findDefinition('monolog.handler.custom');
+        $this->assertDICDefinitionClass($handler, 'stdClass');
+        $this->assertDICConstructorArguments($handler, array('foo', false));
     }
 
     /**
@@ -365,9 +381,13 @@ class MonologExtensionTest extends DependencyInjectionTest
         $this->assertDICConstructorArguments($handler, array(new Reference('monolog.handler.nested'), new Reference('monolog.handler.main.not_found_strategy'), 0, true, true, null));
     }
 
-    protected function getContainer(array $config = array())
+    protected function getContainer(array $config = array(), array $thirdPartyDefinitions = array())
     {
         $container = new ContainerBuilder();
+        foreach ($thirdPartyDefinitions as $id => $definition) {
+            $container->setDefinition($id, $definition);
+        }
+
         $container->getCompilerPassConfig()->setOptimizationPasses(array());
         $container->getCompilerPassConfig()->setRemovingPasses(array());
         $container->addCompilerPass(new LoggerChannelPass());
