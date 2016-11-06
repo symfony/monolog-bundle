@@ -103,7 +103,6 @@ class MonologExtension extends Extension
                 'Monolog\\Handler\\TestHandler',
                 'Monolog\\Logger',
                 'Symfony\\Bridge\\Monolog\\Logger',
-                'Symfony\\Bridge\\Monolog\\Handler\\DebugHandler',
                 'Monolog\\Handler\\FingersCrossed\\ActivationStrategyInterface',
                 'Monolog\\Handler\\FingersCrossed\\ErrorLevelActivationStrategy',
             ));
