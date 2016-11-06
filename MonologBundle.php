@@ -34,7 +34,9 @@ class MonologBundle extends Bundle
         parent::build($container);
 
         $container->addCompilerPass($channelPass = new LoggerChannelPass());
-        $container->addCompilerPass(new DebugHandlerPass($channelPass));
+        if (!class_exists('Symfony\Bridge\Monolog\Processor\DebugProcessor')) {
+            $container->addCompilerPass(new DebugHandlerPass($channelPass));
+        }
         $container->addCompilerPass(new FixEmptyLoggerPass($channelPass));
         $container->addCompilerPass(new AddProcessorsPass());
         $container->addCompilerPass(new AddSwiftMailerTransportPass());
