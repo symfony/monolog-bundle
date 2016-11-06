@@ -1,0 +1,12 @@
+---------------------------------------------------------------------------
+
+by fabpot at 2016-11-06T15:54:53Z
+
+2.11.2 was released from the wrong branch, sorry about that.
+
+---------------------------------------------------------------------------
+
+by avant1 at 2016-11-06T16:10:02Z
+
+Custom handlers are broken in master right now.
+And this PR is created for master branch. So I think it should be reopened.
