@@ -14,6 +14,7 @@ namespace Symfony\Bundle\MonologBundle\Tests\DependencyInjection;
 use Symfony\Bundle\MonologBundle\DependencyInjection\MonologExtension;
 use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\LoggerChannelPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
 
 abstract class FixtureMonologExtensionTest extends DependencyInjectionTest
@@ -176,6 +177,22 @@ abstract class FixtureMonologExtensionTest extends DependencyInjectionTest
             ),
             $container->getParameter('monolog.handlers_to_channels')
         );
+    }
+
+    public function testPsr3MessageProcessingDisabled()
+    {
+        $container = $this->getContainer('process_psr_3_messages_disabled');
+
+        $logger = $container->getDefinition('monolog.handler.custom');
+
+        $methodCalls = $logger->getMethodCalls();
+
+        foreach ($methodCalls as $methodCall) {
+            list($methodName, $params) = $methodCall;
+            if ($methodName === 'pushProcessor') {
+                $this->assertNotEquals(array(new Definition('monolog.processor.psr_log_message')), $params);
+            }
+        }
     }
 
     protected function getContainer($fixture)

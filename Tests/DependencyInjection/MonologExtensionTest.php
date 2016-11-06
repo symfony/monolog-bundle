@@ -33,6 +33,7 @@ class MonologExtensionTest extends DependencyInjectionTest
         $handler = $container->getDefinition('monolog.handler.main');
         $this->assertDICDefinitionClass($handler, '%monolog.handler.stream.class%');
         $this->assertDICConstructorArguments($handler, array('%kernel.logs_dir%/%kernel.environment%.log', \Monolog\Logger::DEBUG, true, null));
+        $this->assertDICDefinitionMethodCallAt(0, $handler, 'pushProcessor', array(new Reference('monolog.processor.psr_log_message')));
     }
 
     public function testLoadWithCustomValues()
@@ -232,10 +233,10 @@ class MonologExtensionTest extends DependencyInjectionTest
         $handler = $container->getDefinition('monolog.handler.socket');
         $this->assertDICDefinitionClass($handler, '%monolog.handler.socket.class%');
         $this->assertDICConstructorArguments($handler, array('localhost:50505', \Monolog\Logger::DEBUG, true));
-        $this->assertDICDefinitionMethodCallAt(0, $handler, 'setTimeout', array('1'));
-        $this->assertDICDefinitionMethodCallAt(1, $handler, 'setConnectionTimeout', array('0.6'));
-        $this->assertDICDefinitionMethodCallAt(2, $handler, 'setPersistent', array(true));
-
+        $this->assertDICDefinitionMethodCallAt(0, $handler, 'pushProcessor', array(new Reference('monolog.processor.psr_log_message')));
+        $this->assertDICDefinitionMethodCallAt(1, $handler, 'setTimeout', array('1'));
+        $this->assertDICDefinitionMethodCallAt(2, $handler, 'setConnectionTimeout', array('0.6'));
+        $this->assertDICDefinitionMethodCallAt(3, $handler, 'setPersistent', array(true));
     }
 
     public function testRavenHandlerWhenConfigurationIsWrong()
@@ -331,14 +332,14 @@ class MonologExtensionTest extends DependencyInjectionTest
         $handler = $container->getDefinition('monolog.handler.loggly');
         $this->assertDICDefinitionClass($handler, '%monolog.handler.loggly.class%');
         $this->assertDICConstructorArguments($handler, array($token, \Monolog\Logger::DEBUG, true));
-        $this->assertEmpty($handler->getMethodCalls());
+        $this->assertDICDefinitionMethodCallAt(0, $handler, 'pushProcessor', array(new Reference('monolog.processor.psr_log_message')));
 
         $container = $this->getContainer(array(array('handlers' => array('loggly' => array(
             'type' => 'loggly', 'token' => $token, 'tags' => array(' ', 'foo', '', 'bar'))
         ))));
         $handler = $container->getDefinition('monolog.handler.loggly');
-        $this->assertDICDefinitionMethodCallAt(0, $handler, 'setTag', array('foo,bar'));
-
+        $this->assertDICDefinitionMethodCallAt(0, $handler, 'pushProcessor', array(new Reference('monolog.processor.psr_log_message')));
+        $this->assertDICDefinitionMethodCallAt(1, $handler, 'setTag', array('foo,bar'));
     }
 
     protected function getContainer(array $config = array())
