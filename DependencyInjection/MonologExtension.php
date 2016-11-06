@@ -129,6 +129,12 @@ class MonologExtension extends Extension
     private function buildHandler(ContainerBuilder $container, $name, array $handler)
     {
         $handlerId = $this->getHandlerId($name);
+        if ('service' === $handler['type']) {
+            $container->setAlias($handlerId, $handler['id']);
+
+            return $handlerId;
+        }
+
         $definition = new Definition($this->getHandlerClassByType($handler['type']));
 
         $handler['level'] = $this->levelToMonologConst($handler['level']);
@@ -138,11 +144,6 @@ class MonologExtension extends Extension
         }
 
         switch ($handler['type']) {
-        case 'service':
-            $container->setAlias($handlerId, $handler['id']);
-
-            return $handlerId;
-
         case 'stream':
             $definition->setArguments(array(
                 $handler['path'],
