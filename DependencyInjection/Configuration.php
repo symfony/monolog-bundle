@@ -311,6 +311,7 @@ class Configuration implements ConfigurationInterface
                             ->booleanNode('bubble')->defaultTrue()->end()
                             ->scalarNode('app_name')->defaultNull()->end()
                             ->booleanNode('include_stacktraces')->defaultFalse()->end()
+                            ->booleanNode('process_psr_3_messages')->defaultTrue()->end()
                             ->scalarNode('path')->defaultValue('%kernel.logs_dir%/%kernel.environment%.log')->end() // stream and rotating
                             ->scalarNode('file_permission')  // stream and rotating
                                 ->defaultNull()
