@@ -16,7 +16,7 @@
         }
     ],
     "require": {
-        "php": ">=5.3.2",
+        "php": ">=5.5.9",
         "symfony/monolog-bridge": "~2.7|~3.0",
         "symfony/dependency-injection": "~2.7|~3.0",
         "symfony/config": "~2.7|~3.0",
