@@ -231,10 +231,6 @@ use Monolog\Logger;
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
  *
- * - debug:
- *   - [level]: level name or int value, defaults to DEBUG
- *   - [bubble]: bool, defaults to true
- *
  * - loggly:
  *   - token: loggly api token
  *   - [level]: level name or int value, defaults to DEBUG
@@ -739,10 +735,6 @@ class Configuration implements ConfigurationInterface
                             ->ifTrue(function ($v) { return 'flowdock' === $v['type'] && empty($v['source']); })
                             ->thenInvalid('The source has to be specified to use a FlowdockHandler')
                         ->end()
-                    ->end()
-                    ->validate()
-                        ->ifTrue(function ($v) { return isset($v['debug']); })
-                        ->thenInvalid('The "debug" name cannot be used as it is reserved for the handler of the profiler')
                     ->end()
                     ->example(array(
                         'syslog' => array(

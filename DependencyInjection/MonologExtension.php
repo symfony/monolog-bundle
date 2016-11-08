@@ -657,7 +657,6 @@ class MonologExtension extends Extension
         case 'browser_console':
         case 'test':
         case 'null':
-        case 'debug':
             $definition->setArguments(array(
                 $handler['level'],
                 $handler['bubble'],
@@ -713,7 +712,6 @@ class MonologExtension extends Extension
             'browser_console' => 'Monolog\Handler\BrowserConsoleHandler',
             'firephp' => 'Symfony\Bridge\Monolog\Handler\FirePHPHandler',
             'chromephp' => 'Symfony\Bridge\Monolog\Handler\ChromePhpHandler',
-            'debug' => 'Symfony\Bridge\Monolog\Handler\DebugHandler',
             'swift_mailer' => 'Symfony\Bridge\Monolog\Handler\SwiftMailerHandler',
             'native_mailer' => 'Monolog\Handler\NativeMailerHandler',
             'socket' => 'Monolog\Handler\SocketHandler',
