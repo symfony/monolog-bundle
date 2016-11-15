@@ -1,3 +1,7 @@
+* 3.0.1 (2016-11-15)
+
+ * Removed obsolete code (DebugHandlerPass)
+
 * 3.0.0 (2016-11-06)
 
  * Removed class parameters for the container configuration
