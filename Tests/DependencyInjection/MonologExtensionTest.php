@@ -166,18 +166,6 @@ class MonologExtensionTest extends DependencyInjectionTest
         $loader->load(array(array('handlers' => array('main' => array('type' => 'service')))), $container);
     }
 
-    /**
-     * @expectedException Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
-     */
-    public function testExceptionWhenUsingDebugName()
-    {
-        // logger
-        $container = new ContainerBuilder();
-        $loader = new MonologExtension();
-
-        $loader->load(array(array('handlers' => array('debug' => array('type' => 'stream')))), $container);
-    }
-
     public function testSyslogHandlerWithLogopts()
     {
         $container = $this->getContainer(array(array('handlers' => array('main' => array('type' => 'syslog', 'logopts' => LOG_CONS)))));
