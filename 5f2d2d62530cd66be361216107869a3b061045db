@@ -1,0 +1,18 @@
+---------------------------------------------------------------------------
+
+by andreybolonin at 2016-11-11T15:26:44Z
+
+@nicolas-grekas  why is not merged?
+Need approve with other symfony members?
+
+---------------------------------------------------------------------------
+
+by tgalopin at 2016-11-12T20:03:55Z
+
+This is indeed an issue for anyone using the Standard edition right now, we should consider merging this asap.
+
+---------------------------------------------------------------------------
+
+by nithinga at 2016-11-15T11:02:33Z
+
+@stof @fabpot Please take a look into this issue....
