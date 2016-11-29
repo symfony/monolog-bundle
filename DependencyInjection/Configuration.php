@@ -369,7 +369,7 @@ class Configuration implements ConfigurationInterface
                             ->scalarNode('room')->end() // hipchat
                             ->scalarNode('message_format')->defaultValue('text')->end() // hipchat
                             ->scalarNode('api_version')->defaultNull()->end() // hipchat
-                            ->scalarNode('channel')->end() // slack & slackwebhook & slackbot
+                            ->scalarNode('channel')->defaultNull()->end() // slack & slackwebhook & slackbot
                             ->scalarNode('bot_name')->defaultValue('Monolog')->end() // slack & slackwebhook
                             ->scalarNode('use_attachment')->defaultTrue()->end() // slack & slackwebhook
                             ->scalarNode('use_short_attachment')->defaultFalse()->end() // slack & slackwebhook
@@ -713,8 +713,8 @@ class Configuration implements ConfigurationInterface
                             ->thenInvalid('The token and channel have to be specified to use a SlackHandler')
                         ->end()
                         ->validate()
-                            ->ifTrue(function ($v) { return 'slackwebhook' === $v['type'] && (empty($v['webhook_url']) || empty($v['channel'])); })
-                            ->thenInvalid('The webhook_url and channel have to be specified to use a SlackWebhookHandler')
+                            ->ifTrue(function ($v) { return 'slackwebhook' === $v['type'] && (empty($v['webhook_url'])); })
+                            ->thenInvalid('The webhook_url have to be specified to use a SlackWebhookHandler')
                         ->end()
                         ->validate()
                             ->ifTrue(function ($v) { return 'slackbot' === $v['type'] && (empty($v['stack_team']) || empty($v['token']) || empty($v['channel'])); })
