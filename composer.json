@@ -21,7 +21,7 @@
         "symfony/dependency-injection": "~2.7|~3.0",
         "symfony/config": "~2.7|~3.0",
         "symfony/http-kernel": "~2.7|~3.0",
-        "monolog/monolog": "~1.18"
+        "monolog/monolog": "~1.22"
     },
     "require-dev": {
         "symfony/yaml": "~2.3|~3.0",

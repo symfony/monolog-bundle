@@ -207,6 +207,24 @@ use Monolog\Logger;
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
  *
+ * - slackwebhook:
+ *   - webhook_url: slack webhook URL
+ *   - channel: channel name (with starting #)
+ *   - [bot_name]: defaults to Monolog
+ *   - [icon_emoji]: defaults to null
+ *   - [use_attachment]: bool, defaults to true
+ *   - [use_short_attachment]: bool, defaults to false
+ *   - [include_extra]: bool, defaults to false
+ *   - [level]: level name or int value, defaults to DEBUG
+ *   - [bubble]: bool, defaults to true
+ *
+ * - slackbot:
+ *   - team: slack team slug
+ *   - token: slackbot token
+ *   - channel: channel name (with starting #)
+ *   - [level]: level name or int value, defaults to DEBUG
+ *   - [bubble]: bool, defaults to true
+ *
  * - cube:
  *   - url: http/udp url to the cube server
  *   - [level]: level name or int value, defaults to DEBUG
@@ -351,15 +369,17 @@ class Configuration implements ConfigurationInterface
                             ->scalarNode('room')->end() // hipchat
                             ->scalarNode('message_format')->defaultValue('text')->end() // hipchat
                             ->scalarNode('api_version')->defaultNull()->end() // hipchat
-                            ->scalarNode('channel')->end() // slack
-                            ->scalarNode('bot_name')->defaultValue('Monolog')->end() // slack
-                            ->scalarNode('use_attachment')->defaultTrue()->end() // slack
-                            ->scalarNode('use_short_attachment')->defaultFalse()->end() // slack
-                            ->scalarNode('include_extra')->defaultFalse()->end() // slack
-                            ->scalarNode('icon_emoji')->defaultNull()->end() // slack
+                            ->scalarNode('channel')->end() // slack & slackwebhook & slackbot
+                            ->scalarNode('bot_name')->defaultValue('Monolog')->end() // slack & slackwebhook
+                            ->scalarNode('use_attachment')->defaultTrue()->end() // slack & slackwebhook
+                            ->scalarNode('use_short_attachment')->defaultFalse()->end() // slack & slackwebhook
+                            ->scalarNode('include_extra')->defaultFalse()->end() // slack & slackwebhook
+                            ->scalarNode('icon_emoji')->defaultNull()->end() // slack & slackwebhook
+                            ->scalarNode('webhook_url')->end() // slackwebhook
+                            ->scalarNode('slack_team')->end() // slackbot
                             ->scalarNode('notify')->defaultFalse()->end() // hipchat
                             ->scalarNode('nickname')->defaultValue('Monolog')->end() // hipchat
-                            ->scalarNode('token')->end() // pushover & hipchat & loggly & logentries & flowdock & rollbar & slack
+                            ->scalarNode('token')->end() // pushover & hipchat & loggly & logentries & flowdock & rollbar & slack & slackbot
                             ->scalarNode('source')->end() // flowdock
                             ->booleanNode('use_ssl')->defaultTrue()->end() // logentries & hipchat
                             ->variableNode('user') // pushover
@@ -691,6 +711,14 @@ class Configuration implements ConfigurationInterface
                         ->validate()
                             ->ifTrue(function ($v) { return 'slack' === $v['type'] && (empty($v['token']) || empty($v['channel'])); })
                             ->thenInvalid('The token and channel have to be specified to use a SlackHandler')
+                        ->end()
+                        ->validate()
+                            ->ifTrue(function ($v) { return 'slackwebhook' === $v['type'] && (empty($v['webhook_url']) || empty($v['channel'])); })
+                            ->thenInvalid('The webhook_url and channel have to be specified to use a SlackWebhookHandler')
+                        ->end()
+                        ->validate()
+                            ->ifTrue(function ($v) { return 'slackbot' === $v['type'] && (empty($v['stack_team']) || empty($v['token']) || empty($v['channel'])); })
+                            ->thenInvalid('The stack_team, token and channel have to be specified to use a SlackbotHandler')
                         ->end()
                         ->validate()
                             ->ifTrue(function ($v) { return 'cube' === $v['type'] && empty($v['url']); })
