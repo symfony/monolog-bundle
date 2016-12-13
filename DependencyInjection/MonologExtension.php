@@ -532,6 +532,30 @@ class MonologExtension extends Extension
             ));
             break;
 
+        case 'slackwebhook':
+            $definition->setArguments(array(
+                $handler['webhook_url'],
+                $handler['channel'],
+                $handler['bot_name'],
+                $handler['use_attachment'],
+                $handler['icon_emoji'],
+                $handler['use_short_attachment'],
+                $handler['include_extra'],
+                $handler['level'],
+                $handler['bubble'],
+            ));
+            break;
+
+        case 'slackbot':
+            $definition->setArguments(array(
+                $handler['slack_team'],
+                $handler['token'],
+                $handler['channel'],
+                $handler['level'],
+                $handler['bubble'],
+            ));
+            break;
+
         case 'cube':
             $definition->setArguments(array(
                 $handler['url'],
@@ -720,6 +744,8 @@ class MonologExtension extends Extension
             'newrelic' => 'Monolog\Handler\NewRelicHandler',
             'hipchat' => 'Monolog\Handler\HipChatHandler',
             'slack' => 'Monolog\Handler\SlackHandler',
+            'slackwebhook' => 'Monolog\Handler\SlackWebhookHandler',
+            'slackbot' => 'Monolog\Handler\SlackbotHandler',
             'cube' => 'Monolog\Handler\CubeHandler',
             'amqp' => 'Monolog\Handler\AmqpHandler',
             'error_log' => 'Monolog\Handler\ErrorLogHandler',
