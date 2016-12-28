@@ -281,6 +281,11 @@ use Monolog\Logger;
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
  *
+ * - server_log:
+ *   - host: server log host. ex: 127.0.0.1:9911
+ *   - [level]: level name or int value, defaults to DEBUG
+ *   - [bubble]: bool, defaults to true
+ *
  * @author Jordi Boggiano <j.boggiano@seld.be>
  * @author Christophe Coevoet <stof@notk.org>
  */
@@ -767,6 +772,10 @@ class Configuration implements ConfigurationInterface
                         ->validate()
                             ->ifTrue(function ($v) { return 'flowdock' === $v['type'] && empty($v['source']); })
                             ->thenInvalid('The source has to be specified to use a FlowdockHandler')
+                        ->end()
+                        ->validate()
+                            ->ifTrue(function ($v) { return 'server_log' === $v['type'] && empty($v['host']); })
+                            ->thenInvalid('The host has to be specified to use a ServerLogHandler')
                         ->end()
                     ->end()
                     ->validate()

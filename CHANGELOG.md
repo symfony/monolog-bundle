@@ -1,3 +1,7 @@
+## 3.1.0 (xxxx-xx-xx)
+
+* Added support for server_log handler
+
 ## 3.0.3 (2017-01-10)
 
 * Fixed deprecation notices when using Symfony 3.3+ and PHP7+
