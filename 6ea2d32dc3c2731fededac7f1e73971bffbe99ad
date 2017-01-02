@@ -1,0 +1,29 @@
+---------------------------------------------------------------------------
+
+by nicolas-grekas at 2017-01-02T17:19:45Z
+
+:+1:
+`DebugHandlerPass` should have been removed before tagging 3.0. Since we missed this step, we have to postpone the removal for 4.0.
+@stof can you update the deprecation message thought?
+
+---------------------------------------------------------------------------
+
+by stof at 2017-01-02T17:29:35Z
+
+@nicolas-grekas you did remove it in 3.0, which is exactly what broke support for Symfony <3.2 (without changing the composer constraint), as the suggested replacement is a Symfony 3.2 feature.
+
+@nicolas-grekas regarding the deprecation warning, I will update it separately (after merging the revert of the removal), as it should be done in 2.x instead
+
+---------------------------------------------------------------------------
+
+by nicolas-grekas at 2017-01-02T17:32:19Z
+
+We did not, that's what prevents a proper fix here, see:
+https://github.com/symfony/monolog-bundle/blob/3.0.0/DependencyInjection/Compiler/DebugHandlerPass.php
+
+---------------------------------------------------------------------------
+
+by stof at 2017-01-02T17:36:23Z
+
+oh, that's even worse, 3.0 is BC with 2.x (with more features I forgot to list above), and 3.0.1 broke BC and Symfony support.
+So the revert is indeed the only meaningful way. but in any case, the removal without bumping the Symfony constraint was wrong.
