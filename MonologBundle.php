@@ -18,6 +18,7 @@ use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\AddSwiftMailerTran
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\LoggerChannelPass;
+use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\DebugHandlerPass;
 use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\AddProcessorsPass;
 use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\FixEmptyLoggerPass;
 
@@ -33,6 +34,9 @@ class MonologBundle extends Bundle
         parent::build($container);
 
         $container->addCompilerPass($channelPass = new LoggerChannelPass());
+        if (!class_exists('Symfony\Bridge\Monolog\Processor\DebugProcessor')) {
+            $container->addCompilerPass(new DebugHandlerPass($channelPass));
+        }
         $container->addCompilerPass(new FixEmptyLoggerPass($channelPass));
         $container->addCompilerPass(new AddProcessorsPass());
         $container->addCompilerPass(new AddSwiftMailerTransportPass());
