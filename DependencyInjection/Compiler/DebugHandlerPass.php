@@ -11,7 +11,6 @@
 
 namespace Symfony\Bundle\MonologBundle\DependencyInjection\Compiler;
 
-@trigger_error('The '.__NAMESPACE__.'\DebugHandlerPass class is deprecated since version 2.12 and will be removed in 3.0. Use AddDebugLogProcessorPass in FrameworkBundle instead.', E_USER_DEPRECATED);
 
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -33,6 +32,11 @@ class DebugHandlerPass implements CompilerPassInterface
 
     public function __construct(LoggerChannelPass $channelPass)
     {
+        // Trigger the deprecation only when using a Symfony version supporting the new feature
+        if (class_exists('Symfony\Bridge\Monolog\Processor\DebugProcessor') && class_exists('Symfony\Bundle\FrameworkBundle\DependencyInjection\Compiler\AddDebugLogProcessorPass')) {
+            @trigger_error('The '.__CLASS__.' class is deprecated since version 2.12 and will be removed in 3.0. Use AddDebugLogProcessorPass in FrameworkBundle instead.', E_USER_DEPRECATED);
+        }
+
         $this->channelPass = $channelPass;
     }
 

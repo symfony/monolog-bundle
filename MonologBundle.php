@@ -34,7 +34,7 @@ class MonologBundle extends Bundle
         parent::build($container);
 
         $container->addCompilerPass($channelPass = new LoggerChannelPass());
-        if (!class_exists('Symfony\Bridge\Monolog\Processor\DebugProcessor')) {
+        if (!class_exists('Symfony\Bridge\Monolog\Processor\DebugProcessor') || !class_exists('Symfony\Bundle\FrameworkBundle\DependencyInjection\Compiler\AddDebugLogProcessorPass')) {
             $container->addCompilerPass(new DebugHandlerPass($channelPass));
         }
         $container->addCompilerPass(new FixEmptyLoggerPass($channelPass));
