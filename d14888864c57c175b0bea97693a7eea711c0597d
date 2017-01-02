@@ -1,0 +1,11 @@
+---------------------------------------------------------------------------
+
+by xabbuh at 2016-12-27T13:04:45Z
+
+Please not that both PRs do not solve https://github.com/symfony/monolog-bundle/issues/165#issuecomment-262452076. For that we would probably have to introduce a new config option in MonologBundle that would allow to customise the `$skipOnCli` property introduced in symfony/symfony#21061.
+
+---------------------------------------------------------------------------
+
+by stof at 2017-01-02T16:54:54Z
+
+I'm merging this because the PR broke cache warmup
