@@ -1,3 +1,7 @@
+## 3.0.3 (2017-01-10)
+
+* Fixed deprecation notices when using Symfony 3.3+ and PHP7+
+
 ## 3.0.2 (2017-01-03)
 
 * Revert disabling DebugHandler in CLI environments
