@@ -52,12 +52,11 @@ class MonologExtension extends Extension
         if (isset($config['handlers'])) {
             $loader = new XmlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
             $loader->load('monolog.xml');
-            $container->setAlias('logger', 'monolog.logger');
 
             $container->setParameter('monolog.use_microseconds', $config['use_microseconds']);
 
-            // always autowire the main logger, require Symfony >= 2.8
-            if (method_exists('Symfony\Component\DependencyInjection\Definition', 'addAutowiringType')) {
+            // always autowire the main logger, require Symfony >= 2.8, < 3.3
+            if (!method_exists('Symfony\Component\DependencyInjection\ContainerBuilder', 'fileExists') && method_exists('Symfony\Component\DependencyInjection\Definition', 'addAutowiringType')) {
                 $container->getDefinition('monolog.logger')->addAutowiringType('Psr\Log\LoggerInterface');
             }
 
