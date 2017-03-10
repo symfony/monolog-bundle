@@ -552,7 +552,7 @@ class MonologExtension extends Extension
             $definition->setArguments(array(
                 $handler['slack_team'],
                 $handler['token'],
-                $handler['channel'],
+                urlencode($handler['channel']),
                 $handler['level'],
                 $handler['bubble'],
             ));

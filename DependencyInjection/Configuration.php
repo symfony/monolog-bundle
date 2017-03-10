@@ -219,7 +219,7 @@ use Monolog\Logger;
  *   - [bubble]: bool, defaults to true
  *
  * - slackbot:
- *   - team: slack team slug
+ *   - slack_team: slack team slug
  *   - token: slackbot token
  *   - channel: channel name (with starting #)
  *   - [level]: level name or int value, defaults to DEBUG
@@ -721,8 +721,8 @@ class Configuration implements ConfigurationInterface
                             ->thenInvalid('The webhook_url have to be specified to use a SlackWebhookHandler')
                         ->end()
                         ->validate()
-                            ->ifTrue(function ($v) { return 'slackbot' === $v['type'] && (empty($v['stack_team']) || empty($v['token']) || empty($v['channel'])); })
-                            ->thenInvalid('The stack_team, token and channel have to be specified to use a SlackbotHandler')
+                            ->ifTrue(function ($v) { return 'slackbot' === $v['type'] && (empty($v['slack_team']) || empty($v['token']) || empty($v['channel'])); })
+                            ->thenInvalid('The slack_team, token and channel have to be specified to use a SlackbotHandler')
                         ->end()
                         ->validate()
                             ->ifTrue(function ($v) { return 'cube' === $v['type'] && empty($v['url']); })
