@@ -219,7 +219,7 @@ use Monolog\Logger;
  *   - [bubble]: bool, defaults to true
  *
  * - slackbot:
- *   - slack_team: slack team slug
+ *   - team: slack team slug
  *   - token: slackbot token
  *   - channel: channel name (with starting #)
  *   - [level]: level name or int value, defaults to DEBUG
@@ -380,7 +380,7 @@ class Configuration implements ConfigurationInterface
                             ->scalarNode('include_extra')->defaultFalse()->end() // slack & slackwebhook
                             ->scalarNode('icon_emoji')->defaultNull()->end() // slack & slackwebhook
                             ->scalarNode('webhook_url')->end() // slackwebhook
-                            ->scalarNode('slack_team')->end() // slackbot
+                            ->scalarNode('team')->end() // slackbot
                             ->scalarNode('notify')->defaultFalse()->end() // hipchat
                             ->scalarNode('nickname')->defaultValue('Monolog')->end() // hipchat
                             ->scalarNode('token')->end() // pushover & hipchat & loggly & logentries & flowdock & rollbar & slack & slackbot
@@ -721,8 +721,8 @@ class Configuration implements ConfigurationInterface
                             ->thenInvalid('The webhook_url have to be specified to use a SlackWebhookHandler')
                         ->end()
                         ->validate()
-                            ->ifTrue(function ($v) { return 'slackbot' === $v['type'] && (empty($v['slack_team']) || empty($v['token']) || empty($v['channel'])); })
-                            ->thenInvalid('The slack_team, token and channel have to be specified to use a SlackbotHandler')
+                            ->ifTrue(function ($v) { return 'slackbot' === $v['type'] && (empty($v['team']) || empty($v['token']) || empty($v['channel'])); })
+                            ->thenInvalid('The team, token and channel have to be specified to use a SlackbotHandler')
                         ->end()
                         ->validate()
                             ->ifTrue(function ($v) { return 'cube' === $v['type'] && empty($v['url']); })

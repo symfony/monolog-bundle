@@ -550,7 +550,7 @@ class MonologExtension extends Extension
 
         case 'slackbot':
             $definition->setArguments(array(
-                $handler['slack_team'],
+                $handler['team'],
                 $handler['token'],
                 urlencode($handler['channel']),
                 $handler['level'],
