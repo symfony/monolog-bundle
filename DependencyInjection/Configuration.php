@@ -528,7 +528,7 @@ class Configuration implements ConfigurationInterface
                                     ->ifArray()
                                     ->then(function ($v) {
                                         $map = array();
-                                        $verbosities = array('VERBOSITY_NORMAL', 'VERBOSITY_VERBOSE', 'VERBOSITY_VERY_VERBOSE', 'VERBOSITY_DEBUG');
+                                        $verbosities = array('VERBOSITY_QUIET', 'VERBOSITY_NORMAL', 'VERBOSITY_VERBOSE', 'VERBOSITY_VERY_VERBOSE', 'VERBOSITY_DEBUG');
                                         // allow numeric indexed array with ascendning verbosity and lowercase names of the constants
                                         foreach ($v as $verbosity => $level) {
                                             if (is_int($verbosity) && isset($verbosities[$verbosity])) {
@@ -542,6 +542,7 @@ class Configuration implements ConfigurationInterface
                                     })
                                 ->end()
                                 ->children()
+                                    ->scalarNode('VERBOSITY_QUIET')->defaultValue('ERROR')->end()
                                     ->scalarNode('VERBOSITY_NORMAL')->defaultValue('WARNING')->end()
                                     ->scalarNode('VERBOSITY_VERBOSE')->defaultValue('NOTICE')->end()
                                     ->scalarNode('VERBOSITY_VERY_VERBOSE')->defaultValue('INFO')->end()
