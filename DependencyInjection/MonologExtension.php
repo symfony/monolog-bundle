@@ -52,7 +52,6 @@ class MonologExtension extends Extension
         if (isset($config['handlers'])) {
             $loader = new XmlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
             $loader->load('monolog.xml');
-            $container->setAlias('logger', 'monolog.logger');
 
             $container->setParameter('monolog.use_microseconds', $config['use_microseconds']);
 
