@@ -14,6 +14,8 @@
 
         <service id="logger" alias="monolog.logger" />
 
+        <service id="Psr\Log\LoggerInterface" alias="logger" public="false" />
+
         <service id="monolog.logger_prototype" class="Symfony\Bridge\Monolog\Logger" abstract="true">
             <argument /><!-- Channel -->
         </service>
