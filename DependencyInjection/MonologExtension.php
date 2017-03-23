@@ -677,6 +677,17 @@ class MonologExtension extends Extension
                 $handler['app_name'],
             ));
             break;
+        case 'server_log':
+            if (!class_exists('Symfony\Bridge\Monolog\Handler\ServerLogHandler')) {
+                throw new \RuntimeException('The ServerLogHandler is not available. Please update "symfony/monolog-bridge" to 3.3.');
+            }
+
+            $definition->setArguments(array(
+                $handler['host'],
+                $handler['level'],
+                $handler['bubble'],
+            ));
+            break;
 
         // Handlers using the constructor of AbstractHandler without adding their own arguments
         case 'browser_console':
@@ -759,6 +770,7 @@ class MonologExtension extends Extension
             'filter' => 'Monolog\Handler\FilterHandler',
             'mongo' => 'Monolog\Handler\MongoDBHandler',
             'elasticsearch' => 'Monolog\Handler\ElasticSearchHandler',
+            'server_log' => 'Symfony\Bridge\Monolog\Handler\ServerLogHandler',
         );
 
         if (!isset($typeToClassMapping[$handlerType])) {

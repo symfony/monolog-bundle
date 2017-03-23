@@ -12,6 +12,7 @@
 namespace Symfony\Bundle\MonologBundle\Tests\DependencyInjection;
 
 use Symfony\Bundle\MonologBundle\DependencyInjection\MonologExtension;
+use Symfony\Bridge\Monolog\Handler\ServerLogHandler;
 use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\LoggerChannelPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
@@ -152,6 +153,21 @@ abstract class FixtureMonologExtensionTest extends DependencyInjectionTest
             'An Error Occurred!', // subject
             null,
         ), $container->getDefinition('monolog.handler.swift.mail_message_factory')->getArguments());
+    }
+
+    public function testServerLog()
+    {
+        if (!class_exists('Symfony\Bridge\Monolog\Handler\ServerLogHandler')) {
+            $this->markTestSkipped('The ServerLogHandler is not available.');
+        }
+
+        $container = $this->getContainer('server_log');
+
+        $this->assertEquals(array(
+            '0:9911',
+            100,
+            true,
+        ), $container->getDefinition('monolog.handler.server_log')->getArguments());
     }
 
     public function testMultipleEmailRecipients()
