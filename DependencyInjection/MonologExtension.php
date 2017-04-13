@@ -557,6 +557,12 @@ class MonologExtension extends Extension
             ));
             break;
 
+        case 'fleephook':
+            $definition->setArguments(array(
+                $handler['token'],
+            ));
+        break;
+
         case 'cube':
             $definition->setArguments(array(
                 $handler['url'],
@@ -760,6 +766,7 @@ class MonologExtension extends Extension
             'slack' => 'Monolog\Handler\SlackHandler',
             'slackwebhook' => 'Monolog\Handler\SlackWebhookHandler',
             'slackbot' => 'Monolog\Handler\SlackbotHandler',
+            'fleephook' => 'Monolog\Handler\FleepHookHandler',
             'cube' => 'Monolog\Handler\CubeHandler',
             'amqp' => 'Monolog\Handler\AmqpHandler',
             'error_log' => 'Monolog\Handler\ErrorLogHandler',
