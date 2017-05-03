@@ -177,7 +177,7 @@ use Monolog\Logger;
  *   - [release]: release number of the application that will be attached to logs, defaults to null
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
- *   - [auto_stack_logs]: bool, defaults to false
+ *   - [auto_log_stacks]: bool, defaults to false
  *
  * - newrelic:
  *   - [level]: level name or int value, defaults to DEBUG
