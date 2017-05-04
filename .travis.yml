@@ -7,8 +7,6 @@ cache:
         - $HOME/.composer/cache/files
 
 php:
-  - 5.3
-  - 5.4
   - 5.5
   - 7.0
   - hhvm
@@ -16,7 +14,7 @@ php:
 matrix:
   fast_finish: true
   include:
-    - php: 5.3
+    - php: 5.5
       env: COMPOSER_FLAGS="--prefer-lowest" SYMFONY_DEPRECATIONS_HELPER=weak
     # Test against Symfony LTS versions
     - php: 5.6
