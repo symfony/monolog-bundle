@@ -263,7 +263,7 @@ class MonologExtension extends Extension
                     'transport' => $handler['elasticsearch']['transport'],
                 );
 
-                if (isset($handler['elasticsearch']['user']) && isset($handler['elasticsearch']['password'])) {
+                if (isset($handler['elasticsearch']['user'], $handler['elasticsearch']['password'])) {
                     $elasticaClientArguments = array_merge(
                         $elasticaClientArguments,
                         array(
