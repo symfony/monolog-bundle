@@ -13,6 +13,7 @@
         </service>
 
         <service id="logger" alias="monolog.logger" />
+        <service id="Psr\Log\LoggerInterface" alias="logger" public="false" />
 
         <service id="Psr\Log\LoggerInterface" alias="logger" public="false" />
 
