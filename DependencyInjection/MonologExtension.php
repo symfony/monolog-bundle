@@ -324,6 +324,14 @@ class MonologExtension extends Extension
                 ));
                 $container->setDefinition($handlerId.'.not_found_strategy', $activationDef);
                 $activation = new Reference($handlerId.'.not_found_strategy');
+            } elseif (!empty($handler['excluded_http_codes'])) {
+                $activationDef = new Definition('Symfony\Bridge\Monolog\Handler\FingersCrossed\HttpCodeActivationStrategy', array(
+                    new Reference('request_stack'),
+                    $handler['excluded_http_codes'],
+                    $handler['action_level']
+                ));
+                $container->setDefinition($handlerId.'.http_code_strategy', $activationDef);
+                $activation = new Reference($handlerId.'.http_code_strategy');
             } else {
                 $activation = $handler['action_level'];
             }
