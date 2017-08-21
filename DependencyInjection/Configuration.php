@@ -33,6 +33,7 @@ use Monolog\Logger;
  *   - [bubble]: bool, defaults to true
  *
  * - console:
+ *   - [formatter_options]: option name => option value
  *   - [verbosity_levels]: level => verbosity configuration
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
@@ -584,6 +585,10 @@ class Configuration implements ConfigurationInterface
                                         return $map;
                                     })
                                 ->end()
+                            ->end()
+                            ->arrayNode('formatter_options') // console
+                                ->canBeUnset()
+                                ->prototype('scalar')->end()
                             ->end()
                             ->arrayNode('channels')
                                 ->fixXmlConfig('channel', 'elements')

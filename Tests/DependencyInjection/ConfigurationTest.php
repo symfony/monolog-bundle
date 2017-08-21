@@ -255,6 +255,12 @@ class ConfigurationTest extends \PHPUnit_Framework_TestCase
                             'verbosity_verbose' => 'info',
                             'VERBOSITY_very_VERBOSE' => 150
                         )
+                    ),
+                    'console_with_options' => array(
+                        'type' => 'console',
+                        'formatter_options' => array(
+                            'some_option' => 'whatever',
+                        ),
                     )
                 )
             )
@@ -270,6 +276,13 @@ class ConfigurationTest extends \PHPUnit_Framework_TestCase
             OutputInterface::VERBOSITY_QUIET => Logger::ERROR,
             OutputInterface::VERBOSITY_DEBUG => Logger::DEBUG
         ), $config['handlers']['console']['verbosity_levels']);
+        $this->assertSame(array(), $config['handlers']['console']['formatter_options']);
+
+        $this->assertSame('console', $config['handlers']['console_with_options']['type']);
+        $this->assertSame(
+            array('some_option' => 'whatever'),
+            $config['handlers']['console_with_options']['formatter_options']
+        );
     }
 
     public function testWithType()

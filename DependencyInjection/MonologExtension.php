@@ -170,6 +170,7 @@ class MonologExtension extends Extension
                 null,
                 $handler['bubble'],
                 isset($handler['verbosity_levels']) ? $handler['verbosity_levels'] : array(),
+                isset($handler['formatter_options']) ? $handler['formatter_options'] : array(),
             ));
             $definition->addTag('kernel.event_subscriber');
             break;
