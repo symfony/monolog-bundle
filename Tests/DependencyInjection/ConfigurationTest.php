@@ -243,6 +243,23 @@ class ConfigurationTest extends \PHPUnit_Framework_TestCase
 
     }
 
+    public function testWidthRedisHandlerPredis() {
+        $configs = array(
+            array(
+                'handlers' => array(
+                    'redis' => array(
+                        'type' => 'redis',
+                        'id' => 'predis.client',
+                        'key' => 'my-key',
+                    )
+                )
+            )
+        );
+
+        $config = $this->process($configs);
+        $this->assertEquals('my-key', $config['handlers']['redis']['key']);
+    }
+
     public function testWithConsoleHandler()
     {
         $configs = array(

@@ -251,6 +251,38 @@ class MonologExtension extends Extension
             ));
             break;
 
+        case 'redis':
+            if (isset($handler['redis']['id'])) {
+                $clientId = $handler['redis']['id'];
+            } else {
+                //if (isset($handler['redis']['predis'])) {
+                    // Predis client new definition
+                    $predisClient          = new Definition('Predis\Client');
+                    $predisClientArguments = array(
+                        'host' => $handler['redis']['host'],
+                    );
+
+                    $predisClient->setArguments(array(
+                        $predisClientArguments
+                    ));
+
+                    $clientId = uniqid('monolog.predis.client.', true);
+                    $predisClient->setPublic(false);
+                    $container->setDefinition($clientId, $predisClient);
+                //} else {
+                    // phpredis
+                 //   $clientId = uniqid('monolog.phpredis.client.', true);
+                //}
+            }
+            // redis handler definition
+            $definition->setArguments(array(
+                new Reference($clientId),
+                $handler['key'],
+                $handler['level'],
+                $handler['bubble'],
+            ));
+            break;
+
         case 'elasticsearch':
             if (isset($handler['elasticsearch']['id'])) {
                 $clientId = $handler['elasticsearch']['id'];
@@ -771,6 +803,7 @@ class MonologExtension extends Extension
             'mongo' => 'Monolog\Handler\MongoDBHandler',
             'elasticsearch' => 'Monolog\Handler\ElasticSearchHandler',
             'server_log' => 'Symfony\Bridge\Monolog\Handler\ServerLogHandler',
+            'redis' => 'Monolog\Handler\RedisHandler',
         );
 
         if (!isset($typeToClassMapping[$handlerType])) {

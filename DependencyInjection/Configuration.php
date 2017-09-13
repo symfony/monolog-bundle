@@ -74,7 +74,12 @@ use Monolog\Logger;
  *      - [collection]: defaults to logs
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
- *
+ * - redis:
+ *   - redis:
+ *      - id: optional if host is given
+ *      - host: redis host name
+ *   - [key]: keyname name, defaults to monolog
+ * 
  * - elasticsearch:
  *   - elasticsearch:
  *      - id: optional if host is given
@@ -449,6 +454,18 @@ class Configuration implements ConfigurationInterface
                                     ->thenInvalid('If you set user, you must provide a password.')
                                 ->end()
                             ->end() // mongo
+                            ->arrayNode('redis') // redis
+                                ->canBeUnset()
+                                ->beforeNormalization()
+                                    ->ifString()
+                                    ->then(function ($v) { return array('id'=> $v); })
+                                ->end()
+                                ->children()
+                                    ->scalarNode('id')->end()
+                                    ->scalarNode('host')->end()
+                                ->end()
+                            -> end() // redis
+                            ->scalarNode('key')->defaultValue('monolog')->end() // redis
                             ->arrayNode('elasticsearch')
                                 ->canBeUnset()
                                 ->beforeNormalization()
