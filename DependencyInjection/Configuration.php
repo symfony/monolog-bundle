@@ -79,7 +79,7 @@ use Monolog\Logger;
  *      - id: optional if host is given
  *      - host: redis host name
  *   - [key]: keyname name, defaults to monolog
- * 
+ *
  * - elasticsearch:
  *   - elasticsearch:
  *      - id: optional if host is given
