@@ -465,6 +465,12 @@ class Configuration implements ConfigurationInterface
                                     ->scalarNode('host')->end()
                                     ->scalarNode('key')->defaultValue('monolog')->end() // redis
                                 ->end()
+                                ->validate()
+                                    ->ifTrue(function ($v) {
+                                        return !isset($v['id']) && !isset($v['host']);
+                                    })
+                                    ->thenInvalid('What must be set is either the host or the id.')
+                                ->end()
                             -> end() // redis
                             ->arrayNode('elasticsearch')
                                 ->canBeUnset()
