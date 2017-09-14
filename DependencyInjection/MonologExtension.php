@@ -255,24 +255,19 @@ class MonologExtension extends Extension
             if (isset($handler['redis']['id'])) {
                 $clientId = $handler['redis']['id'];
             } else {
-                //if (isset($handler['redis']['predis'])) {
-                    // Predis client new definition
-                    $predisClient          = new Definition('Predis\Client');
-                    $predisClientArguments = array(
-                        'host' => $handler['redis']['host'],
-                    );
+                // Predis client new definition
+                $predisClient          = new Definition('Predis\Client');
+                $predisClientArguments = array(
+                    'host' => $handler['redis']['host'],
+                );
 
-                    $predisClient->setArguments(array(
-                        $predisClientArguments
-                    ));
+                $predisClient->setArguments(array(
+                    $predisClientArguments
+                ));
 
-                    $clientId = uniqid('monolog.predis.client.', true);
-                    $predisClient->setPublic(false);
-                    $container->setDefinition($clientId, $predisClient);
-                //} else {
-                    // phpredis
-                 //   $clientId = uniqid('monolog.phpredis.client.', true);
-                //}
+                $clientId = uniqid('monolog.predis.client.', true);
+                $predisClient->setPublic(false);
+                $container->setDefinition($clientId, $predisClient);
             }
             // redis handler definition
             $definition->setArguments(array(
