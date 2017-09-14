@@ -463,9 +463,9 @@ class Configuration implements ConfigurationInterface
                                 ->children()
                                     ->scalarNode('id')->end()
                                     ->scalarNode('host')->end()
+                                    ->scalarNode('key')->defaultValue('monolog')->end() // redis
                                 ->end()
                             -> end() // redis
-                            ->scalarNode('key')->defaultValue('monolog')->end() // redis
                             ->arrayNode('elasticsearch')
                                 ->canBeUnset()
                                 ->beforeNormalization()
