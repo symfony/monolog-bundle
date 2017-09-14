@@ -277,7 +277,7 @@ class MonologExtension extends Extension
             // redis handler definition
             $definition->setArguments(array(
                 new Reference($clientId),
-                $handler['key'],
+                $handler['redis']['key'],
                 $handler['level'],
                 $handler['bubble'],
             ));
