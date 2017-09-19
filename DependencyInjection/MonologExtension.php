@@ -561,7 +561,7 @@ class MonologExtension extends Extension
             $definition->setArguments(array(
                 $handler['token'],
             ));
-        break;
+            break;
 
         case 'cube':
             $definition->setArguments(array(
