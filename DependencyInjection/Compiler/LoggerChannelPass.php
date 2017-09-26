@@ -12,6 +12,7 @@
 namespace Symfony\Bundle\MonologBundle\DependencyInjection\Compiler;
 
 use Symfony\Component\DependencyInjection\Reference;
+use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\DefinitionDecorator;
@@ -106,7 +107,12 @@ class LoggerChannelPass implements CompilerPassInterface
     protected function createLogger($channel, $loggerId, ContainerBuilder $container)
     {
         if (!in_array($channel, $this->channels)) {
-            $logger = new DefinitionDecorator('monolog.logger_prototype');
+            if (class_exists('Symfony\Component\DependencyInjection\ChildDefinition')) {
+                $logger = new ChildDefinition('monolog.logger_prototype');
+            } else {
+                $logger = new DefinitionDecorator('monolog.logger_prototype');
+            }
+
             $logger->replaceArgument(0, $channel);
             $container->setDefinition($loggerId, $logger);
             $this->channels[] = $channel;
