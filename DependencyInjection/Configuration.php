@@ -225,6 +225,9 @@ use Monolog\Logger;
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
  *
+ * - fleephook:
+ *   - token: fleep hook token
+ *
  * - cube:
  *   - url: http/udp url to the cube server
  *   - [level]: level name or int value, defaults to DEBUG
@@ -388,7 +391,7 @@ class Configuration implements ConfigurationInterface
                             ->scalarNode('team')->end() // slackbot
                             ->scalarNode('notify')->defaultFalse()->end() // hipchat
                             ->scalarNode('nickname')->defaultValue('Monolog')->end() // hipchat
-                            ->scalarNode('token')->end() // pushover & hipchat & loggly & logentries & flowdock & rollbar & slack & slackbot
+                            ->scalarNode('token')->end() // pushover & hipchat & loggly & logentries & flowdock & rollbar & slack & slackbot & fleephook
                             ->scalarNode('source')->end() // flowdock
                             ->booleanNode('use_ssl')->defaultTrue()->end() // logentries & hipchat
                             ->variableNode('user') // pushover
@@ -729,6 +732,10 @@ class Configuration implements ConfigurationInterface
                         ->validate()
                             ->ifTrue(function ($v) { return 'slackbot' === $v['type'] && (empty($v['team']) || empty($v['token']) || empty($v['channel'])); })
                             ->thenInvalid('The team, token and channel have to be specified to use a SlackbotHandler')
+                        ->end()
+                        ->validate()
+                            ->ifTrue(function ($v) { return 'fleephook' === $v['type'] && empty($v['token']); })
+                            ->thenInvalid('The token has to be specified to use a FleepHookHandler')
                         ->end()
                         ->validate()
                             ->ifTrue(function ($v) { return 'cube' === $v['type'] && empty($v['url']); })
