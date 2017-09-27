@@ -11,6 +11,7 @@ php:
   - 5.4
   - 5.5
   - 7.0
+  - 7.1
   - hhvm
 
 matrix:
@@ -23,8 +24,12 @@ matrix:
       env: SYMFONY_VERSION="2.7.*"
     - php: 5.6
       env: SYMFONY_VERSION="2.8.*" DEPENDENCIES=dev
+    - php: 7.1
+      env: SYMFONY_VERSION="2.8.*" DEPENDENCIES=dev
     # Test against dev versions
     - php: 5.6
+      env: DEPENDENCIES=dev
+    - php: 7.1
       env: DEPENDENCIES=dev
   allow_failures:
     - env: DEPENDENCIES=dev
