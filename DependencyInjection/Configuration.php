@@ -406,7 +406,7 @@ class Configuration implements ConfigurationInterface
                                 ->canBeUnset()
                                 ->beforeNormalization()
                                     ->ifString()
-                                    ->then(function ($v) { return array('id'=> $v); })
+                                    ->then(function ($v) { return array('id' => $v); })
                                 ->end()
                                 ->children()
                                     ->scalarNode('id')->end()
