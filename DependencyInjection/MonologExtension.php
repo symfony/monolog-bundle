@@ -268,7 +268,7 @@ class MonologExtension extends Extension
                         $elasticaClientArguments,
                         array(
                             'headers' => array(
-                                'Authorization ' =>  'Basic ' . base64_encode($handler['elasticsearch']['user'] . ':' . $handler['elasticsearch']['password'])
+                                'Authorization' => 'Basic ' . base64_encode($handler['elasticsearch']['user'] . ':' . $handler['elasticsearch']['password'])
                             )
                         )
                     );
