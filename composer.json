@@ -29,7 +29,10 @@
         "phpunit/phpunit": "^4.8"
     },
     "autoload": {
-        "psr-4": { "Symfony\\Bundle\\MonologBundle\\": "" }
+        "psr-4": { "Symfony\\Bundle\\MonologBundle\\": "" },
+        "exclude-from-classmap": [
+            "/Tests/"
+        ]
     },
     "extra": {
         "branch-alias": {
