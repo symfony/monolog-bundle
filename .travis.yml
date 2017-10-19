@@ -11,6 +11,8 @@ php:
   - 5.4
   - 5.5
   - 7.0
+  - 7.1
+  - 7.2
   - hhvm
 
 matrix:
@@ -28,6 +30,7 @@ matrix:
       env: DEPENDENCIES=dev
   allow_failures:
     - env: DEPENDENCIES=dev
+    - php: 7.2
 
 before_install:
     - composer self-update
