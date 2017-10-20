@@ -651,7 +651,7 @@ class Configuration implements ConfigurationInterface
                             ->thenInvalid('Service handlers can not have a formatter configured in the bundle, you must reconfigure the service itself instead')
                         ->end()
                         ->validate()
-                            ->ifTrue(function ($v) { return ('fingers_crossed' === $v['type'] || 'buffer' === $v['type'] || 'filter' === $v['type']) && 1 !== count($v['handler']); })
+                            ->ifTrue(function ($v) { return ('fingers_crossed' === $v['type'] || 'buffer' === $v['type'] || 'filter' === $v['type']) && empty($v['handler']); })
                             ->thenInvalid('The handler has to be specified to use a FingersCrossedHandler or BufferHandler or FilterHandler')
                         ->end()
                         ->validate()
