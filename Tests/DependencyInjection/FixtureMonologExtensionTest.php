@@ -174,7 +174,7 @@ abstract class FixtureMonologExtensionTest extends DependencyInjectionTest
     {
         $container = $this->getContainer('multiple_email_recipients');
 
-        $this->assertEquals (array(
+        $this->assertEquals(array(
             new Reference('mailer'),
             'error@example.com',
             array('dev1@example.com', 'dev2@example.com'),

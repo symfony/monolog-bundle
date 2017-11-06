@@ -68,18 +68,18 @@ class LoggerChannelPassTest extends \PHPUnit_Framework_TestCase
         $loader = new XmlFileLoader($container, new FileLocator(__DIR__.'/../../../Resources/config'));
         $loader->load('monolog.xml');
         $definition = $container->getDefinition('monolog.logger_prototype');
-        $container->set('monolog.handler.test', new Definition('%monolog.handler.null.class%', array (100, false)));
+        $container->set('monolog.handler.test', new Definition('%monolog.handler.null.class%', array(100, false)));
         $definition->addMethodCall('pushHandler', array(new Reference('monolog.handler.test')));
 
         // Handlers
-        $container->set('monolog.handler.a', new Definition('%monolog.handler.null.class%', array (100, false)));
-        $container->set('monolog.handler.b', new Definition('%monolog.handler.null.class%', array (100, false)));
-        $container->set('monolog.handler.c', new Definition('%monolog.handler.null.class%', array (100, false)));
+        $container->set('monolog.handler.a', new Definition('%monolog.handler.null.class%', array(100, false)));
+        $container->set('monolog.handler.b', new Definition('%monolog.handler.null.class%', array(100, false)));
+        $container->set('monolog.handler.c', new Definition('%monolog.handler.null.class%', array(100, false)));
 
         // Channels
         foreach (array('test', 'foo', 'bar') as $name) {
             $service = new Definition('TestClass', array('false', new Reference('logger')));
-            $service->addTag('monolog.logger', array ('channel' => $name));
+            $service->addTag('monolog.logger', array('channel' => $name));
             $container->setDefinition($name, $service);
         }
 
@@ -110,12 +110,12 @@ class LoggerChannelPassTest extends \PHPUnit_Framework_TestCase
         $loader = new XmlFileLoader($container, new FileLocator(__DIR__.'/../../../Resources/config'));
         $loader->load('monolog.xml');
         $definition = $container->getDefinition('monolog.logger_prototype');
-        $container->set('monolog.handler.test', new Definition('%monolog.handler.null.class%', array (100, false)));
+        $container->set('monolog.handler.test', new Definition('%monolog.handler.null.class%', array(100, false)));
         $definition->addMethodCall('pushHandler', array(new Reference('monolog.handler.test')));
 
         // Channels
         $service = new Definition('TestClass');
-        $service->addTag('monolog.logger', array ('channel' => 'test'));
+        $service->addTag('monolog.logger', array('channel' => 'test'));
         $service->addMethodCall('setLogger', array(new Reference('logger')));
         $container->setDefinition('foo', $service);
 
