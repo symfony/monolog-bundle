@@ -1,23 +1,23 @@
-sudo: false
-
 language: php
+
+dist: trusty
+sudo: false
 
 cache:
     directories:
         - $HOME/.composer/cache/files
+        - .phpunit
 
-php:
-  - 5.3
-  - 5.4
-  - 5.5
-  - 7.0
-  - hhvm
+env:
+    global:
+        - SYMFONY_PHPUNIT_DIR=.phpunit
 
 matrix:
   fast_finish: true
   include:
     - php: 5.3
       env: COMPOSER_FLAGS="--prefer-lowest" SYMFONY_DEPRECATIONS_HELPER=weak
+      dist: precise
     # Test against Symfony LTS versions
     - php: 5.6
       env: SYMFONY_VERSION="2.7.*"
@@ -26,6 +26,9 @@ matrix:
     # Test against dev versions
     - php: 5.6
       env: DEPENDENCIES=dev
+    - php: 7.0
+    - php: 7.1
+    - php: hhvm
   allow_failures:
     - env: DEPENDENCIES=dev
 
@@ -37,4 +40,4 @@ before_install:
 install:
     - composer update $COMPOSER_FLAGS
 
-script: phpunit -v --coverage-text
+script: ./vendor/bin/simple-phpunit -v --coverage-text
