@@ -5,6 +5,7 @@ language: php
 cache:
     directories:
         - $HOME/.composer/cache/files
+        - .phpunit
 
 php:
   - 5.3
@@ -37,4 +38,4 @@ before_install:
 install:
     - composer update $COMPOSER_FLAGS
 
-script: phpunit -v --coverage-text
+script: ./vendor/bin/simple-phpunit -v --coverage-text
