@@ -1,3 +1,11 @@
+## 3.1.2 (2017-11-06)
+
+* fix invalid usage of count()
+
+## 3.1.1 (2017-09-26)
+
+* added support for Symfony 4
+
 ## 3.1.0 (2017-03-26)
 
 * Added support for server_log handler
