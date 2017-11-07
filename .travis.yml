@@ -22,9 +22,11 @@ matrix:
     - php: 5.6
       env: SYMFONY_VERSION="2.7.*"
     - php: 5.6
-      env: SYMFONY_VERSION="2.8.*" DEPENDENCIES=dev
-    # Test against dev versions
+      env: SYMFONY_VERSION="2.8.*"
     - php: 5.6
+      env: SYMFONY_VERSION="3.4.*" DEPENDENCIES=dev
+    # Test against dev versions
+    - php: 7.1
       env: DEPENDENCIES=dev
     - php: 7.0
     - php: 7.1
@@ -39,5 +41,6 @@ before_install:
 
 install:
     - composer update $COMPOSER_FLAGS
+    - ./vendor/bin/simple-phpunit install
 
 script: ./vendor/bin/simple-phpunit -v --coverage-text
