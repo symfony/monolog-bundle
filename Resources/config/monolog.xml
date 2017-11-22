@@ -12,16 +12,16 @@
             </call>
         </service>
 
-        <service id="logger" alias="monolog.logger" />
+        <service id="logger" alias="monolog.logger" public="true" />
 
         <service id="Psr\Log\LoggerInterface" alias="logger" public="false" />
 
-        <service id="monolog.logger_prototype" class="Symfony\Bridge\Monolog\Logger" abstract="true">
+        <service id="monolog.logger_prototype" class="Symfony\Bridge\Monolog\Logger" abstract="true" public="true">
             <argument /><!-- Channel -->
         </service>
 
-        <service id="monolog.activation_strategy.not_found" class="Symfony\Bridge\Monolog\Handler\FingersCrossed\NotFoundActivationStrategy"/>
-        <service id="monolog.handler.fingers_crossed.error_level_activation_strategy" class="Monolog\Handler\FingersCrossed\ErrorLevelActivationStrategy"/>
+        <service id="monolog.activation_strategy.not_found" class="Symfony\Bridge\Monolog\Handler\FingersCrossed\NotFoundActivationStrategy" public="true"/>
+        <service id="monolog.handler.fingers_crossed.error_level_activation_strategy" class="Monolog\Handler\FingersCrossed\ErrorLevelActivationStrategy" public="true"/>
 
         <!-- Formatters -->
         <service id="monolog.formatter.chrome_php" class="Monolog\Formatter\ChromePHPFormatter" public="false" />
