@@ -162,6 +162,7 @@ class MonologExtension extends Extension
                 $handler['level'],
                 $handler['bubble'],
                 $handler['file_permission'],
+                $handler['use_locking'],
             ));
             break;
 

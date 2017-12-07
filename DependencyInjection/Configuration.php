@@ -31,6 +31,8 @@ use Monolog\Logger;
  *   - path: string
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
+ *   - [file_permission]: int|null, defaults to null (0644)
+ *   - [use_locking]: bool, defaults to false
  *
  * - console:
  *   - [verbosity_levels]: level => verbosity configuration
@@ -349,6 +351,7 @@ class Configuration implements ConfigurationInterface
                                     })
                                 ->end()
                             ->end()
+                            ->booleanNode('use_locking')->defaultFalse()->end() // stream
                             ->scalarNode('filename_format')->defaultValue('{filename}-{date}')->end() //rotating
                             ->scalarNode('date_format')->defaultValue('Y-m-d')->end() //rotating
                             ->scalarNode('ident')->defaultFalse()->end() // syslog
