@@ -41,8 +41,8 @@ class LoglevelEnvVarProcessor implements EnvVarProcessorInterface
      */
     public static function getProvidedTypes()
     {
-        return [
+        return array(
             'loglevel' => 'int',
-        ];
+        );
     }
 }
