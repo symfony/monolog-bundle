@@ -11,6 +11,7 @@
 
 namespace Symfony\Bundle\MonologBundle\DependencyInjection;
 
+use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -34,7 +35,18 @@ class MonologExtension extends Extension
 
     private function levelToMonologConst($level)
     {
-        return is_int($level) ? $level : constant('Monolog\Logger::'.strtoupper($level));
+        if (is_int($level) || 1 === preg_match('#^%env\(.+\)%$#', $level)) {
+            return $level;
+        }
+        $levelConstant = 'Monolog\Logger::'.strtoupper($level);
+        if (!defined($levelConstant)) {
+            throw new \InvalidArgumentException(sprintf(
+                'The configured log level "%s" is invalid as it is not defined in Monolog\Logger.',
+                $level
+            ));
+        }
+
+        return constant($levelConstant);
     }
 
     /**
@@ -138,7 +150,7 @@ class MonologExtension extends Extension
 
         $definition = new Definition($this->getHandlerClassByType($handler['type']));
 
-        $handler['level'] = $this->levelToMonologConst($handler['level']);
+        $handler['level'] = $this->levelToMonologConst($container->resolveEnvPlaceholders($handler['level']));
 
         if ($handler['include_stacktraces']) {
             $definition->setConfigurator(array('Symfony\\Bundle\\MonologBundle\\MonologBundle', 'includeStacktraces'));
@@ -319,9 +331,9 @@ class MonologExtension extends Extension
             break;
 
         case 'fingers_crossed':
-            $handler['action_level'] = $this->levelToMonologConst($handler['action_level']);
+            $handler['action_level'] = $this->levelToMonologConst($container->resolveEnvPlaceholders($handler['action_level']));
             if (null !== $handler['passthru_level']) {
-                $handler['passthru_level'] = $this->levelToMonologConst($handler['passthru_level']);
+                $handler['passthru_level'] = $this->levelToMonologConst($container->resolveEnvPlaceholders($handler['passthru_level']));
             }
             $nestedHandlerId = $this->getHandlerId($handler['handler']);
             $this->markNestedHandler($nestedHandlerId);
@@ -351,10 +363,10 @@ class MonologExtension extends Extension
             break;
 
         case 'filter':
-            $handler['min_level'] = $this->levelToMonologConst($handler['min_level']);
-            $handler['max_level'] = $this->levelToMonologConst($handler['max_level']);
+            $handler['min_level'] = $this->levelToMonologConst($container->resolveEnvPlaceholders($handler['min_level']));
+            $handler['max_level'] = $this->levelToMonologConst($container->resolveEnvPlaceholders($handler['max_level']));
             foreach (array_keys($handler['accepted_levels']) as $k) {
-                $handler['accepted_levels'][$k] = $this->levelToMonologConst($handler['accepted_levels'][$k]);
+                $handler['accepted_levels'][$k] = $this->levelToMonologConst($container->resolveEnvPlaceholders($handler['accepted_levels'][$k]));
             }
 
             $nestedHandlerId = $this->getHandlerId($handler['handler']);

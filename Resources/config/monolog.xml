@@ -23,6 +23,10 @@
         <service id="monolog.activation_strategy.not_found" class="Symfony\Bridge\Monolog\Handler\FingersCrossed\NotFoundActivationStrategy"/>
         <service id="monolog.handler.fingers_crossed.error_level_activation_strategy" class="Monolog\Handler\FingersCrossed\ErrorLevelActivationStrategy"/>
 
+        <service id="monolog.env_var_processor.log_level_env_var_processor" class="Symfony\Bundle\MonologBundle\EnvVarProcessor\LoglevelEnvVarProcessor">
+            <tag name="container.env_var_processor" />
+        </service>
+
         <!-- Formatters -->
         <service id="monolog.formatter.chrome_php" class="Monolog\Formatter\ChromePHPFormatter" public="false" />
         <service id="monolog.formatter.gelf_message" class="Monolog\Formatter\GelfMessageFormatter" public="false" />

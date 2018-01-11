@@ -1,0 +1,21 @@
+monolog:
+    handlers:
+        custom:
+            type: stream
+            path: /tmp/symfony.log
+            bubble: false
+            level: '%env(LOGLEVEL1)%'
+            file_permission: 0666
+        main:
+            type: fingers_crossed
+            action_level: '%env(LOGLEVEL2)%'
+            passthru_level: '%env(LOGLEVEL3)%'
+            handler: nested
+        nested:
+            type: stream
+        filtered:
+            type: filter
+            accepted_levels: ['%env(LOGLEVEL4)%', '%env(LOGLEVEL5)%']
+            handler: nested2
+        nested2:
+            type: stream

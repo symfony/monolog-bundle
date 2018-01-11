@@ -54,6 +54,31 @@ class MonologExtensionTest extends DependencyInjectionTest
         $this->assertDICConstructorArguments($handler, array('/tmp/symfony.log', \Monolog\Logger::ERROR, false, 0666));
     }
 
+    public function testLoadWithEnvironmentVariableForLevel()
+    {
+        $container = $this->getContainer(array(array('handlers' => array('main' => array('type' => 'stream', 'level' => '%env(LOG_LEVEL)%')))));
+
+        $this->assertTrue($container->hasDefinition('monolog.logger'));
+        $this->assertTrue($container->hasDefinition('monolog.handler.main'));
+
+        $logger = $container->getDefinition('monolog.logger');
+        $this->assertDICDefinitionMethodCallAt(0, $logger, 'useMicrosecondTimestamps', array('%monolog.use_microseconds%'));
+        $this->assertDICDefinitionMethodCallAt(1, $logger, 'pushHandler', array(new Reference('monolog.handler.main')));
+
+        $handler = $container->getDefinition('monolog.handler.main');
+        $this->assertDICDefinitionClass($handler, 'Monolog\Handler\StreamHandler');
+        $this->assertDICConstructorArguments($handler, array('%kernel.logs_dir%/%kernel.environment%.log', '%env(LOG_LEVEL)%', true, null));
+        $this->assertDICDefinitionMethodCallAt(0, $handler, 'pushProcessor', array(new Reference('monolog.processor.psr_log_message')));
+    }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testErrorOnInvalidLoglevel()
+    {
+        $this->getContainer(array(array('handlers' => array('main' => array('type' => 'stream', 'level' => 'invalid-loglevel')))));
+    }
+
     public function testLoadWithNestedHandler()
     {
         $container = $this->getContainer(array(array('handlers' => array(

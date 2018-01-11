@@ -89,34 +89,43 @@
     </xsd:complexType>
 
     <xsd:simpleType name="level">
-        <xsd:restriction base="xsd:string">
-            <xsd:enumeration value="debug" />
-            <xsd:enumeration value="info" />
-            <xsd:enumeration value="notice" />
-            <xsd:enumeration value="warning" />
-            <xsd:enumeration value="error" />
-            <xsd:enumeration value="critical" />
-            <xsd:enumeration value="alert" />
-            <xsd:enumeration value="emergency" />
+        <xsd:union>
+            <xsd:simpleType>
+                <xsd:restriction base="xsd:string">
+                    <xsd:enumeration value="debug" />
+                    <xsd:enumeration value="info" />
+                    <xsd:enumeration value="notice" />
+                    <xsd:enumeration value="warning" />
+                    <xsd:enumeration value="error" />
+                    <xsd:enumeration value="critical" />
+                    <xsd:enumeration value="alert" />
+                    <xsd:enumeration value="emergency" />
 
-            <xsd:enumeration value="DEBUG" />
-            <xsd:enumeration value="INFO" />
-            <xsd:enumeration value="NOTICE" />
-            <xsd:enumeration value="WARNING" />
-            <xsd:enumeration value="ERROR" />
-            <xsd:enumeration value="CRITICAL" />
-            <xsd:enumeration value="ALERT" />
-            <xsd:enumeration value="EMERGENCY" />
+                    <xsd:enumeration value="DEBUG" />
+                    <xsd:enumeration value="INFO" />
+                    <xsd:enumeration value="NOTICE" />
+                    <xsd:enumeration value="WARNING" />
+                    <xsd:enumeration value="ERROR" />
+                    <xsd:enumeration value="CRITICAL" />
+                    <xsd:enumeration value="ALERT" />
+                    <xsd:enumeration value="EMERGENCY" />
 
-            <xsd:enumeration value="100" />
-            <xsd:enumeration value="200" />
-            <xsd:enumeration value="250" />
-            <xsd:enumeration value="300" />
-            <xsd:enumeration value="400" />
-            <xsd:enumeration value="500" />
-            <xsd:enumeration value="550" />
-            <xsd:enumeration value="600" />
-        </xsd:restriction>
+                    <xsd:enumeration value="100" />
+                    <xsd:enumeration value="200" />
+                    <xsd:enumeration value="250" />
+                    <xsd:enumeration value="300" />
+                    <xsd:enumeration value="400" />
+                    <xsd:enumeration value="500" />
+                    <xsd:enumeration value="550" />
+                    <xsd:enumeration value="600" />
+                </xsd:restriction>
+            </xsd:simpleType>
+            <xsd:simpleType>
+                <xsd:restriction base="xsd:string">
+                    <xsd:pattern value="%env\(.+\)%" />
+                </xsd:restriction>
+            </xsd:simpleType>
+        </xsd:union>
     </xsd:simpleType>
 
     <xsd:complexType name="publisher">
