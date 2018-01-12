@@ -195,8 +195,21 @@ class MonologExtension extends Extension
                 $transport->setPublic(false);
                 $container->setDefinition($transportId, $transport);
 
+                if ($handler['publisher']['ignore_error']) {
+                    if (!class_exists("Gelf\Transport\IgnoreErrorTransportWrapper")) {
+                        throw new \RuntimeException('ignore_error for gelf is only compatible with graylog2/gelf-php:^1.5');
+                    }
+                    $transportWrapper = new Definition("Gelf\Transport\IgnoreErrorTransportWrapper", array(new Reference($transportId)));
+                    $transportWrapperId = uniqid('monolog.gelf.transport.wrapper.', true);
+                    $transportWrapper->setPublic(false);
+                    $container->setDefinition($transportWrapperId, $transportWrapper);
+                    $gelfTransportId = $transportWrapperId;
+                } else {
+                    $gelfTransportId = $transportId;
+                }
+
                 $publisher = new Definition('Gelf\Publisher', array());
-                $publisher->addMethodCall('addTransport', array(new Reference($transportId)));
+                $publisher->addMethodCall('addTransport', array(new Reference($gelfTransportId)));
                 $publisherId = uniqid('monolog.gelf.publisher.', true);
                 $publisher->setPublic(false);
                 $container->setDefinition($publisherId, $publisher);
