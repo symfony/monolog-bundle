@@ -11,14 +11,12 @@
 
 namespace Symfony\Bundle\MonologBundle\DependencyInjection;
 
-use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Elastica\Client;
 
 /**
@@ -33,11 +31,24 @@ class MonologExtension extends Extension
 
     private $swiftMailerHandlers = array();
 
-    private function levelToMonologConst($level)
+    /**
+     * @param ContainerBuilder $container
+     * @param int|string       $level
+     * @param bool             $isEnvVarProcessorAvailable
+     *
+     * @return int|string
+     *
+     * @throws \InvalidArgumentException
+     */
+    private function levelToMonologConst(ContainerBuilder $container, $level, $isEnvVarProcessorAvailable)
     {
+        if ($isEnvVarProcessorAvailable) {
+            $level = $container->resolveEnvPlaceholders($level);
+        }
         if (is_int($level) || 1 === preg_match('#^%env\(.+\)%$#', $level)) {
             return $level;
         }
+
         $levelConstant = 'Monolog\Logger::'.strtoupper($level);
         if (!defined($levelConstant)) {
             throw new \InvalidArgumentException(sprintf(
@@ -54,6 +65,8 @@ class MonologExtension extends Extension
      *
      * @param array            $configs   An array of configuration settings
      * @param ContainerBuilder $container A ContainerBuilder instance
+     *
+     * @throws \InvalidArgumentException
      */
     public function load(array $configs, ContainerBuilder $container)
     {
@@ -64,6 +77,11 @@ class MonologExtension extends Extension
         if (isset($config['handlers'])) {
             $loader = new XmlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
             $loader->load('monolog.xml');
+
+            $isEnvVarProcessorAvailable = interface_exists('Symfony\Component\DependencyInjection\EnvVarProcessorInterface');
+            if (!$isEnvVarProcessorAvailable) {
+                $container->removeDefinition('monolog.env_var_processor.log_level_env_var_processor');
+            }
 
             $container->setParameter('monolog.use_microseconds', $config['use_microseconds']);
 
@@ -76,7 +94,7 @@ class MonologExtension extends Extension
 
             foreach ($config['handlers'] as $name => $handler) {
                 $handlers[$handler['priority']][] = array(
-                    'id' => $this->buildHandler($container, $name, $handler),
+                    'id' => $this->buildHandler($container, $name, $handler, $isEnvVarProcessorAvailable),
                     'channels' => empty($handler['channels']) ? null : $handler['channels'],
                 );
             }
@@ -139,7 +157,17 @@ class MonologExtension extends Extension
         return 'http://symfony.com/schema/dic/monolog';
     }
 
-    private function buildHandler(ContainerBuilder $container, $name, array $handler)
+    /**
+     * @param ContainerBuilder $container
+     * @param string           $name
+     * @param array            $handler
+     * @param bool             $isEnvVarProcessorAvailable
+     *
+     * @return string
+     *
+     * @throws \InvalidArgumentException
+     */
+    private function buildHandler(ContainerBuilder $container, $name, array $handler, $isEnvVarProcessorAvailable)
     {
         $handlerId = $this->getHandlerId($name);
         if ('service' === $handler['type']) {
@@ -150,7 +178,7 @@ class MonologExtension extends Extension
 
         $definition = new Definition($this->getHandlerClassByType($handler['type']));
 
-        $handler['level'] = $this->levelToMonologConst($container->resolveEnvPlaceholders($handler['level']));
+        $handler['level'] = $this->levelToMonologConst($container, $handler['level'], $isEnvVarProcessorAvailable);
 
         if ($handler['include_stacktraces']) {
             $definition->setConfigurator(array('Symfony\\Bundle\\MonologBundle\\MonologBundle', 'includeStacktraces'));
@@ -331,9 +359,9 @@ class MonologExtension extends Extension
             break;
 
         case 'fingers_crossed':
-            $handler['action_level'] = $this->levelToMonologConst($container->resolveEnvPlaceholders($handler['action_level']));
+            $handler['action_level'] = $this->levelToMonologConst($container, $handler['action_level'], $isEnvVarProcessorAvailable);
             if (null !== $handler['passthru_level']) {
-                $handler['passthru_level'] = $this->levelToMonologConst($container->resolveEnvPlaceholders($handler['passthru_level']));
+                $handler['passthru_level'] = $this->levelToMonologConst($container, $handler['passthru_level'], $isEnvVarProcessorAvailable);
             }
             $nestedHandlerId = $this->getHandlerId($handler['handler']);
             $this->markNestedHandler($nestedHandlerId);
@@ -363,10 +391,10 @@ class MonologExtension extends Extension
             break;
 
         case 'filter':
-            $handler['min_level'] = $this->levelToMonologConst($container->resolveEnvPlaceholders($handler['min_level']));
-            $handler['max_level'] = $this->levelToMonologConst($container->resolveEnvPlaceholders($handler['max_level']));
+            $handler['min_level'] = $this->levelToMonologConst($container, $handler['min_level'], $isEnvVarProcessorAvailable);
+            $handler['max_level'] = $this->levelToMonologConst($container, $handler['max_level'], $isEnvVarProcessorAvailable);
             foreach (array_keys($handler['accepted_levels']) as $k) {
-                $handler['accepted_levels'][$k] = $this->levelToMonologConst($container->resolveEnvPlaceholders($handler['accepted_levels'][$k]));
+                $handler['accepted_levels'][$k] = $this->levelToMonologConst($container, $handler['accepted_levels'][$k], $isEnvVarProcessorAvailable);
             }
 
             $nestedHandlerId = $this->getHandlerId($handler['handler']);

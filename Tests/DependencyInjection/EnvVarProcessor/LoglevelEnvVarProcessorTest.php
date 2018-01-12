@@ -18,6 +18,10 @@ class LoglevelEnvVarProcessorTest extends \PHPUnit_Framework_TestCase
 {
     public function testValidEnvValue()
     {
+        if (!interface_exists('Symfony\Component\DependencyInjection\EnvVarProcessorInterface')) {
+            return;
+        }
+
         $loglevelEnvVarProcessor = new LoglevelEnvVarProcessor();
         $result = $loglevelEnvVarProcessor->getEnv('loglevel', 'LOGLEVEL', function($varName) {
             if ('LOGLEVEL' === $varName) {
@@ -40,31 +44,37 @@ class LoglevelEnvVarProcessorTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(400, $result);
     }
 
-    /**
-     * @expectedException \Symfony\Component\DependencyInjection\Exception\RuntimeException
-     */
     public function testInvalidPrefix()
     {
+        if (!interface_exists('Symfony\Component\DependencyInjection\EnvVarProcessorInterface')) {
+            return;
+        }
+        $this->expectException('\Symfony\Component\DependencyInjection\Exception\RuntimeException');
+
         $loglevelEnvVarProcessor = new LoglevelEnvVarProcessor();
         $loglevelEnvVarProcessor->getEnv('invalidPrefix', 'LOGLEVEL', function($varName) { });
     }
 
-    /**
-     * @expectedException \Symfony\Component\DependencyInjection\Exception\RuntimeException
-     */
     public function testInvalidValue()
     {
+        if (!interface_exists('Symfony\Component\DependencyInjection\EnvVarProcessorInterface')) {
+            return;
+        }
+        $this->expectException('\Symfony\Component\DependencyInjection\Exception\RuntimeException');
+
         $loglevelEnvVarProcessor = new LoglevelEnvVarProcessor();
         $loglevelEnvVarProcessor->getEnv('loglevel', 'LOGLEVEL', function($varName) {
             return 'invalid-value';
         });
     }
 
-    /**
-     * @expectedException \Symfony\Component\DependencyInjection\Exception\RuntimeException
-     */
     public function testInvalidVariable()
     {
+        if (!interface_exists('Symfony\Component\DependencyInjection\EnvVarProcessorInterface')) {
+            return;
+        }
+        $this->expectException('\Symfony\Component\DependencyInjection\Exception\RuntimeException');
+
         $loglevelEnvVarProcessor = new LoglevelEnvVarProcessor();
         $loglevelEnvVarProcessor->getEnv('loglevel', 'LOGLEVEL', function($varName) {
             throw new RuntimeException('test');

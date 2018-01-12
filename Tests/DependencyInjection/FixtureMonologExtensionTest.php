@@ -11,11 +11,9 @@
 
 namespace Symfony\Bundle\MonologBundle\Tests\DependencyInjection;
 
-use Monolog\Logger;
 use Symfony\Bundle\MonologBundle\DependencyInjection\MonologExtension;
 use Symfony\Bridge\Monolog\Handler\ServerLogHandler;
 use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\LoggerChannelPass;
-use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
@@ -53,6 +51,10 @@ abstract class FixtureMonologExtensionTest extends DependencyInjectionTest
 
     public function testLoadWithLoglevelFromEnvironment()
     {
+        if (!interface_exists('Symfony\Component\DependencyInjection\EnvVarProcessorInterface')) {
+            return;
+        }
+
         $container = $this->getContainer('level_from_environment');
 
         $this->assertTrue($container->hasDefinition('monolog.logger'));

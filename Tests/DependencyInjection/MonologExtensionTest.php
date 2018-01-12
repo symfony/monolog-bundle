@@ -56,6 +56,10 @@ class MonologExtensionTest extends DependencyInjectionTest
 
     public function testLoadWithEnvironmentVariableForLevel()
     {
+        if (!interface_exists('Symfony\Component\DependencyInjection\EnvVarProcessorInterface')) {
+            return;
+        }
+
         $container = $this->getContainer(array(array('handlers' => array('main' => array('type' => 'stream', 'level' => '%env(LOG_LEVEL)%')))));
 
         $this->assertTrue($container->hasDefinition('monolog.logger'));
