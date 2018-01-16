@@ -46,7 +46,7 @@ use Monolog\Logger;
  *   - [bubble]: bool, defaults to true
  *
  * - gelf:
- *   - publisher: {id: ...} or {hostname: ..., port: ..., chunk_size: ...}
+ *   - publisher: {id: ...} or {hostname: ..., port: ..., chunk_size: ..., ignore_error: ...}
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
  *
@@ -413,6 +413,7 @@ class Configuration implements ConfigurationInterface
                                     ->scalarNode('hostname')->end()
                                     ->scalarNode('port')->defaultValue(12201)->end()
                                     ->scalarNode('chunk_size')->defaultValue(1420)->end()
+                                    ->booleanNode('ignore_error')->defaultValue(false)->end()
                                 ->end()
                                 ->validate()
                                     ->ifTrue(function ($v) {
