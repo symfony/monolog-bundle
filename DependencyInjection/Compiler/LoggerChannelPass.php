@@ -113,6 +113,7 @@ class LoggerChannelPass implements CompilerPassInterface
                 $logger = new DefinitionDecorator('monolog.logger_prototype');
             }
 
+            $logger->setPublic(true);
             $logger->replaceArgument(0, $channel);
             $container->setDefinition($loggerId, $logger);
             $this->channels[] = $channel;
