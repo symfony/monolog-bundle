@@ -11,10 +11,11 @@
 
 namespace Symfony\Bundle\MonologBundle\Tests\DependencyInjection\Compiler;
 
+use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\FixEmptyLoggerPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
-class FixEmptyLoggerPassTest extends \PHPUnit_Framework_TestCase
+class FixEmptyLoggerPassTest extends TestCase
 {
     public function testProcess()
     {

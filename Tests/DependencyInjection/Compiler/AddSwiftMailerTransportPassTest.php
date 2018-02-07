@@ -11,13 +11,14 @@
 
 namespace Symfony\Bundle\MonologBundle\Tests\DependencyInjection\Compiler;
 
+use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\AddSwiftMailerTransportPass;
 use Symfony\Component\DependencyInjection\Reference;
 
 /**
  * @author Christian Flothmann <christian.flothmann@xabbuh.de>
  */
-class AddSwiftMailerTransportPassTest extends \PHPUnit_Framework_TestCase
+class AddSwiftMailerTransportPassTest extends TestCase
 {
     private $compilerPass;
 
