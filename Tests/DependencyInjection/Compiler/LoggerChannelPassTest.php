@@ -11,6 +11,7 @@
 
 namespace Symfony\Bundle\MonologBundle\Tests\DependencyInjection\Compiler;
 
+use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -60,6 +61,70 @@ class LoggerChannelPassTest extends \PHPUnit_Framework_TestCase
         $service = $container->getDefinition('foo');
         $calls = $service->getMethodCalls();
         $this->assertEquals('monolog.logger.test', (string) $calls[0][1][0], '->process replaces the logger by the new one in setters');
+    }
+
+    public function testAutowiredLoggerArgumentsAreReplacedWithChannelLogger()
+    {
+        if (!method_exists('Symfony\Component\DependencyInjection\Definition', 'setArgument')) {
+            $this->markTestSkipped('Need DependencyInjection 3.3+ to autowire channel logger.');
+        }
+
+        $container = new ContainerBuilder();
+        $container->setParameter('monolog.additional_channels', array());
+        $container->setParameter('monolog.handlers_to_channels', array());
+        $container->register('monolog.logger');
+        $container->register('monolog.logger.test');
+        $dummyService = $container->register('dummy_service', 'Symfony\Bundle\MonologBundle\Tests\DependencyInjection\Compiler\DummyService')
+            ->setAutowired(true)
+            ->addTag('monolog.logger', array('channel' => 'test'));
+
+        $pass = new LoggerChannelPass();
+        $pass->process($container);
+
+        $this->assertEquals('monolog.logger.test', (string) $dummyService->getArgument('$logger'));
+    }
+
+    public function testAutowiredLoggerArgumentsAreNotReplacedWithChannelLoggerIfLoggerArgumentIsConfiguredExplicitlyWithIndex()
+    {
+        if (!method_exists('Symfony\Component\DependencyInjection\Definition', 'setArgument')) {
+            $this->markTestSkipped('Need DependencyInjection 3.3+ to autowire channel logger.');
+        }
+
+        $container = new ContainerBuilder();
+        $container->setParameter('monolog.additional_channels', array());
+        $container->setParameter('monolog.handlers_to_channels', array());
+        $container->register('monolog.logger');
+        $dummyService = $container->register('dummy_service', 'Symfony\Bundle\MonologBundle\Tests\DependencyInjection\Compiler\DummyService')
+            ->setAutowired(true)
+            ->setArgument(2, new Reference('monolog.logger'))
+            ->addTag('monolog.logger', array('channel' => 'test'));
+
+        $pass = new LoggerChannelPass();
+        $pass->process($container);
+
+        $this->assertEquals('monolog.logger', (string) $dummyService->getArgument(2));
+        $this->assertArrayNotHasKey('$logger', $dummyService->getArguments());
+    }
+
+    public function testAutowiredLoggerArgumentsAreNotReplacedWithChannelLoggerIfLoggerArgumentIsConfiguredExplicitlyWithName()
+    {
+        if (!method_exists('Symfony\Component\DependencyInjection\Definition', 'setArgument')) {
+            $this->markTestSkipped('Need DependencyInjection 3.3+ to autowire channel logger.');
+        }
+
+        $container = new ContainerBuilder();
+        $container->setParameter('monolog.additional_channels', array());
+        $container->setParameter('monolog.handlers_to_channels', array());
+        $container->register('monolog.logger');
+        $dummyService = $container->register('dummy_service', 'Symfony\Bundle\MonologBundle\Tests\DependencyInjection\Compiler\DummyService')
+            ->setAutowired(true)
+            ->setArgument('$logger', new Reference('monolog.logger'))
+            ->addTag('monolog.logger', array('channel' => 'test'));
+
+        $pass = new LoggerChannelPass();
+        $pass->process($container);
+
+        $this->assertEquals('monolog.logger', (string) $dummyService->getArgument('$logger'));
     }
 
     protected function getContainer()
@@ -128,5 +193,12 @@ class LoggerChannelPassTest extends \PHPUnit_Framework_TestCase
         $container->compile();
 
         return $container;
+    }
+}
+
+class DummyService
+{
+    public function __construct(Foo $foo, $scalar, LoggerInterface $logger)
+    {
     }
 }
