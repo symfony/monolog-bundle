@@ -184,22 +184,18 @@ class MonologExtension extends Extension
 
         case 'gelf':
             if (isset($handler['publisher']['id'])) {
-                $publisherId = $handler['publisher']['id'];
+                $publisher = new Reference($handler['publisher']['id']);
             } elseif (class_exists('Gelf\Transport\UdpTransport')) {
                 $transport = new Definition("Gelf\Transport\UdpTransport", array(
                     $handler['publisher']['hostname'],
                     $handler['publisher']['port'],
                     $handler['publisher']['chunk_size'],
                 ));
-                $transportId = uniqid('monolog.gelf.transport.', true);
                 $transport->setPublic(false);
-                $container->setDefinition($transportId, $transport);
 
                 $publisher = new Definition('Gelf\Publisher', array());
-                $publisher->addMethodCall('addTransport', array(new Reference($transportId)));
-                $publisherId = uniqid('monolog.gelf.publisher.', true);
+                $publisher->addMethodCall('addTransport', array($transport));
                 $publisher->setPublic(false);
-                $container->setDefinition($publisherId, $publisher);
             } elseif (class_exists('Gelf\MessagePublisher')) {
                 $publisher = new Definition('Gelf\MessagePublisher', array(
                     $handler['publisher']['hostname'],
@@ -207,15 +203,13 @@ class MonologExtension extends Extension
                     $handler['publisher']['chunk_size'],
                 ));
 
-                $publisherId = uniqid('monolog.gelf.publisher.', true);
                 $publisher->setPublic(false);
-                $container->setDefinition($publisherId, $publisher);
             } else {
                 throw new \RuntimeException('The gelf handler requires the graylog2/gelf-php package to be installed');
             }
 
             $definition->setArguments(array(
-                new Reference($publisherId),
+                $publisher,
                 $handler['level'],
                 $handler['bubble'],
             ));
@@ -223,7 +217,7 @@ class MonologExtension extends Extension
 
         case 'mongo':
             if (isset($handler['mongo']['id'])) {
-                $clientId = $handler['mongo']['id'];
+                $client = new Reference($handler['mongo']['id']);
             } else {
                 $server = 'mongodb://';
 
@@ -237,13 +231,11 @@ class MonologExtension extends Extension
                     $server,
                 ));
 
-                $clientId = uniqid('monolog.mongo.client.', true);
                 $client->setPublic(false);
-                $container->setDefinition($clientId, $client);
             }
 
             $definition->setArguments(array(
-                new Reference($clientId),
+                $client,
                 $handler['mongo']['database'],
                 $handler['mongo']['collection'],
                 $handler['level'],
@@ -253,7 +245,7 @@ class MonologExtension extends Extension
 
         case 'elasticsearch':
             if (isset($handler['elasticsearch']['id'])) {
-                $clientId = $handler['elasticsearch']['id'];
+                $elasticaClient = new Reference($handler['elasticsearch']['id']);
             } else {
                 // elastica client new definition
                 $elasticaClient = new Definition('Elastica\Client');
@@ -278,14 +270,12 @@ class MonologExtension extends Extension
                     $elasticaClientArguments
                 ));
 
-                $clientId = uniqid('monolog.elastica.client.', true);
                 $elasticaClient->setPublic(false);
-                $container->setDefinition($clientId, $elasticaClient);
             }
 
             // elastica handler definition
             $definition->setArguments(array(
-                new Reference($clientId),
+                $elasticaClient,
                 array(
                     'index' => $handler['index'],
                     'type' => $handler['document_type'],
