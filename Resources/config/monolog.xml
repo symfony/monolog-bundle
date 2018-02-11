@@ -12,7 +12,7 @@
             </call>
         </service>
 
-        <service id="logger" alias="monolog.logger" />
+        <service id="logger" alias="monolog.logger" public="true" />
 
         <service id="Psr\Log\LoggerInterface" alias="logger" public="false" />
 
