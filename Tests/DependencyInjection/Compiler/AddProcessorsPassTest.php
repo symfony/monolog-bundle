@@ -11,6 +11,7 @@
 
 namespace Symfony\Bundle\MonologBundle\Tests\DependencyInjection\Compiler;
 
+use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\AddProcessorsPass;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\DependencyInjection\Definition;
@@ -18,7 +19,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 
-class AddProcessorsPassTest extends \PHPUnit_Framework_TestCase
+class AddProcessorsPassTest extends TestCase
 {
     public function testHandlerProcessors()
     {
