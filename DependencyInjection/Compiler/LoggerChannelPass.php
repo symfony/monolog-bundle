@@ -61,6 +61,38 @@ class LoggerChannelPass implements CompilerPassInterface
                     }
                 }
                 $definition->setMethodCalls($calls);
+
+                if (method_exists($definition, 'setArgument') && $definition->isAutowired() && null !== $class = $definition->getClass()) {
+                    try {
+                        $r = new \ReflectionClass($class);
+                        $constructor = $r->getConstructor();
+
+                        $arguments = $definition->getArguments();
+
+                        foreach ($constructor->getParameters() as $parameter) {
+                            try {
+                                $type = $parameter->getClass();
+                            } catch (\ReflectionException $e) {
+                                continue;
+                            }
+
+                            if (null === $type) {
+                                continue;
+                            }
+
+                            if ('Psr\Log\LoggerInterface' !== $type->getName()) {
+                                continue;
+                            }
+
+                            if (isset($arguments[$parameter->getPosition()]) || isset($arguments['$'.$parameter->getName()])) {
+                                continue;
+                            }
+
+                            $definition->setArgument('$'.$parameter->getName(), new Reference($loggerId));
+                        }
+                    } catch (\ReflectionException $e) {
+                    }
+                }
             }
         }
 
