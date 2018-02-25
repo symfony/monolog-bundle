@@ -11,7 +11,9 @@
 
 namespace Symfony\Bundle\MonologBundle\Tests\DependencyInjection;
 
-abstract class DependencyInjectionTest extends \PHPUnit_Framework_TestCase
+use PHPUnit\Framework\TestCase;
+
+abstract class DependencyInjectionTest extends TestCase
 {
     /**
      * Assertion on the Class of a DIC Service Definition.

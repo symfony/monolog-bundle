@@ -12,7 +12,6 @@
 namespace Symfony\Bundle\MonologBundle\Tests\DependencyInjection;
 
 use Symfony\Bundle\MonologBundle\DependencyInjection\MonologExtension;
-use Symfony\Bridge\Monolog\Handler\ServerLogHandler;
 use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\LoggerChannelPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
