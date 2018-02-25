@@ -11,10 +11,11 @@
 
 namespace Symfony\Bundle\MonologBundle\Tests\EnvVarProcessor;
 
+use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MonologBundle\EnvVarProcessor\LoglevelEnvVarProcessor;
 use Symfony\Component\DependencyInjection\Exception\RuntimeException;
 
-class LoglevelEnvVarProcessorTest extends \PHPUnit_Framework_TestCase
+class LoglevelEnvVarProcessorTest extends TestCase
 {
     public function testValidEnvValue()
     {
