@@ -11,6 +11,7 @@
 
 namespace Symfony\Bundle\MonologBundle\DependencyInjection\Compiler;
 
+use Symfony\Component\DependencyInjection\Argument\BoundArgument;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -61,6 +62,20 @@ class LoggerChannelPass implements CompilerPassInterface
                     }
                 }
                 $definition->setMethodCalls($calls);
+
+                if (!$definition instanceof ChildDefinition && \method_exists($definition, 'getBindings')) {
+                    $binding = new BoundArgument(new Reference($loggerId));
+
+                    // Mark the binding as used already, to avoid reporting it as unused if the service does not use a
+                    // logger injected through the LoggerInterface alias.
+                    $values = $binding->getValues();
+                    $values[2] = true;
+                    $binding->setValues($values);
+
+                    $bindings = $definition->getBindings();
+                    $bindings['Psr\Log\LoggerInterface'] = $binding;
+                    $definition->setBindings($bindings);
+                }
             }
         }
 
