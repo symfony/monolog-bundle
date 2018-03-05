@@ -194,6 +194,17 @@ abstract class FixtureMonologExtensionTest extends DependencyInjectionTest
         );
     }
 
+    public function testPsr3MessageProcessingEnabled()
+    {
+        $container = $this->getContainer('parameterized_handlers');
+
+        $logger = $container->getDefinition('monolog.handler.custom');
+
+        $methodCalls = $logger->getMethodCalls();
+
+        $this->assertContains(array('pushProcessor', array(new Reference('monolog.processor.psr_log_message'))), $methodCalls, 'The PSR-3 processor should not be enabled', false, false);
+    }
+
     public function testPsr3MessageProcessingDisabled()
     {
         $container = $this->getContainer('process_psr_3_messages_disabled');
@@ -202,12 +213,7 @@ abstract class FixtureMonologExtensionTest extends DependencyInjectionTest
 
         $methodCalls = $logger->getMethodCalls();
 
-        foreach ($methodCalls as $methodCall) {
-            list($methodName, $params) = $methodCall;
-            if ($methodName === 'pushProcessor') {
-                $this->assertNotEquals(array(new Definition('monolog.processor.psr_log_message')), $params);
-            }
-        }
+        $this->assertNotContains(array('pushProcessor', array(new Reference('monolog.processor.psr_log_message'))), $methodCalls, 'The PSR-3 processor should not be enabled', false, false);
     }
 
     protected function getContainer($fixture)
