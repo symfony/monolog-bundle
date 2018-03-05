@@ -1,0 +1,5 @@
+---------------------------------------------------------------------------
+
+by stof at 2018-03-02T15:48:52Z
+
+While discussing with @nicolas-grekas, we realized that the whole logic we have to handle the `logger` references could be replaced by another binding once we drop support for Symfony < 3.4 (which will wait until Symfony 2.8 reaches EOL at the end of the year as we want to keep support for it until then)
