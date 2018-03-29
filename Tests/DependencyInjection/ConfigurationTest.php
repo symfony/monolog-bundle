@@ -244,6 +244,25 @@ class ConfigurationTest extends TestCase
         $this->assertEquals('my-index', $config['handlers']['elasticsearch']['index']);
     }
 
+    public function testWidthRedisHandlerPredis() {
+        $configs = [
+            [
+                'handlers' => [
+                    'redis' => [
+                        'type' => 'redis',
+                        'redis' => [
+                            'id' => 'predis.client',
+                            'key' => 'my-key',
+                        ]
+                    ]
+                ]
+            ]
+        ];
+
+        $config = $this->process($configs);
+        $this->assertEquals('my-key', $config['handlers']['redis']['redis']['key']);
+    }
+
     public function testWithConsoleHandler()
     {
         $configs = array(

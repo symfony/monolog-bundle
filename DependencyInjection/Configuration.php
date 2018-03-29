@@ -74,6 +74,11 @@ use Monolog\Logger;
  *      - [collection]: defaults to logs
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
+ * - redis:
+ *   - redis:
+ *      - id: optional if host is given
+ *      - host: redis host name
+ *   - [key]: keyname name, defaults to monolog
  *
  * - elasticsearch:
  *   - elasticsearch:
@@ -449,6 +454,24 @@ class Configuration implements ConfigurationInterface
                                     ->thenInvalid('If you set user, you must provide a password.')
                                 ->end()
                             ->end() // mongo
+                            ->arrayNode('redis') // redis
+                                ->canBeUnset()
+                                ->beforeNormalization()
+                                    ->ifString()
+                                    ->then(function ($v) { return array('id'=> $v); })
+                                ->end()
+                                ->children()
+                                    ->scalarNode('id')->end()
+                                    ->scalarNode('host')->end()
+                                    ->scalarNode('key')->defaultValue('monolog')->end() // redis
+                                ->end()
+                                ->validate()
+                                    ->ifTrue(function ($v) {
+                                        return !isset($v['id']) && !isset($v['host']);
+                                    })
+                                    ->thenInvalid('What must be set is either the host or the id.')
+                                ->end()
+                            -> end() // redis
                             ->arrayNode('elasticsearch')
                                 ->canBeUnset()
                                 ->beforeNormalization()
@@ -737,6 +760,10 @@ class Configuration implements ConfigurationInterface
                         ->validate()
                             ->ifTrue(function ($v) { return 'mongo' === $v['type'] && !isset($v['mongo']); })
                             ->thenInvalid('The mongo configuration has to be specified to use a MongoHandler')
+                        ->end()
+                        ->validate()
+                            ->ifTrue(function ($v) { return 'redis' === $v['type'] && !isset($v['redis']); })
+                            ->thenInvalid('The redis configuration has to be specified to use a RedisHandler')
                         ->end()
                         ->validate()
                             ->ifTrue(function ($v) { return 'amqp' === $v['type'] && empty($v['exchange']); })

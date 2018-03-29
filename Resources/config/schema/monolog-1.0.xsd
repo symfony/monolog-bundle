@@ -163,4 +163,10 @@
         <xsd:attribute name="user" type="xsd:string" />
         <xsd:attribute name="password" type="xsd:string" />
     </xsd:complexType>
+
+    <xsd:complexType name="redis">
+        <xsd:attribute name="id" type="xsd:string" />
+        <xsd:attribute name="host" type="xsd:string" />
+        <xsd:attribute name="key" type="xsd:string" />
+    </xsd:complexType>
 </xsd:schema>
