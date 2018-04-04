@@ -385,6 +385,10 @@ class MonologExtensionTest extends DependencyInjectionTest
 
     public function testFingersCrossedHandlerWhenExcludedHttpCodesAreSpecified()
     {
+        if (!class_exists('Symfony\Bridge\Monolog\Handler\FingersCrossed\HttpCodeActivationStrategy')) {
+            $this->markTestSkipped('Symfony Monolog 4.1+ is needed.');
+        }
+
         $container = $this->getContainer(array(array('handlers' => array(
             'main' => array(
                 'type' => 'fingers_crossed',
@@ -408,9 +412,9 @@ class MonologExtensionTest extends DependencyInjectionTest
         $this->assertDICConstructorArguments($strategy, array(
             new Reference('request_stack'),
             array(
-                array('code' => 403, 'url' => array()),
-                array('code' => 404, 'url' => array()),
-                array('code' => 405, 'url' => array('^/foo', '^/bar'))
+                array('code' => 403, 'urls' => array()),
+                array('code' => 404, 'urls' => array()),
+                array('code' => 405, 'urls' => array('^/foo', '^/bar'))
             ),
             \Monolog\Logger::WARNING
         ));

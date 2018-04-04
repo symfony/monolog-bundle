@@ -89,7 +89,7 @@ use Monolog\Logger;
  *   - handler: the wrapped handler's name
  *   - [action_level|activation_strategy]: minimum level or service id to activate the handler, defaults to WARNING
  *   - [excluded_404s]: if set, the strategy will be changed to one that excludes 404s coming from URLs matching any of those patterns
- *   - [excluded_http_codes]: if set, the strategy will be changed to one that excludes specific HTTP codes
+ *   - [excluded_http_codes]: if set, the strategy will be changed to one that excludes specific HTTP codes (requires Symfony Monolog bridge 4.1+)
  *   - [buffer_size]: defaults to 0 (unlimited)
  *   - [stop_buffering]: bool to disable buffering once the handler has been activated, defaults to true
  *   - [passthru_level]: level name or int value for messages to always flush, disabled by default
@@ -383,19 +383,17 @@ class Configuration implements ConfigurationInterface
                                              */
 
                                             if (is_array($value)) {
-                                                return isset($value['code'])
-                                                    ? $value
-                                                    : array('code' => key($value), 'url' => current($value));
+                                                return isset($value['code']) ? $value : array('code' => key($value), 'urls' => current($value));
                                             }
 
-                                            return array('code' => $value, 'url' => array());
+                                            return array('code' => $value, 'urls' => array());
                                         }, $values);
                                     })
                                 ->end()
                                 ->prototype('array')
                                     ->children()
                                         ->scalarNode('code')->end()
-                                        ->arrayNode('url')
+                                        ->arrayNode('urls')
                                             ->prototype('scalar')->end()
                                         ->end()
                                     ->end()
