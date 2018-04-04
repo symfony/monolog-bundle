@@ -1,0 +1,46 @@
+---------------------------------------------------------------------------
+
+by simshaun at 2017-07-28T21:25:37Z
+
+Note: Travis failure seems to be unrelated:
+
+```
+HHVM is no longer supported on Ubuntu Precise. Please consider using Trusty with `dist: trusty`.
+```
+
+---------------------------------------------------------------------------
+
+by xabbuh at 2017-07-31T08:47:53Z
+
+You need to update the schema definition too.
+
+---------------------------------------------------------------------------
+
+by simshaun at 2017-07-31T17:31:42Z
+
+Thanks. Added
+
+---------------------------------------------------------------------------
+
+by simshaun at 2018-02-18T10:51:22Z
+
+Per discussion on the related symfony/symfony PR, this strategy now supports a URL blacklist per status code.
+
+I really struggled with making the Configuration tree work with both YAML and XML. I ended up just normalizing the two into a common format that the new activation strategy understands.
+
+It now supports:
+
+**YAML:**
+```yaml
+excluded_http_codes: [403, 404, { 400: ['^/foo', '^/bar'] }]
+```
+
+**XML:**
+```xml
+<monolog:excluded-http-code code="403" />
+<monolog:excluded-http-code code="404" />
+<monolog:excluded-http-code code="400">
+  <monolog:url>^/foo</monolog:url>
+  <monolog:url>^/bar</monolog:url>
+</monolog:excluded-http-code>
+```
