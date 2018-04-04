@@ -89,6 +89,7 @@ use Monolog\Logger;
  *   - handler: the wrapped handler's name
  *   - [action_level|activation_strategy]: minimum level or service id to activate the handler, defaults to WARNING
  *   - [excluded_404s]: if set, the strategy will be changed to one that excludes 404s coming from URLs matching any of those patterns
+ *   - [excluded_http_codes]: if set, the strategy will be changed to one that excludes specific HTTP codes (requires Symfony Monolog bridge 4.1+)
  *   - [buffer_size]: defaults to 0 (unlimited)
  *   - [stop_buffering]: bool to disable buffering once the handler has been activated, defaults to true
  *   - [passthru_level]: level name or int value for messages to always flush, disabled by default
@@ -316,6 +317,7 @@ class Configuration implements ConfigurationInterface
                     ->prototype('array')
                         ->fixXmlConfig('member')
                         ->fixXmlConfig('excluded_404')
+                        ->fixXmlConfig('excluded_http_code')
                         ->fixXmlConfig('tag')
                         ->fixXmlConfig('accepted_level')
                         ->canBeUnset()
@@ -362,6 +364,40 @@ class Configuration implements ConfigurationInterface
                             ->arrayNode('excluded_404s') // fingers_crossed
                                 ->canBeUnset()
                                 ->prototype('scalar')->end()
+                            ->end()
+                            ->arrayNode('excluded_http_codes') // fingers_crossed
+                                ->canBeUnset()
+                                ->beforeNormalization()
+                                    ->always(function ($values) {
+                                        return array_map(function ($value) {
+                                            /*
+                                             * Allows YAML:
+                                             *   excluded_http_codes: [403, 404, { 400: ['^/foo', '^/bar'] }]
+                                             *
+                                             * and XML:
+                                             *   <monolog:excluded-http-code code="403">
+                                             *     <monolog:url>^/foo</monolog:url>
+                                             *     <monolog:url>^/bar</monolog:url>
+                                             *   </monolog:excluded-http-code>
+                                             *   <monolog:excluded-http-code code="404" />
+                                             */
+
+                                            if (is_array($value)) {
+                                                return isset($value['code']) ? $value : array('code' => key($value), 'urls' => current($value));
+                                            }
+
+                                            return array('code' => $value, 'urls' => array());
+                                        }, $values);
+                                    })
+                                ->end()
+                                ->prototype('array')
+                                    ->children()
+                                        ->scalarNode('code')->end()
+                                        ->arrayNode('urls')
+                                            ->prototype('scalar')->end()
+                                        ->end()
+                                    ->end()
+                                ->end()
                             ->end()
                             ->arrayNode('accepted_levels') // filter
                                 ->canBeUnset()
@@ -657,6 +693,14 @@ class Configuration implements ConfigurationInterface
                         ->validate()
                             ->ifTrue(function ($v) { return 'fingers_crossed' === $v['type'] && !empty($v['excluded_404s']) && !empty($v['activation_strategy']); })
                             ->thenInvalid('You can not use excluded_404s together with a custom activation_strategy in a FingersCrossedHandler')
+                        ->end()
+                        ->validate()
+                            ->ifTrue(function ($v) { return 'fingers_crossed' === $v['type'] && !empty($v['excluded_http_codes']) && !empty($v['activation_strategy']); })
+                            ->thenInvalid('You can not use excluded_http_codes together with a custom activation_strategy in a FingersCrossedHandler')
+                        ->end()
+                        ->validate()
+                            ->ifTrue(function ($v) { return 'fingers_crossed' === $v['type'] && !empty($v['excluded_http_codes']) && !empty($v['excluded_404s']); })
+                            ->thenInvalid('You can not use excluded_http_codes together with excluded_404s in a FingersCrossedHandler')
                         ->end()
                         ->validate()
                             ->ifTrue(function ($v) { return 'filter' === $v['type'] && "DEBUG" !== $v['min_level'] && !empty($v['accepted_levels']); })

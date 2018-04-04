@@ -383,6 +383,47 @@ class MonologExtensionTest extends DependencyInjectionTest
         $this->assertDICConstructorArguments($handler, array(new Reference('monolog.handler.nested'), new Reference('monolog.handler.main.not_found_strategy'), 0, true, true, null));
     }
 
+    public function testFingersCrossedHandlerWhenExcludedHttpCodesAreSpecified()
+    {
+        if (!class_exists('Symfony\Bridge\Monolog\Handler\FingersCrossed\HttpCodeActivationStrategy')) {
+            $this->markTestSkipped('Symfony Monolog 4.1+ is needed.');
+        }
+
+        $container = $this->getContainer(array(array('handlers' => array(
+            'main' => array(
+                'type' => 'fingers_crossed',
+                'handler' => 'nested',
+                'excluded_http_codes' => array(403, 404, array(405 => array('^/foo', '^/bar')))
+            ),
+            'nested' => array('type' => 'stream', 'path' => '/tmp/symfony.log')
+        ))));
+
+        $this->assertTrue($container->hasDefinition('monolog.logger'));
+        $this->assertTrue($container->hasDefinition('monolog.handler.main'));
+        $this->assertTrue($container->hasDefinition('monolog.handler.nested'));
+        $this->assertTrue($container->hasDefinition('monolog.handler.main.http_code_strategy'));
+
+        $logger = $container->getDefinition('monolog.logger');
+        $this->assertDICDefinitionMethodCallAt(0, $logger, 'useMicrosecondTimestamps', array('%monolog.use_microseconds%'));
+        $this->assertDICDefinitionMethodCallAt(1, $logger, 'pushHandler', array(new Reference('monolog.handler.main')));
+
+        $strategy = $container->getDefinition('monolog.handler.main.http_code_strategy');
+        $this->assertDICDefinitionClass($strategy, 'Symfony\Bridge\Monolog\Handler\FingersCrossed\HttpCodeActivationStrategy');
+        $this->assertDICConstructorArguments($strategy, array(
+            new Reference('request_stack'),
+            array(
+                array('code' => 403, 'urls' => array()),
+                array('code' => 404, 'urls' => array()),
+                array('code' => 405, 'urls' => array('^/foo', '^/bar'))
+            ),
+            \Monolog\Logger::WARNING
+        ));
+
+        $handler = $container->getDefinition('monolog.handler.main');
+        $this->assertDICDefinitionClass($handler, 'Monolog\Handler\FingersCrossedHandler');
+        $this->assertDICConstructorArguments($handler, array(new Reference('monolog.handler.nested'), new Reference('monolog.handler.main.http_code_strategy'), 0, true, true, null));
+    }
+
     protected function getContainer(array $config = array(), array $thirdPartyDefinitions = array())
     {
         $container = new ContainerBuilder();

@@ -24,6 +24,7 @@
             <xsd:element name="elasticsearch" type="elasticsearch" minOccurs="0" maxOccurs="1" />
             <xsd:element name="config" type="xsd:anyType" minOccurs="0" maxOccurs="1" />
             <xsd:element name="excluded-404" type="xsd:string" minOccurs="0" maxOccurs="unbounded" />
+            <xsd:element name="excluded-http-code" type="excluded-http-code" minOccurs="0" maxOccurs="unbounded" />
             <xsd:element name="tag" type="xsd:string" minOccurs="0" maxOccurs="unbounded" />
             <xsd:element name="accepted-level" type="level" minOccurs="0" maxOccurs="unbounded" />
             <xsd:element name="to-email" type="xsd:string" minOccurs="0" maxOccurs="unbounded" />
@@ -162,5 +163,12 @@
         <xsd:attribute name="transport" type="xsd:string" />
         <xsd:attribute name="user" type="xsd:string" />
         <xsd:attribute name="password" type="xsd:string" />
+    </xsd:complexType>
+
+    <xsd:complexType name="excluded-http-code">
+        <xsd:choice minOccurs="0" maxOccurs="unbounded">
+            <xsd:element name="url" type="xsd:string" />
+        </xsd:choice>
+        <xsd:attribute name="code" type="xsd:integer" />
     </xsd:complexType>
 </xsd:schema>
