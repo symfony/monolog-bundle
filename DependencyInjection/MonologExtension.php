@@ -427,6 +427,7 @@ class MonologExtension extends Extension
                 $handler['facility'],
                 $handler['level'],
                 $handler['bubble'],
+                $handler['ident'],
             ));
             break;
 
