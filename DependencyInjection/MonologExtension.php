@@ -699,6 +699,9 @@ class MonologExtension extends Extension
             ));
             break;
 
+        case 'redis':
+            break;
+        
         default:
             throw new \InvalidArgumentException(sprintf('Invalid handler type "%s" given for handler "%s"', $handler['type'], $name));
         }
@@ -770,6 +773,7 @@ class MonologExtension extends Extension
             'mongo' => 'Monolog\Handler\MongoDBHandler',
             'elasticsearch' => 'Monolog\Handler\ElasticSearchHandler',
             'server_log' => 'Symfony\Bridge\Monolog\Handler\ServerLogHandler',
+            'redis' => 'Monolog\Handler\RedisHandler',
         );
 
         if (!isset($typeToClassMapping[$handlerType])) {
