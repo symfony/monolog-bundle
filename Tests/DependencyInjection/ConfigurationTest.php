@@ -364,6 +364,25 @@ class ConfigurationTest extends TestCase
         $this->assertEquals(1234, $config['handlers']['redis']['redis']['port']);
         $this->assertEquals(1, $config['handlers']['redis']['redis']['database']);
         $this->assertEquals('monolog_redis_test', $config['handlers']['redis']['redis']['key_name']);
+        
+        $configs = array(
+            array(
+                'handlers' => array(
+                    'redis' => array(
+                        'type' => 'predis',
+                        'redis' => array(
+                            'host' => '127.0.1.1',
+                            'key_name' => 'monolog_redis_test'
+                        )
+                    )
+                )
+            )
+        );
+
+        $config = $this->process($configs);
+        
+        $this->assertEquals('127.0.1.1', $config['handlers']['redis']['redis']['host']);
+        $this->assertEquals('monolog_redis_test', $config['handlers']['redis']['redis']['key_name']);
     }
 
     /**

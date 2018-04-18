@@ -294,6 +294,11 @@ use Monolog\Logger;
  *    - port: 6379
  *    - database: 0
  *    - key_name: monolog_redis
+ * 
+ *  - predis:
+ *    - id: optional if host is given
+ *    - host: tcp://10.0.0.1:6379
+ *    - key_name: monolog_redis
  *
  * @author Jordi Boggiano <j.boggiano@seld.be>
  * @author Christophe Coevoet <stof@notk.org>
@@ -535,6 +540,23 @@ class Configuration implements ConfigurationInterface
                                     ->thenInvalid('What must be set is either the host or the id.')
                                 ->end()
                             ->end() // redis
+                            ->arrayNode('predis')
+                                ->canBeUnset()
+                                ->beforeNormalization()
+                                    ->ifString()
+                                    ->then(function ($v) { return array('id' => $v); })
+                                ->end()
+                                ->children()
+                                    ->scalarNode('id')->end()
+                                    ->scalarNode('host')->end()
+                                ->end()
+                                ->validate()
+                                    ->ifTrue(function ($v) {
+                                        return !isset($v['id']) && !isset($v['host']);
+                                    })
+                                    ->thenInvalid('What must be set is either the host or the id.')
+                                ->end()
+                            ->end() // predis
                             ->scalarNode('index')->defaultValue('monolog')->end() // elasticsearch
                             ->scalarNode('document_type')->defaultValue('logs')->end() // elasticsearch
                             ->scalarNode('ignore_error')->defaultValue(false)->end() // elasticsearch
@@ -852,6 +874,10 @@ class Configuration implements ConfigurationInterface
                         ->end()
                         ->validate()
                             ->ifTrue(function ($v) { return 'redis' === $v['type'] && empty($v['redis']); })
+                            ->thenInvalid('The host has to be specified to use a RedisLogHandler')
+                        ->end()
+                        ->validate()
+                            ->ifTrue(function ($v) { return 'predis' === $v['type'] && empty($v['redis']); })
                             ->thenInvalid('The host has to be specified to use a RedisLogHandler')
                         ->end()
                     ->end()
