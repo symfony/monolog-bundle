@@ -288,6 +288,7 @@ use Monolog\Logger;
  *   - [bubble]: bool, defaults to true
  * 
  *  - redis:
+ *    - id: optional if host is given
  *    - host: 127.0.0.1
  *    - password: null
  *    - port: 6379

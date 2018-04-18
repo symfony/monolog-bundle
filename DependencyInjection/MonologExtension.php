@@ -700,18 +700,23 @@ class MonologExtension extends Extension
             break;
 
         case 'redis':
-            if(class_exists('\Redis')){
+            if (isset($handler['redis']['id'])) {
+                $clientId = $handler['redis']['id']; 
+            }elseif(class_exists('\Redis')){
                 $client = new Definition('\Redis');
                 $client->addMethodCall('connect', array($handler['redis']['host'], $handler['redis']['port']));
                 $client->addMethodCall('auth', array($handler['redis']['password']));
                 $client->addMethodCall('select', array($handler['redis']['database']));
                 $client->setPublic(false);
+                
+                $clientId = uniqid('monolog.redis.client.', true);
+                $container->setDefinition($clientId, $client);
             }else{
-                throw new \RuntimeException('The \Redis is not available.');
+                throw new \RuntimeException('The \Redis is not available.');  
             }
 
             $definition->setArguments(array(
-                $client,
+                new Reference($clientId),
                 $handler['redis']['key_name'],
                 $handler['level'],
                 $handler['bubble'],
