@@ -501,6 +501,12 @@ class MonologExtension extends Extension
                 $handler['level'],
                 $handler['bubble'],
             ));
+            if (isset($handler['timeout'])) {
+                $definition->addMethodCall('setTimeout', array($handler['timeout']));
+            }
+            if (isset($handler['connection_timeout'])) {
+                $definition->addMethodCall('setConnectionTimeout', array($handler['connection_timeout']));
+            }
             break;
 
         case 'hipchat':
@@ -516,6 +522,12 @@ class MonologExtension extends Extension
                 !empty($handler['host']) ? $handler['host'] : 'api.hipchat.com',
                 !empty($handler['api_version']) ? $handler['api_version'] : 'v1',
             ));
+            if (isset($handler['timeout'])) {
+                $definition->addMethodCall('setTimeout', array($handler['timeout']));
+            }
+            if (isset($handler['connection_timeout'])) {
+                $definition->addMethodCall('setConnectionTimeout', array($handler['connection_timeout']));
+            }
             break;
 
         case 'slack':
@@ -530,6 +542,12 @@ class MonologExtension extends Extension
                 $handler['use_short_attachment'],
                 $handler['include_extra'],
             ));
+            if (isset($handler['timeout'])) {
+                $definition->addMethodCall('setTimeout', array($handler['timeout']));
+            }
+            if (isset($handler['connection_timeout'])) {
+                $definition->addMethodCall('setConnectionTimeout', array($handler['connection_timeout']));
+            }
             break;
 
         case 'slackwebhook':
