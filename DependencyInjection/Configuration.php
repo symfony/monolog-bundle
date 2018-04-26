@@ -138,7 +138,7 @@ use Monolog\Logger;
  *   - [logopts]: defaults to LOG_PID
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
- *   - [ident]: string, program name or tag for each log message, defaults to php
+ *   - [ident]: string, program name or tag for each log message, defaults to 'php'
  *
  * - swift_mailer:
  *   - from_email: optional if email_prototype is given
