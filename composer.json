@@ -18,7 +18,7 @@
     "require": {
         "php": ">=5.6",
         "symfony/monolog-bridge": "~2.7|~3.3|~4.0",
-        "symfony/dependency-injection": "~2.7|~3.3|~4.0",
+        "symfony/dependency-injection": "~2.7|~3.4.10|^4.0.10",
         "symfony/config": "~2.7|~3.3|~4.0",
         "symfony/http-kernel": "~2.7|~3.3|~4.0",
         "monolog/monolog": "~1.22"
