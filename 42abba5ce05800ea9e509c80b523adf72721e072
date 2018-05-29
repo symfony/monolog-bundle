@@ -1,0 +1,6 @@
+---------------------------------------------------------------------------
+
+by stof at 2018-05-15T09:23:58Z
+
+Merging this is blocked until the Symfony PR is merged (and propagated to newer dev branches), to be sure that 3.4.10 and 4.0.10 are the releases including the fix.
+And the release of MonologBundle including this fix should wait until 3.4.10 and 4.0.10 of Symfony are released to avoid weird issues where either MonologBundle or Symfony could not use the latest release in a 3.x or 4.x project.
