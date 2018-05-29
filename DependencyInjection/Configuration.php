@@ -171,6 +171,8 @@ use Monolog\Logger;
  *   - [title]: optional title for messages, defaults to the server hostname
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
+ *   - [timeout]: float
+ *   - [connection_timeout]: float
  *
  * - raven:
  *   - dsn: connection string
@@ -196,6 +198,8 @@ use Monolog\Logger;
  *   - [message_format]: text or html, defaults to text
  *   - [host]: defaults to "api.hipchat.com"
  *   - [api_version]: defaults to "v1"
+ *   - [timeout]: float
+ *   - [connection_timeout]: float
  *
  * - slack:
  *   - token: slack api token
@@ -207,6 +211,8 @@ use Monolog\Logger;
  *   - [include_extra]: bool, defaults to false
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
+ *   - [timeout]: float
+ *   - [connection_timeout]: float
  *
  * - slackwebhook:
  *   - webhook_url: slack webhook URL
@@ -542,11 +548,11 @@ class Configuration implements ConfigurationInterface
                             ->end()
                             ->booleanNode('lazy')->defaultValue(true)->end() // swift_mailer
                             ->scalarNode('connection_string')->end() // socket_handler
-                            ->scalarNode('timeout')->end() // socket_handler & logentries
+                            ->scalarNode('timeout')->end() // socket_handler, logentries, pushover, hipchat & slack
                             ->scalarNode('time')->defaultValue(60)->end() // deduplication
                             ->scalarNode('deduplication_level')->defaultValue(Logger::ERROR)->end() // deduplication
                             ->scalarNode('store')->defaultNull()->end() // deduplication
-                            ->scalarNode('connection_timeout')->end() // socket_handler & logentries
+                            ->scalarNode('connection_timeout')->end() // socket_handler, logentries, pushover, hipchat & slack
                             ->booleanNode('persistent')->end() // socket_handler
                             ->scalarNode('dsn')->end() // raven_handler
                             ->scalarNode('client_id')->defaultNull()->end() // raven_handler
