@@ -82,6 +82,28 @@ class LoggerChannelPassTest extends TestCase
         $this->assertEquals('monolog.logger.test', (string) $dummyService->getArgument(0));
     }
 
+    public function testAutowiredLoggerArgumentsAreReplacedWithChannelLoggerWhenAutoconfigured()
+    {
+        if (!\method_exists('Symfony\Component\DependencyInjection\Definition', 'getBindings')) {
+            $this->markTestSkipped('Need DependencyInjection 3.4+ to autowire channel logger.');
+        }
+
+        $container = $this->getFunctionalContainer();
+
+        $container->registerForAutoconfiguration('Symfony\Bundle\MonologBundle\Tests\DependencyInjection\Compiler\DummyService')
+            ->setProperty('fake', 'dummy');
+
+        $container->register('dummy_service', 'Symfony\Bundle\MonologBundle\Tests\DependencyInjection\Compiler\DummyService')
+            ->setAutowired(true)
+            ->setAutoconfigured(true)
+            ->setPublic(true)
+            ->addTag('monolog.logger', array('channel' => 'test'));
+
+        $container->compile();
+
+        $this->assertEquals('monolog.logger.test', (string) $container->getDefinition('dummy_service')->getArgument(0));
+    }
+
     public function testAutowiredLoggerArgumentsAreNotReplacedWithChannelLoggerIfLoggerArgumentIsConfiguredExplicitly()
     {
         if (!\method_exists('Symfony\Component\DependencyInjection\Definition', 'getBindings')) {
