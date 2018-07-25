@@ -36,5 +36,9 @@
         <service id="monolog.formatter.logstash" class="Monolog\Formatter\LogstashFormatter" public="false">
             <argument index="0">app</argument>
         </service>
+        <service id="monolog.formatter.elastica" class="Monolog\Formatter\ElasticaFormatter" public="false">
+            <argument index="0">index</argument>
+            <argument index="1">type</argument>
+        </service>
     </services>
 </container>
