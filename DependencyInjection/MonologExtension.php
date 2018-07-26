@@ -11,6 +11,7 @@
 
 namespace Symfony\Bundle\MonologBundle\DependencyInjection;
 
+use Symfony\Bridge\Monolog\Handler\FingersCrossed\HttpCodeActivationStrategy;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -317,6 +318,9 @@ class MonologExtension extends Extension
             if (isset($handler['activation_strategy'])) {
                 $activation = new Reference($handler['activation_strategy']);
             } elseif (!empty($handler['excluded_404s'])) {
+                if (class_exists(HttpCodeActivationStrategy::class)) {
+                    @trigger_error('The "excluded_404s" option is deprecated in MonologBundle since version 3.4.0, you should rely on the "excluded_http_codes" option instead.', E_USER_DEPRECATED);
+                }
                 $activationDef = new Definition('Symfony\Bridge\Monolog\Handler\FingersCrossed\NotFoundActivationStrategy', array(
                     new Reference('request_stack'),
                     $handler['excluded_404s'],

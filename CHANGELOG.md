@@ -4,6 +4,7 @@
 * Added timeouts to the pushover, hipchat, slack handlers
 * Dropped support for PHP 5.3, 5.4, and HHVM
 * Added configuration for HttpCodeActivationStrategy
+* Deprecated "excluded_404s" option for Symfony >= 3.4
 
 ## 3.2.0 (2018-03-05)
 
