@@ -383,6 +383,7 @@ class MonologExtensionTest extends DependencyInjectionTest
         $this->assertDICDefinitionMethodCallAt(1, $handler, 'setTag', array('foo,bar'));
     }
 
+    /** @group legacy */
     public function testFingersCrossedHandlerWhenExcluded404sAreSpecified()
     {
         $container = $this->getContainer(array(array('handlers' => array(
