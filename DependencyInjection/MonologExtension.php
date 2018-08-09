@@ -142,6 +142,10 @@ class MonologExtension extends Extension
             $definition->setConfigurator(array('Symfony\\Bundle\\MonologBundle\\MonologBundle', 'includeStacktraces'));
         }
 
+        if (null === $handler['process_psr_3_messages']) {
+            $handler['process_psr_3_messages'] = !isset($handler['handler']) && !$handler['members'];
+        }
+
         if ($handler['process_psr_3_messages']) {
             $processorId = 'monolog.processor.psr_log_message';
             if (!$container->hasDefinition($processorId)) {

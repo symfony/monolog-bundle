@@ -202,7 +202,7 @@ abstract class FixtureMonologExtensionTest extends DependencyInjectionTest
 
         $methodCalls = $logger->getMethodCalls();
 
-        $this->assertContains(array('pushProcessor', array(new Reference('monolog.processor.psr_log_message'))), $methodCalls, 'The PSR-3 processor should not be enabled', false, false);
+        $this->assertContains(array('pushProcessor', array(new Reference('monolog.processor.psr_log_message'))), $methodCalls, 'The PSR-3 processor should be enabled', false, false);
     }
 
     public function testPsr3MessageProcessingDisabled()
