@@ -1,3 +1,17 @@
+## 3.3.0 (2018-06-04)
+
+* Fixed the autowiring of the channel logger in autoconfigured services
+* Added timeouts to the pushover, hipchat, slack handlers
+* Dropped support for PHP 5.3, 5.4, and HHVM
+* Added configuration for HttpCodeActivationStrategy
+
+## 3.2.0 (2018-03-05)
+
+* Removed randomness from the container build
+* Fixed support for the `monolog.logger` tag specifying a channel in combination with Symfony 3.4+ autowiring
+* Fixed visibility of channels configured explicitly in the bundle config (they are now public in Symfony 4 too)
+* Fixed invalid service definitions
+
 ## 3.1.2 (2017-11-06)
 
 * fix invalid usage of count()

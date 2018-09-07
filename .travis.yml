@@ -15,9 +15,8 @@ env:
 matrix:
   fast_finish: true
   include:
-    - php: 5.3
+    - php: 5.6
       env: COMPOSER_FLAGS="--prefer-lowest" SYMFONY_DEPRECATIONS_HELPER=weak
-      dist: precise
     # Test against Symfony LTS versions
     - php: 5.6
       env: SYMFONY_VERSION="2.7.*"
@@ -25,13 +24,13 @@ matrix:
       env: SYMFONY_VERSION="2.8.*"
     - php: 5.6
       env: SYMFONY_VERSION="3.4.*" DEPENDENCIES=dev
-    # Test against dev versions
     - php: 7.1
-      env: DEPENDENCIES=dev
     - php: 7.0
     - php: 7.1
     - php: 7.2
-    - php: hhvm
+    # Test against dev versions
+    - php: nightly
+      env: DEPENDENCIES=dev
   allow_failures:
     - env: DEPENDENCIES=dev
 
