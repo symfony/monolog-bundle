@@ -81,6 +81,9 @@ class LoggerChannelPass implements CompilerPassInterface
 
         // create additional channels
         foreach ($container->getParameter('monolog.additional_channels') as $chan) {
+            if ($chan === 'app') {
+                continue;
+            }
             $loggerId = sprintf('monolog.logger.%s', $chan);
             $this->createLogger($chan, $loggerId, $container);
             $container->getDefinition($loggerId)->setPublic(true);
