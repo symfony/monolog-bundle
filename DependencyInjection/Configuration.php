@@ -552,7 +552,11 @@ class Configuration implements ConfigurationInterface
                                     ->ifTrue(function ($v) {
                                         return !isset($v['id']) && !isset($v['host']);
                                     })
+<<<<<<< HEAD
                                     ->thenInvalid('What must be set is either the host or the service id of the Redis client.')
+=======
+                                    ->thenInvalid('What must be set is either the host or the id.')
+>>>>>>> add support for redis
                                 ->end()
                             ->end() // redis
                             ->arrayNode('predis')
@@ -569,7 +573,11 @@ class Configuration implements ConfigurationInterface
                                     ->ifTrue(function ($v) {
                                         return !isset($v['id']) && !isset($v['host']);
                                     })
+<<<<<<< HEAD
                                     ->thenInvalid('What must be set is either the host or the service id of the Predis client.')
+=======
+                                    ->thenInvalid('What must be set is either the host or the id.')
+>>>>>>> add support for redis
                                 ->end()
                             ->end() // predis
                             ->arrayNode('config')

@@ -313,39 +313,37 @@ class MonologExtension extends Extension
             break;
         case 'redis':
         case 'predis':
-            $type = $handler['type'];
-
-            if (isset($handler[$type]['id'])) {
-                $clientId = $handler[$type]['id'];
-            } elseif ('redis' === $type) {
-                if (!class_exists('\Redis')) {
+            if (isset($handler['redis']['id'])) {
+                $clientId = $handler['redis']['id'];
+            } elseif ('redis' === $handler['type']) {
+                if (class_exists('\Redis')) {
+                    $client = new Definition('\Redis');
+                    $client->addMethodCall('connect', array($handler['redis']['host'], $handler['redis']['port']));
+                    $client->addMethodCall('auth', array($handler['redis']['password']));
+                    $client->addMethodCall('select', array($handler['redis']['database']));
+                    $client->setPublic(false);
+                    $clientId = uniqid('monolog.redis.client.', true);
+                    $container->setDefinition($clientId, $client);
+                } else {
                     throw new \RuntimeException('The \Redis is not available.');
                 }
-
-                $client = new Definition('\Redis');
-                $client->addMethodCall('connect', array($handler['redis']['host'], $handler['redis']['port']));
-                $client->addMethodCall('auth', array($handler['redis']['password']));
-                $client->addMethodCall('select', array($handler['redis']['database']));
-                $client->setPublic(false);
-                $clientId = uniqid('monolog.redis.client.', true);
-                $container->setDefinition($clientId, $client);
             } else {
-                if (!class_exists('\Predis\Client')) {
+                if (class_exists('\Predis\Client')) {
+                    $client = new Definition('\Predis\Client');
+                    $client->setArguments(array(
+                        $handler['redis']['host'],
+                    ));
+                    $client->setPublic(false);
+
+                    $clientId = uniqid('monolog.predis.client.', true);
+                    $container->setDefinition($clientId, $client);
+                } else {
                     throw new \RuntimeException('The \Predis\Client is not available.');
                 }
-
-                $client = new Definition('\Predis\Client');
-                $client->setArguments(array(
-                    $handler['predis']['host'],
-                ));
-                $client->setPublic(false);
-
-                $clientId = uniqid('monolog.predis.client.', true);
-                $container->setDefinition($clientId, $client);
             }
             $definition->setArguments(array(
                 new Reference($clientId),
-                $handler[$type]['key_name'],
+                $handler['redis']['key_name'],
                 $handler['level'],
                 $handler['bubble'],
             ));
