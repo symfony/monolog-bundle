@@ -305,8 +305,8 @@ class Configuration implements ConfigurationInterface
      */
     public function getConfigTreeBuilder()
     {
-        $treeBuilder = new TreeBuilder();
-        $rootNode = $treeBuilder->root('monolog');
+        $treeBuilder = new TreeBuilder('monolog');
+        $rootNode = method_exists(TreeBuilder::class, 'getRootNode') ? $treeBuilder->getRootNode() : $treeBuilder->root('monolog');
 
         $rootNode
             ->fixXmlConfig('channel')
