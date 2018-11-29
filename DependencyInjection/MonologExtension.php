@@ -32,7 +32,7 @@ class MonologExtension extends Extension
 
     private function levelToMonologConst($level)
     {
-        return is_int($level) ? $level : constant('Monolog\Logger::'.strtoupper($level));
+        return \Monolog\Logger::toMonologLevel($level);
     }
 
     /**

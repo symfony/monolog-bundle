@@ -89,6 +89,16 @@ class MonologExtensionTest extends DependencyInjectionTest
         $this->assertDICConstructorArguments($handler, array('foo', false));
     }
 
+    public function testEnvironmentVariablesAsLogLevel()
+    {
+        $container = $this->getContainer(array(array('handlers' => array('main' => array('type' => 'stream', 'level' => '%env(DUMMY_ENV_LOG_LEVEL)%')))));
+        $this->assertTrue($container->hasDefinition('monolog.logger'));
+        $this->assertTrue($container->hasDefinition('monolog.handler.main'));
+
+        $handler = $container->getDefinition('monolog.handler.main');
+        $this->assertDICConstructorArguments($handler, array('%kernel.logs_dir%/%kernel.environment%.log', '%env(DUMMY_ENV_LOG_LEVEL)%', true, null));
+    }
+
     /**
      * @expectedException InvalidArgumentException
      */
