@@ -40,11 +40,9 @@ class MessageFactory
     /**
      * Creates a Swift_Message template that will be used to send the log message
      *
-     * @param string $content formatted email body to be sent
-     * @param array  $records Log records that formed the content
      * @return \Swift_Message
      */
-    public function createMessage($content, array $records)
+    public function createMessage()
     {
         /** @var \Swift_Message $message */
         $message = $this->mailer->createMessage();
