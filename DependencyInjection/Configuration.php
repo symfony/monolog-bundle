@@ -711,7 +711,7 @@ class Configuration implements ConfigurationInterface
                             ->thenInvalid('You can not use excluded_http_codes together with excluded_404s in a FingersCrossedHandler')
                         ->end()
                         ->validate()
-                            ->ifTrue(function ($v) { return 'fingers_crossed' !== $v['type'] && !empty($v['excluded_http_codes']) || !empty($v['excluded_404s']); })
+                            ->ifTrue(function ($v) { return 'fingers_crossed' !== $v['type'] && (!empty($v['excluded_http_codes']) || !empty($v['excluded_404s'])); })
                             ->thenInvalid('You can only use excluded_http_codes/excluded_404s with a FingersCrossedHandler definition')
                         ->end()
                         ->validate()
