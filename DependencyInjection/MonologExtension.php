@@ -131,6 +131,10 @@ class MonologExtension extends Extension
         if ('service' === $handler['type']) {
             $container->setAlias($handlerId, $handler['id']);
 
+            if (!empty($handler['nested']) && true === $handler['nested']) {
+                $this->markNestedHandler($handlerId);
+            }
+
             return $handlerId;
         }
 
