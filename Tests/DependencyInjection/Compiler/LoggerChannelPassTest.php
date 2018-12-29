@@ -134,6 +134,14 @@ class LoggerChannelPassTest extends TestCase
         $this->assertEquals(array(), $dummyService->getArguments());
     }
 
+    public function testChannelsConfigurationOptionSupportsAppChannel()
+    {
+        $container = $this->getFunctionalContainer();
+
+        $container->setParameter('monolog.additional_channels', array('app'));
+        $container->compile();
+    }
+
     private function getContainer()
     {
         $container = new ContainerBuilder();
@@ -202,6 +210,9 @@ class LoggerChannelPassTest extends TestCase
         return $container;
     }
 
+    /**
+     * @return ContainerBuilder
+     */
     private function getFunctionalContainer()
     {
         $container = new ContainerBuilder();
