@@ -84,6 +84,31 @@ class MonologExtensionTest extends DependencyInjectionTest
         $this->assertTrue($container->hasDefinition('monolog.logger'));
         $this->assertTrue($container->hasAlias('monolog.handler.custom'));
 
+        $logger = $container->getDefinition('monolog.logger');
+        // Custom service handler must be pushed to logger
+        $this->assertDICDefinitionMethodCallAt(0, $logger, 'useMicrosecondTimestamps', array('%monolog.use_microseconds%'));
+        $this->assertDICDefinitionMethodCallAt(1, $logger, 'pushHandler', array(new Reference('monolog.handler.custom')));
+
+        $handler = $container->findDefinition('monolog.handler.custom');
+        $this->assertDICDefinitionClass($handler, 'stdClass');
+        $this->assertDICConstructorArguments($handler, array('foo', false));
+    }
+
+    public function testLoadWithNestedServiceHandler()
+    {
+        $container = $this->getContainer(
+            array(array('handlers' => array('custom' => array('type' => 'service', 'id' => 'some.service.id', 'nested' => true)))),
+            array('some.service.id' => new Definition('stdClass', array('foo', false)))
+        );
+
+        $this->assertTrue($container->hasDefinition('monolog.logger'));
+        $this->assertTrue($container->hasAlias('monolog.handler.custom'));
+
+        $logger = $container->getDefinition('monolog.logger');
+        // Nested service handler must not be pushed to logger
+        $this->assertCount(1, $logger->getMethodCalls());
+        $this->assertDICDefinitionMethodCallAt(0, $logger, 'useMicrosecondTimestamps', array('%monolog.use_microseconds%'));
+
         $handler = $container->findDefinition('monolog.handler.custom');
         $this->assertDICDefinitionClass($handler, 'stdClass');
         $this->assertDICConstructorArguments($handler, array('foo', false));

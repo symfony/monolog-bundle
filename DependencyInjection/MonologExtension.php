@@ -131,6 +131,10 @@ class MonologExtension extends Extension
         if ('service' === $handler['type']) {
             $container->setAlias($handlerId, $handler['id']);
 
+            if (!empty($handler['nested']) && true === $handler['nested']) {
+                $this->markNestedHandler($handlerId);
+            }
+
             return $handlerId;
         }
 
@@ -140,6 +144,10 @@ class MonologExtension extends Extension
 
         if ($handler['include_stacktraces']) {
             $definition->setConfigurator(array('Symfony\\Bundle\\MonologBundle\\MonologBundle', 'includeStacktraces'));
+        }
+
+        if (null === $handler['process_psr_3_messages']) {
+            $handler['process_psr_3_messages'] = !isset($handler['handler']) && !$handler['members'];
         }
 
         if ($handler['process_psr_3_messages']) {
@@ -755,7 +763,12 @@ class MonologExtension extends Extension
             break;
 
         default:
-            throw new \InvalidArgumentException(sprintf('Invalid handler type "%s" given for handler "%s"', $handler['type'], $name));
+            $nullWarning = '';
+            if ($handler['type'] == '') {
+                $nullWarning = ', if you meant to define a null handler in a yaml config, make sure you quote "null" so it does not get converted to a php null';
+            }
+
+            throw new \InvalidArgumentException(sprintf('Invalid handler type "%s" given for handler "%s"' . $nullWarning, $handler['type'], $name));
         }
 
         if (!empty($handler['nested']) && true === $handler['nested']) {

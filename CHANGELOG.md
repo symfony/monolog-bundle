@@ -1,3 +1,13 @@
+## 3.3.2 (2018-12-29)
+
+* Fixed psr-3 processing being applied to all handlers, only leaf ones are now processing
+* Fixed regression when `app` channel is defined explicitly
+* Fixed handlers marked as nested not being ignored properly from the stack
+
+## 3.3.1 (2018-11-04)
+
+* Fixed compatiblity with Symfony 4.2
+
 ## 3.3.0 (2018-06-04)
 
 * Fixed the autowiring of the channel logger in autoconfigured services
