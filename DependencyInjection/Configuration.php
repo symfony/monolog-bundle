@@ -36,6 +36,7 @@ use Monolog\Logger;
  *   - [verbosity_levels]: level => verbosity configuration
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
+ *   - [console_formater_options]: array
  *
  * - firephp:
  *   - [level]: level name or int value, defaults to DEBUG
@@ -571,6 +572,16 @@ class Configuration implements ConfigurationInterface
                                     ->then(function ($v) { return array_filter(array_map('trim', $v)); })
                                 ->end()
                                 ->prototype('scalar')->end()
+                            ->end()
+                             // console
+                            ->variableNode('console_formater_options')
+                                ->defaultValue([])
+                                ->validate()
+                                    ->ifTrue(function ($v) {
+                                        return !is_array($v);
+                                    })
+                                    ->thenInvalid('console_formater_options must an array.')
+                                ->end()
                             ->end()
                             ->arrayNode('verbosity_levels') // console
                                 ->beforeNormalization()
