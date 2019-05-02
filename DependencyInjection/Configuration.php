@@ -111,7 +111,7 @@ use Monolog\Logger;
  *   - [flush_on_overflow]: bool, defaults to false
  *
  * - deduplication:
- *   - handler: the wrapper handler's name
+ *   - handler: the wrapped handler's name
  *   - [store]: The file/path where the deduplication log should be kept, defaults to %kernel.cache_dir%/monolog_dedup_*
  *   - [deduplication_level]: The minimum logging level for log records to be looked at for deduplication purposes, defaults to ERROR
  *   - [time]: The period (in seconds) during which duplicate entries should be suppressed after a given log is sent through, defaults to 60
