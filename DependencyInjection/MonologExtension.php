@@ -11,6 +11,9 @@
 
 namespace Symfony\Bundle\MonologBundle\DependencyInjection;
 
+use Monolog\Processor\ProcessorInterface;
+use Symfony\Bridge\Monolog\Processor\TokenProcessor;
+use Symfony\Bridge\Monolog\Processor\WebProcessor;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -108,6 +111,18 @@ class MonologExtension extends Extension
         }
 
         $container->setParameter('monolog.additional_channels', isset($config['channels']) ? $config['channels'] : array());
+
+        if (method_exists($container, 'registerForAutoconfiguration')) {
+            if (interface_exists(ProcessorInterface::class)) {
+                $container->registerForAutoconfiguration(ProcessorInterface::class)
+                    ->addTag('monolog.processor');
+            } else {
+                $container->registerForAutoconfiguration(WebProcessor::class)
+                    ->addTag('monolog.processor');
+            }
+            $container->registerForAutoconfiguration(TokenProcessor::class)
+                ->addTag('monolog.processor');
+        }
     }
 
     /**
