@@ -1,5 +1,6 @@
 ## 3.4.0 (xxxx-xx-xx)
 
+* Deprecate "excluded_404s" option
 * Flush loggers on `kernel.reset`
 * Register processors (`ProcessorInterface`) for autoconfiguration (tag: `monolog.processor`)
 * Expose configuration for the `ConsoleHandler`
@@ -17,6 +18,7 @@
 * Added timeouts to the pushover, hipchat, slack handlers
 * Dropped support for PHP 5.3, 5.4, and HHVM
 * Added configuration for HttpCodeActivationStrategy
+* Deprecated "excluded_404s" option for Symfony >= 3.4
 
 ## 3.2.0 (2018-03-05)
 
