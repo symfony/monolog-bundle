@@ -139,6 +139,7 @@ use Monolog\Logger;
  *   - [logopts]: defaults to LOG_PID
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
+ *   - [ident]: string, defaults to
  *
  * - swift_mailer:
  *   - from_email: optional if email_prototype is given
@@ -362,7 +363,7 @@ class Configuration implements ConfigurationInterface
                             ->end()
                             ->scalarNode('filename_format')->defaultValue('{filename}-{date}')->end() //rotating
                             ->scalarNode('date_format')->defaultValue('Y-m-d')->end() //rotating
-                            ->scalarNode('ident')->defaultFalse()->end() // syslog
+                            ->scalarNode('ident')->defaultFalse()->end() // syslog and syslogudp
                             ->scalarNode('logopts')->defaultValue(LOG_PID)->end() // syslog
                             ->scalarNode('facility')->defaultValue('user')->end() // syslog
                             ->scalarNode('max_files')->defaultValue(0)->end() // rotating
