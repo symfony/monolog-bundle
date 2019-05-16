@@ -12,6 +12,7 @@
 namespace Symfony\Bundle\MonologBundle\DependencyInjection;
 
 use Monolog\Processor\ProcessorInterface;
+use Monolog\ResettableInterface;
 use Symfony\Bridge\Monolog\Processor\TokenProcessor;
 use Symfony\Bridge\Monolog\Processor\WebProcessor;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
@@ -20,7 +21,6 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
-use Monolog\ResettableInterface;
 
 /**
  * MonologExtension is an extension for the Monolog library.

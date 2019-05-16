@@ -1,5 +1,8 @@
-## 3.3.2 (2018-12-29)
+## 3.4.0 (xxxx-xx-xx)
 
+* Flush loggers on `kernel.reset`
+* Register processors (`ProcessorInterface`) for autoconfiguration (tag: `monolog.processor`)
+* Expose configuration for the `ConsoleHandler`
 * Fixed psr-3 processing being applied to all handlers, only leaf ones are now processing
 * Fixed regression when `app` channel is defined explicitly
 * Fixed handlers marked as nested not being ignored properly from the stack
