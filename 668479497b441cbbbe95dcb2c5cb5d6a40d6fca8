@@ -1,0 +1,148 @@
+---------------------------------------------------------------------------
+
+by nicolas-grekas at 2018-09-09T21:16:03Z
+
+Shouldn't we use the `kernel.reset` tag instead?
+See https://github.com/symfony/symfony/pull/24155
+
+---------------------------------------------------------------------------
+
+by dnna at 2018-09-09T21:21:54Z
+
+Actually I tried `kernel.reset`, but it didn't seem to trigger the flush when an exception occurred.
+
+---------------------------------------------------------------------------
+
+by dnna at 2018-09-09T21:29:11Z
+
+Never mind, I see the issue now. `kernel.reset` triggers on the next request, not the current one, so I actually needed to perform a second request for the logs of the first request to flush.
+
+Its not ideal, but it still solves the problem adequately and `kernel.reset` was designed specifically for PHP-PM cases, so I will adapt the code to use that instead.
+
+---------------------------------------------------------------------------
+
+by lyrixx at 2018-09-21T14:53:36Z
+
+I would use https://github.com/Seldaek/monolog/pull/997 instead of using `flush`
+
+---------------------------------------------------------------------------
+
+by dnna at 2018-09-21T15:02:38Z
+
+Yeap, that solution looks better. Hope it gets merged soon, and I'll change this PR to use that one :)
+
+---------------------------------------------------------------------------
+
+by lyrixx at 2018-09-21T15:05:27Z
+
+I hope too :)
+
+---------------------------------------------------------------------------
+
+by Seldaek at 2018-12-26T22:30:14Z
+
+reset is now part of Monolog 1.24.0 and above.. Would be good to update this PR. You can test for ResettableInterface being present.
+
+---------------------------------------------------------------------------
+
+by dnna at 2018-12-26T22:33:53Z
+
+Perfect, will update it in the next few days.
+
+---------------------------------------------------------------------------
+
+by dnna at 2019-01-01T22:21:55Z
+
+@Seldaek @lyrixx @nicolas-grekas I have updated this PR to use the `ResettableInterface`.
+
+There is a deprecation notice in the PHP 7.1 tests, but I don't think its related with this PR, could you guys have a look?
+
+---------------------------------------------------------------------------
+
+by Seldaek at 2019-01-13T17:04:20Z
+
+Sorry for the delay. This looks better already but I am afraid attaching kernel.reset to all handlers means that some of them will end up being reset multiple times. For example a GroupHandler or BufferHandler when it gets reset it resets the handlers it contains. This is so you can simply call Logger::reset and then it trickles down to all handlers from there even tho the Logger doesn't know about all of them.
+
+I think it would be preferrable to set the tag on the Logger instances to avoid these multi-resets.
+
+---------------------------------------------------------------------------
+
+by dnna at 2019-01-14T09:54:26Z
+
+Hmm is it a good idea to explicitly set the tag on specific loggers? Won't this be something we'll have to keep track of whenever a new logger is added?
+
+If reset is designed to trickle down to all handlers, maybe it would be better to just trigger reset on the `main` handler (if it has `ResettableInterface`)  and let it trickle down to the rest?
+
+---------------------------------------------------------------------------
+
+by Seldaek at 2019-01-14T09:58:08Z
+
+Yes.. this is kinda complicated by the fact that some handlers can be only in some loggers, and not in all. But I guess resetting only the main logger would probably make sense, otherwise we end up with duplicate resets again. Channel-specific handlers might be needing a manual reset from the user in that case.. that's a trade-off we may have to live with unless someone feels like figuring out which handlers are not in the default logger chain and then tagging those for reset too.. I'm not sure what's worse between maybe double resets and maybe no reset at all.
+
+---------------------------------------------------------------------------
+
+by dnna at 2019-01-14T10:11:42Z
+
+I think just resetting the `main` logger and having it trickle down the chain would resolve most of the use cases requiring a logger reset anyway.
+
+It will certainly improve the situation compared to what it is currently, so maybe we should proceed with that?
+
+---------------------------------------------------------------------------
+
+by Seldaek at 2019-01-14T10:20:27Z
+
+Yes that sounds good to me :)
+
+---------------------------------------------------------------------------
+
+by lyrixx at 2019-01-14T15:52:33Z
+
+We could leverage the autoconfiguration, isn't ?
+
+---------------------------------------------------------------------------
+
+by stof at 2019-01-14T16:13:12Z
+
+I think the DI extension already knows which handlers are nested ones. So it could manage the tagging of non-nested ones.
+
+---------------------------------------------------------------------------
+
+by dnna at 2019-01-15T20:07:21Z
+
+OK, so we'll leverage the the DI extension to find all the top-level handlers (like `main`) and reset them, given that they implement `ResettableInterface`. I'll try to work on that in the next few days and update the PR.
+
+---------------------------------------------------------------------------
+
+by dnna at 2019-01-16T15:52:00Z
+
+I have changed the logic to apply the reset tag only to non-nested handlers. @Seldaek @stof please have a look again.
+
+---------------------------------------------------------------------------
+
+by acasademont at 2019-03-19T10:05:05Z
+
+Is there something left to be done here? Can we help in some way? We're really interested in this PR
+
+---------------------------------------------------------------------------
+
+by Seldaek at 2019-04-05T13:34:01Z
+
+I think it looks good to me now. Would be happy to get a second opinion from someone else, but for me it looks mergeable.
+
+---------------------------------------------------------------------------
+
+by acasademont at 2019-05-08T14:44:33Z
+
+@lyrixx @stof any comments on this one? Thanks!
+
+---------------------------------------------------------------------------
+
+by acasademont at 2019-05-08T14:45:50Z
+
+@dnna the only thing i'd probably suggest is a squash of all the commits.
+
+---------------------------------------------------------------------------
+
+by dnna at 2019-05-08T19:02:44Z
+
+@acasademont there is an option to do this automatically during the merge, no? If not I'm happy to squash them
