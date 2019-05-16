@@ -324,6 +324,31 @@ class ConfigurationTest extends TestCase
         $this->assertSame(0777, $config['handlers']['bar']['file_permission']);
     }
 
+    public function testWithUseLocking()
+    {
+        $configs = array(
+            array(
+                'handlers' => array(
+                    'foo' => array(
+                        'type' => 'stream',
+                        'path' => '/foo',
+                        'use_locking' => false,
+                    ),
+                    'bar' => array(
+                        'type' => 'stream',
+                        'path' => '/bar',
+                        'use_locking' => true,
+                    )
+                )
+            )
+        );
+
+        $config = $this->process($configs);
+
+        $this->assertFalse($config['handlers']['foo']['use_locking']);
+        $this->assertTrue($config['handlers']['bar']['use_locking']);
+    }
+
     public function testWithNestedHandler()
     {
         $configs = array(
