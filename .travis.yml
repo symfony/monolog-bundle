@@ -26,6 +26,8 @@ matrix:
       env: SYMFONY_VERSION="3.4.*" DEPENDENCIES=dev
     - php: 7.0
     - php: 7.1
+      # There is a bug in PHPUnit 5.7
+      env: SYMFONY_PHPUNIT_VERSION=6.5
     - php: 7.2
     - php: 7.3
     # Test against dev versions

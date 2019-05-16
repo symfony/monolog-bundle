@@ -140,6 +140,9 @@ class LoggerChannelPassTest extends TestCase
 
         $container->setParameter('monolog.additional_channels', array('app'));
         $container->compile();
+
+        // the test ensures that the validation does not fail (i.e. it does not throw any exceptions)
+        $this->addToAssertionCount(1);
     }
 
     private function getContainer()
