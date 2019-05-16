@@ -20,6 +20,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
+use Monolog\ResettableInterface;
 
 /**
  * MonologExtension is an extension for the Monolog library.
@@ -153,7 +154,8 @@ class MonologExtension extends Extension
             return $handlerId;
         }
 
-        $definition = new Definition($this->getHandlerClassByType($handler['type']));
+        $handlerClass = $this->getHandlerClassByType($handler['type']);
+        $definition = new Definition($handlerClass);
 
         $handler['level'] = $this->levelToMonologConst($handler['level']);
 
@@ -757,6 +759,11 @@ class MonologExtension extends Extension
         if (!empty($handler['formatter'])) {
             $definition->addMethodCall('setFormatter', array(new Reference($handler['formatter'])));
         }
+
+        if (!in_array($handlerId, $this->nestedHandlers) && is_subclass_of($handlerClass, ResettableInterface::class)) {
+            $definition->addTag('kernel.reset', array('method' => 'reset'));
+        }
+
         $container->setDefinition($handlerId, $definition);
 
         return $handlerId;
