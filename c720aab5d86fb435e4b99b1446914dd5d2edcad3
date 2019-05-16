@@ -1,0 +1,11 @@
+---------------------------------------------------------------------------
+
+by MatTheCat at 2018-06-20T08:41:35Z
+
+Maybe default value could be `%kernel.environment%`?
+
+---------------------------------------------------------------------------
+
+by Taluu at 2018-06-20T09:06:32Z
+
+I think it's better to leave sentry's default, `null`. It is not really coupled to the kernel's env imo (e.g, on our sentry, we have the `staging`, `qa`, ... and so on)
