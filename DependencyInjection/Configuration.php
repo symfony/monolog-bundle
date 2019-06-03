@@ -89,17 +89,19 @@ use Monolog\Logger;
  *   - [bubble]: bool, defaults to true
  *
  * - redis:
- *   - id: optional if host is given
- *   - host: 127.0.0.1
- *   - password: null
- *   - port: 6379
- *   - database: 0
- *   - key_name: monolog_redis
+ *   - redis:
+ *      - id: optional if host is given
+ *      - host: 127.0.0.1
+ *      - password: null
+ *      - port: 6379
+ *      - database: 0
+ *      - key_name: monolog_redis
  *
  * - predis:
- *   - id: optional if host is given
- *   - host: tcp://10.0.0.1:6379
- *   - key_name: monolog_redis
+ *   - redis:
+ *      - id: optional if host is given
+ *      - host: tcp://10.0.0.1:6379
+ *      - key_name: monolog_redis
  *
  * - fingers_crossed:
  *   - handler: the wrapped handler's name

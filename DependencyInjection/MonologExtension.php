@@ -315,11 +315,9 @@ class MonologExtension extends Extension
             break;
         case 'redis':
         case 'predis':
-            $type = $handler['type'];
-
-            if (isset($handler[$type]['id'])) {
-                $clientId = $handler[$type]['id'];
-            } elseif ('redis' === $type) {
+            if (isset($handler['redis']['id'])) {
+                $clientId = $handler['redis']['id'];
+            } elseif ('redis' === $handler['type']) {
                 if (!class_exists(Redis::class)) {
                     throw new \RuntimeException('The \Redis class is not available.');
                 }
@@ -338,7 +336,7 @@ class MonologExtension extends Extension
 
                 $client = new Definition('\Predis\Client');
                 $client->setArguments(array(
-                    $handler['predis']['host'],
+                    $handler['redis']['host'],
                 ));
                 $client->setPublic(false);
 
@@ -347,7 +345,7 @@ class MonologExtension extends Extension
             }
             $definition->setArguments(array(
                 new Reference($clientId),
-                $handler[$type]['key_name'],
+                $handler['redis']['key_name'],
                 $handler['level'],
                 $handler['bubble'],
             ));
