@@ -7,6 +7,7 @@
 * Fixed psr-3 processing being applied to all handlers, only leaf ones are now processing
 * Fixed regression when `app` channel is defined explicitly
 * Fixed handlers marked as nested not being ignored properly from the stack
+* Added configuration support for Redis
 
 ## 3.3.1 (2018-11-04)
 

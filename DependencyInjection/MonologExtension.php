@@ -13,6 +13,8 @@ namespace Symfony\Bundle\MonologBundle\DependencyInjection;
 
 use Monolog\Processor\ProcessorInterface;
 use Monolog\ResettableInterface;
+use Predis;
+use Redis;
 use Symfony\Bridge\Monolog\Handler\FingersCrossed\HttpCodeActivationStrategy;
 use Symfony\Bridge\Monolog\Processor\TokenProcessor;
 use Symfony\Bridge\Monolog\Processor\WebProcessor;
@@ -307,6 +309,43 @@ class MonologExtension extends Extension
                     'type' => $handler['document_type'],
                     'ignore_error' => $handler['ignore_error']
                 ),
+                $handler['level'],
+                $handler['bubble'],
+            ));
+            break;
+        case 'redis':
+        case 'predis':
+            if (isset($handler['redis']['id'])) {
+                $clientId = $handler['redis']['id'];
+            } elseif ('redis' === $handler['type']) {
+                if (!class_exists(Redis::class)) {
+                    throw new \RuntimeException('The \Redis class is not available.');
+                }
+
+                $client = new Definition('\Redis');
+                $client->addMethodCall('connect', array($handler['redis']['host'], $handler['redis']['port']));
+                $client->addMethodCall('auth', array($handler['redis']['password']));
+                $client->addMethodCall('select', array($handler['redis']['database']));
+                $client->setPublic(false);
+                $clientId = uniqid('monolog.redis.client.', true);
+                $container->setDefinition($clientId, $client);
+            } else {
+                if (!class_exists(Predis\Client::class)) {
+                    throw new \RuntimeException('The \Predis\Client class is not available.');
+                }
+
+                $client = new Definition('\Predis\Client');
+                $client->setArguments(array(
+                    $handler['redis']['host'],
+                ));
+                $client->setPublic(false);
+
+                $clientId = uniqid('monolog.predis.client.', true);
+                $container->setDefinition($clientId, $client);
+            }
+            $definition->setArguments(array(
+                new Reference($clientId),
+                $handler['redis']['key_name'],
                 $handler['level'],
                 $handler['bubble'],
             ));
@@ -835,6 +874,8 @@ class MonologExtension extends Extension
             'mongo' => 'Monolog\Handler\MongoDBHandler',
             'elasticsearch' => 'Monolog\Handler\ElasticSearchHandler',
             'server_log' => 'Symfony\Bridge\Monolog\Handler\ServerLogHandler',
+            'redis' => 'Monolog\Handler\RedisHandler',
+            'predis' => 'Monolog\Handler\RedisHandler',
         );
 
         if (!isset($typeToClassMapping[$handlerType])) {
