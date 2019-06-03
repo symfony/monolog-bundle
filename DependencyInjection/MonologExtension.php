@@ -13,8 +13,6 @@ namespace Symfony\Bundle\MonologBundle\DependencyInjection;
 
 use Monolog\Processor\ProcessorInterface;
 use Monolog\ResettableInterface;
-use Predis;
-use Redis;
 use Symfony\Bridge\Monolog\Handler\FingersCrossed\HttpCodeActivationStrategy;
 use Symfony\Bridge\Monolog\Processor\TokenProcessor;
 use Symfony\Bridge\Monolog\Processor\WebProcessor;
@@ -318,11 +316,11 @@ class MonologExtension extends Extension
             if (isset($handler['redis']['id'])) {
                 $clientId = $handler['redis']['id'];
             } elseif ('redis' === $handler['type']) {
-                if (!class_exists(Redis::class)) {
+                if (!class_exists(\Redis::class)) {
                     throw new \RuntimeException('The \Redis class is not available.');
                 }
 
-                $client = new Definition('\Redis');
+                $client = new Definition(\Redis::class);
                 $client->addMethodCall('connect', array($handler['redis']['host'], $handler['redis']['port']));
                 $client->addMethodCall('auth', array($handler['redis']['password']));
                 $client->addMethodCall('select', array($handler['redis']['database']));
@@ -330,11 +328,11 @@ class MonologExtension extends Extension
                 $clientId = uniqid('monolog.redis.client.', true);
                 $container->setDefinition($clientId, $client);
             } else {
-                if (!class_exists(Predis\Client::class)) {
+                if (!class_exists(\Predis\Client::class)) {
                     throw new \RuntimeException('The \Predis\Client class is not available.');
                 }
 
-                $client = new Definition('\Predis\Client');
+                $client = new Definition(\Predis\Client::class);
                 $client->setArguments(array(
                     $handler['redis']['host'],
                 ));
