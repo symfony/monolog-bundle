@@ -100,6 +100,7 @@ use Monolog\Logger;
  *   - id: optional if host is given
  *   - host: tcp://10.0.0.1:6379
  *   - key_name: monolog_redis
+ *
  * - fingers_crossed:
  *   - handler: the wrapped handler's name
  *   - [action_level|activation_strategy]: minimum level or service id to activate the handler, defaults to WARNING
