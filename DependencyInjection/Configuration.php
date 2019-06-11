@@ -81,7 +81,7 @@ use Monolog\Logger;
  * - elasticsearch:
  *   - elasticsearch:
  *      - id: optional if host is given
- *      - host: elastic search host name
+ *      - host: elastic search host name. Do not prepend with http(s)://
  *      - [port]: defaults to 9200
  *   - [index]: index name, defaults to monolog
  *   - [document_type]: document_type, defaults to logs
