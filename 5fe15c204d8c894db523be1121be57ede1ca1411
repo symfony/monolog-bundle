@@ -1,0 +1,28 @@
+---------------------------------------------------------------------------
+
+by stof at 2019-06-04T12:44:06Z
+
+should we make a release with all the existing changes before that ?
+
+---------------------------------------------------------------------------
+
+by lyrixx at 2019-06-04T12:48:38Z
+
+I don't know. I initially wanted to merge / close as many issue as possible and then make a release.
+Before I cleanup this project, the changelog was broken. So making a release without burden could be possible on the very last commit of master f51d377648794e8a8a54f889f17a621911295ce9
+
+But IMHO, it's a bit stupid to do a release, and then to continue to merge new things...
+
+I would go for simplicity: do a release after merge of pending PRs (this one, the one about mailer, and a another couples)
+
+---------------------------------------------------------------------------
+
+by lyrixx at 2019-06-05T12:31:26Z
+
+ping @symfony/deciders
+
+---------------------------------------------------------------------------
+
+by fabpot at 2019-06-05T12:33:14Z
+
+I agree, let's do one release with everything, including the bumps for the deps.
