@@ -8,6 +8,7 @@
 * Fixed regression when `app` channel is defined explicitly
 * Fixed handlers marked as nested not being ignored properly from the stack
 * Added support for Redis configuration
+* Drop support for Symfony <3
 
 ## 3.3.1 (2018-11-04)
 

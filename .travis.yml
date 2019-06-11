@@ -19,11 +19,7 @@ matrix:
       env: COMPOSER_FLAGS="--prefer-lowest" SYMFONY_DEPRECATIONS_HELPER=weak
     # Test against Symfony LTS versions
     - php: 5.6
-      env: SYMFONY_VERSION="2.7.*"
-    - php: 5.6
-      env: SYMFONY_VERSION="2.8.*"
-    - php: 5.6
-      env: SYMFONY_VERSION="3.4.*" DEPENDENCIES=dev
+      env: SYMFONY_VERSION="3.4.*"
     - php: 7.0
     - php: 7.1
       # There is a bug in PHPUnit 5.7

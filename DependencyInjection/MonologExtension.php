@@ -58,11 +58,6 @@ class MonologExtension extends Extension
 
             $container->setParameter('monolog.use_microseconds', $config['use_microseconds']);
 
-            // always autowire the main logger, require Symfony >= 2.8, < 3.3
-            if (!method_exists('Symfony\Component\DependencyInjection\ContainerBuilder', 'fileExists') && method_exists('Symfony\Component\DependencyInjection\Definition', 'addAutowiringType')) {
-                $container->getDefinition('monolog.logger')->addAutowiringType('Psr\Log\LoggerInterface');
-            }
-
             $handlers = array();
 
             foreach ($config['handlers'] as $name => $handler) {

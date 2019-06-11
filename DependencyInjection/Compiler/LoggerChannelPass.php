@@ -126,12 +126,7 @@ class LoggerChannelPass implements CompilerPassInterface
     protected function createLogger($channel, $loggerId, ContainerBuilder $container)
     {
         if (!in_array($channel, $this->channels)) {
-            if (class_exists('Symfony\Component\DependencyInjection\ChildDefinition')) {
-                $logger = new ChildDefinition('monolog.logger_prototype');
-            } else {
-                $logger = new DefinitionDecorator('monolog.logger_prototype');
-            }
-
+            $logger = new ChildDefinition('monolog.logger_prototype');
             $logger->replaceArgument(0, $channel);
             $container->setDefinition($loggerId, $logger);
             $this->channels[] = $channel;
