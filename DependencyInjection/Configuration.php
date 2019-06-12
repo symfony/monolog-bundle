@@ -175,7 +175,7 @@ use Monolog\Logger;
  *   - subject: string
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
- *   - [headers]: optional array containing additional headers
+ *   - [headers]: optional array containing additional headers: ['Foo: Bar', '...']
  *
  * - socket:
  *   - connection_string: string
@@ -348,6 +348,7 @@ class Configuration implements ConfigurationInterface
                         ->fixXmlConfig('excluded_http_code')
                         ->fixXmlConfig('tag')
                         ->fixXmlConfig('accepted_level')
+                        ->fixXmlConfig('header')
                         ->canBeUnset()
                         ->children()
                             ->scalarNode('type')

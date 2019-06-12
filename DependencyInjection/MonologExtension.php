@@ -541,7 +541,7 @@ class MonologExtension extends Extension
                 $handler['bubble'],
             ));
             if (!empty($handler['headers'])) {
-                $definition->addMethodCall('addHeader', $handler['headers']);
+                $definition->addMethodCall('addHeader', [$handler['headers']]);
             }
             break;
 
