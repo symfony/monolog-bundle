@@ -540,6 +540,9 @@ class MonologExtension extends Extension
                 $handler['level'],
                 $handler['bubble'],
             ));
+            if (!empty($handler['headers'])) {
+                $definition->addMethodCall('addHeader', [$handler['headers']]);
+            }
             break;
 
         case 'socket':

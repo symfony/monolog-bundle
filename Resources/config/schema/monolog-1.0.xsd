@@ -28,6 +28,7 @@
             <xsd:element name="tag" type="xsd:string" minOccurs="0" maxOccurs="unbounded" />
             <xsd:element name="accepted-level" type="level" minOccurs="0" maxOccurs="unbounded" />
             <xsd:element name="to-email" type="xsd:string" minOccurs="0" maxOccurs="unbounded" />
+            <xsd:element name="header" type="xsd:string" minOccurs="0" maxOccurs="unbounded" />
         </xsd:sequence>
         <xsd:attribute name="type" type="xsd:string" />
         <xsd:attribute name="priority" type="xsd:integer" />
@@ -185,5 +186,11 @@
             <xsd:element name="url" type="xsd:string" />
         </xsd:choice>
         <xsd:attribute name="code" type="xsd:integer" />
+    </xsd:complexType>
+
+    <xsd:complexType name="headers">
+        <xsd:sequence>
+            <xsd:any minOccurs="0" processContents="lax"/>
+        </xsd:sequence>
     </xsd:complexType>
 </xsd:schema>

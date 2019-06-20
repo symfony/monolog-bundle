@@ -175,6 +175,7 @@ use Monolog\Logger;
  *   - subject: string
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
+ *   - [headers]: optional array containing additional headers: ['Foo: Bar', '...']
  *
  * - socket:
  *   - connection_string: string
@@ -347,6 +348,7 @@ class Configuration implements ConfigurationInterface
                         ->fixXmlConfig('excluded_http_code')
                         ->fixXmlConfig('tag')
                         ->fixXmlConfig('accepted_level')
+                        ->fixXmlConfig('header')
                         ->canBeUnset()
                         ->children()
                             ->scalarNode('type')
@@ -594,6 +596,10 @@ class Configuration implements ConfigurationInterface
                             ->end()
                             ->scalarNode('subject')->end() // swift_mailer and native_mailer
                             ->scalarNode('content_type')->defaultNull()->end() // swift_mailer
+                            ->arrayNode('headers') // native_mailer
+                                ->canBeUnset()
+                                ->scalarPrototype()->end()
+                            ->end()
                             ->scalarNode('mailer')->defaultValue('mailer')->end() // swift_mailer
                             ->arrayNode('email_prototype') // swift_mailer
                                 ->canBeUnset()

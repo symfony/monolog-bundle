@@ -216,6 +216,17 @@ abstract class FixtureMonologExtensionTest extends DependencyInjectionTest
         $this->assertNotContains(array('pushProcessor', array(new Reference('monolog.processor.psr_log_message'))), $methodCalls, 'The PSR-3 processor should not be enabled', false, false);
     }
 
+    public function testNativeMailer()
+    {
+        $container = $this->getContainer('native_mailer');
+
+        $logger = $container->getDefinition('monolog.handler.mailer');
+        $methodCalls = $logger->getMethodCalls();
+
+        $this->assertCount(2, $methodCalls);
+        $this->assertSame(['addHeader', [['Foo: bar', 'Baz: inga']]], $methodCalls[1]);
+    }
+
     protected function getContainer($fixture)
     {
         $container = new ContainerBuilder();
