@@ -1,0 +1,263 @@
+---------------------------------------------------------------------------
+
+by lyrixx at 2019-06-03T15:13:43Z
+
+hello @anthonybocci. Your code is not valid. Could you fix it? (It generates a fatal error, see the CI)
+
+---------------------------------------------------------------------------
+
+by anthonybocci at 2019-06-03T20:01:33Z
+
+Hello @lyrixx. I didn't see the errors on the page, sorry. I'll fix it. For now the XSD seems not to be valid, my complex type is not accepted.
+
+---------------------------------------------------------------------------
+
+by lyrixx at 2019-06-04T09:59:13Z
+
+There is this error too:
+
+```
+PHP Fatal error:  Call to undefined method Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition::scalarPrototype() in /home/travis/build/symfony/monolog-bundle/DependencyInjection/Configuration.php on line 547
+```
+
+> https://travis-ci.org/symfony/monolog-bundle/jobs/534250452
+
+@fabpot Symfony 2.8 is not maintained anymore. I think we could drop support for it. WDYT ?
+
+---------------------------------------------------------------------------
+
+by fabpot at 2019-06-04T10:05:04Z
+
+I would indeed drop 2.8 support.
+
+---------------------------------------------------------------------------
+
+by lyrixx at 2019-06-04T12:18:17Z
+
+See https://github.com/symfony/monolog-bundle/pull/306 for the drop
+
+---------------------------------------------------------------------------
+
+by anthonybocci at 2019-06-04T12:40:43Z
+
+Thank you @lyrixx for pointing this out, I'll try to have a look this week.
+
+---------------------------------------------------------------------------
+
+by lyrixx at 2019-06-11T09:02:54Z
+
+Hi. I dropped support for SF <3.4. Could you rebase your PR? Thanks
+
+---------------------------------------------------------------------------
+
+by lyrixx at 2019-06-11T15:43:44Z
+
+I have rebased this PR for you
+
+---------------------------------------------------------------------------
+
+by lyrixx at 2019-06-11T15:56:40Z
+
+The XML is still invalid.
+Could you fix it please:
+```
+1) Symfony\Bundle\MonologBundle\Tests\DependencyInjection\XmlMonologExtensionTest::testLoadWithSeveralHandlers
+Symfony\Component\DependencyInjection\Exception\InvalidArgumentException: Unable to parse file "/home/travis/build/symfony/monolog-bundle/Tests/DependencyInjection/Fixtures/xml/multiple_handlers.xml".
+```
+
+---------------------------------------------------------------------------
+
+by anthonybocci at 2019-06-11T20:15:45Z
+
+Hi, the error is in fact `attribute decl. 'headers', attribute 'type': The QName value '{http://symfony.com/schema/dic/monolog}headers' does not resolve to a(n) simple type definition. (in file:////home/anthony/Documents/programming/php/monolog-bundle/DependencyInjection/../Resources/config/schema//monolog-1.0.xsd`, because I have created `headers` in the file monolog-1.0.xsd, I will try to fix this issue today, but I don't understand where my type is invalid yet.
+
+---------------------------------------------------------------------------
+
+by lyrixx at 2019-06-12T08:55:40Z
+
+@anthonybocci I finished the PR for you. I pushed in your branch, so if you need to change something, be careful.
+
+I have one little question: did you test your work in a real application? I'm asking because of [this change](https://github.com/symfony/monolog-bundle/pull/304/commits/b64cb2925fd5e548953a87cb81c51a1f46a672f6#diff-25076ecfab002a680c691e32a36c5e6bR544)
+ I made.
+```diff
+            if (!empty($handler['headers'])) {
+-                $definition->addMethodCall('addHeader', $handler['headers']);
++                $definition->addMethodCall('addHeader', [$handler['headers']]);
+            }
+```
+
+I did not test in a real application, but this is how `Definition::addMethodCall()` works. I may be wrong, but I don't think.
+
+---------------------------------------------------------------------------
+
+by anthonybocci at 2019-06-12T12:01:28Z
+
+Thank you @lyrixx, I was far from the result.
+I did test in a real application during my development (before trying to fix the unit tests), and I successfully received the email as HTML thanks to the header. I'm not familiar with Definition that's why I make the error in addMethodCall, sorry.
+Do you need me to test the branch, or is it ok for you? If it's ok for you, it is for me.
+
+---------------------------------------------------------------------------
+
+by lyrixx at 2019-06-12T12:10:03Z
+
+If you can test it, it would be very nice. Thanks.
+
+---------------------------------------------------------------------------
+
+by anthonybocci at 2019-06-12T12:20:25Z
+
+For sure, I will test it this evening.
+
+---------------------------------------------------------------------------
+
+by anthonybocci at 2019-06-12T18:39:17Z
+
+@lyrixx I just tested. It is working if I use the following form:
+
+```
+headers:
+  - "Content-Type: text/html"
+```
+
+But it's not working when I use the following form:
+
+```
+headers:
+  content-type: text/html
+```
+
+In the second case only the value is added to the content, not the key.
+The first case works and I can combine it with the `formatter` key so the mail is prettier.
+
+In my commits I tried to implement the first case because it allows to use any chars, and I was not sure if every char was allowed in a YAML key.
+
+---------------------------------------------------------------------------
+
+by lyrixx at 2019-06-12T21:47:53Z
+
+It's weird because according to the test cast it should be ok. I'll look at it in a real app tomorrow. Thanks for your feedbacks
+
+---------------------------------------------------------------------------
+
+by anthonybocci at 2019-06-13T17:55:04Z
+
+If it helps, here is the demonstration of what I encounter when I test:
+
+`config/packages/dev/monolog.yaml`
+```yaml
+monolog:
+    handlers:
+        main:
+            type: fingers_crossed
+            action_level: debug
+            handler: nested
+            excluded_http_codes: [403, 404]
+            max_files: 10
+        deduplicated:
+            type:    deduplication
+            handler: mail
+        nested:
+            type: stream
+            path: "%kernel.logs_dir%/%kernel.environment%.log"
+            level: debug
+            handler: deduplicated
+        mail:
+            type:       native_mailer
+            from_email: 'logger@email.com'
+            to_email:   ['dev@email.com']
+            subject:    'Mail Log'
+            level:      error
+            headers:
+                Content-Type: "text/html"
+```
+
+Here is the beginning of the email's source:
+
+```
+Return-Path: <...>
+Received: from ...
+        for <...>
+        (version=... cipher=... bits=...);
+        ...
+Received: by ...
+	id ...; ...
+To: ...
+Subject: ...
+From: ...
+Date: ...
+
+text/html
+Content-type: text/plain; charset=utf-8
+```
+
+The interesting part is the `text/html` at the end of the message. It's the config value, but the header name is not here. If I change my `monolog.yaml` a bit it works:
+
+```
+headers:
+    - "Content-Type: text/html"
+```
+
+But your tests are done as if it we were using the first structure.
+
+---------------------------------------------------------------------------
+
+by lyrixx at 2019-06-19T14:26:33Z
+
+Actually, Symfony normalize the keys. So using:
+```
+headers:
+  content-type: text/html
+```
+
+is a bad idea.
+
+---
+
+You should use the following configuration instead
+
+```
+headers:
+  - "content-type: text/html"
+```
+
+---------------------------------------------------------------------------
+
+by lyrixx at 2019-06-19T14:34:04Z
+
+I updated the PR to reflect this decision
+
+---------------------------------------------------------------------------
+
+by anthonybocci at 2019-06-19T14:44:50Z
+
+@lyrixx Both configurations seem to be the same in your previous comment.
+
+---------------------------------------------------------------------------
+
+by lyrixx at 2019-06-19T14:56:47Z
+
+ahaha, sorry. I edited my comment. Thanks
+
+---------------------------------------------------------------------------
+
+by anthonybocci at 2019-06-19T15:05:37Z
+
+Haha I read it twice to be sure. I'm ok with the current configuration, it already worked. Do you need me to test it again?
+
+---------------------------------------------------------------------------
+
+by lyrixx at 2019-06-19T15:19:31Z
+
+I test it :) it should be OK :)
+
+---------------------------------------------------------------------------
+
+by lyrixx at 2019-06-19T15:20:01Z
+
+But if you can, it would be nice !
+
+---------------------------------------------------------------------------
+
+by anthonybocci at 2019-06-19T18:35:32Z
+
+I just tested it, I receive the email as HTML, it's good for me :)
