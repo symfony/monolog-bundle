@@ -342,6 +342,88 @@ class MonologExtensionTest extends DependencyInjectionTest
         $this->assertDICConstructorArguments($handler, array(new Reference('raven.client'), 100, true));
     }
 
+    public function testSentryHandlerWhenConfigurationIsWrong()
+    {
+        try {
+            $this->getContainer(array(array('handlers' => array('sentry' => array('type' => 'sentry')))));
+            $this->fail();
+        } catch (InvalidConfigurationException $e) {
+            $this->assertContains('DSN', $e->getMessage());
+        }
+    }
+
+    public function testSentryHandlerWhenADSNIsSpecified()
+    {
+        $dsn = 'http://43f6017361224d098402974103bfc53d:a6a0538fc2934ba2bed32e08741b2cd3@marca.python.live.cheggnet.com:9000/1';
+
+        $container = $this->getContainer(array(array('handlers' => array('sentry' => array(
+            'type' => 'sentry', 'dsn' => $dsn)
+        ))));
+        $this->assertTrue($container->hasDefinition('monolog.logger'));
+        $this->assertTrue($container->hasDefinition('monolog.handler.sentry'));
+
+        $logger = $container->getDefinition('monolog.logger');
+        $this->assertDICDefinitionMethodCallAt(0, $logger, 'useMicrosecondTimestamps', array('%monolog.use_microseconds%'));
+        $this->assertDICDefinitionMethodCallAt(1, $logger, 'pushHandler', array(new Reference('monolog.handler.sentry')));
+
+        $handler = $container->getDefinition('monolog.handler.sentry');
+        $this->assertDICDefinitionClass($handler, 'Sentry\Monolog\Handler');
+    }
+
+    public function testSentryHandlerWhenADSNAndAClientAreSpecified()
+    {
+        $container = $this->getContainer(
+            array(
+                array(
+                    'handlers' => array(
+                        'sentry' => array(
+                            'type' => 'sentry',
+                            'dsn' => 'foobar',
+                            'client_id' => 'sentry.client',
+                        ),
+                    ),
+                ),
+            ),
+            array(
+                'sentry.client' => new Definition('Sentry\Client'),
+            )
+        );
+
+        $logger = $container->getDefinition('monolog.logger');
+        $this->assertDICDefinitionMethodCallAt(0, $logger, 'useMicrosecondTimestamps', array('%monolog.use_microseconds%'));
+        $this->assertDICDefinitionMethodCallAt(1, $logger, 'pushHandler', array(new Reference('monolog.handler.sentry')));
+
+        $handler = $container->getDefinition('monolog.handler.sentry');
+        $this->assertDICConstructorArguments($handler->getArguments()[0], array(new Reference('sentry.client')));
+    }
+
+    public function testSentryHandlerWhenAClientIsSpecified()
+    {
+        $container = $this->getContainer(
+            array(
+                array(
+                    'handlers' => array(
+                        'sentry' => array(
+                            'type' =>
+                            'sentry',
+                            'client_id' => 'sentry.client',
+                        ),
+                    ),
+                ),
+            ),
+            array(
+                'sentry.client' => new Definition('Sentry\Client'),
+            )
+        );
+
+        $logger = $container->getDefinition('monolog.logger');
+        $this->assertDICDefinitionMethodCallAt(0, $logger, 'useMicrosecondTimestamps', array('%monolog.use_microseconds%'));
+        $this->assertDICDefinitionMethodCallAt(1, $logger, 'pushHandler', array(new Reference('monolog.handler.sentry')));
+
+        $handler = $container->getDefinition('monolog.handler.sentry');
+        $this->assertDICConstructorArguments($handler->getArguments()[0], array(new Reference('sentry.client')));
+    }
+
     public function testLogglyHandler()
     {
         $token = '026308d8-2b63-4225-8fe9-e01294b6e472';

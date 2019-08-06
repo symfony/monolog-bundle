@@ -668,6 +668,51 @@ class MonologExtension extends Extension
             ));
             break;
 
+        case 'sentry':
+            if (null !== $handler['client_id']) {
+                $clientId = $handler['client_id'];
+            } else {
+                $options = new Definition(
+                    'Sentry\\Options',
+                    array(array('dsn' => $handler['dsn']))
+                );
+
+                if (!empty($handler['environment'])) {
+                    $options->addMethodCall('setEnvironment', [$handler['environment']]);
+                }
+
+                if (!empty($handler['release'])) {
+                    $options->addMethodCall('setRelease', [$handler['release']]);
+                }
+
+                $builder = new Definition('Sentry\\ClientBuilder', array($options));
+
+                $client = new Definition('Sentry\\Client');
+                $client->setFactory(array($builder, 'getClient'));
+
+                $clientId = 'monolog.sentry.client.'.sha1($handler['dsn']);
+                $container->setDefinition($clientId, $client);
+
+                if (!$container->hasAlias('Sentry\\ClientInterface')) {
+                    $container->setAlias('Sentry\\ClientInterface', $clientId);
+                }
+            }
+
+            $hub = new Definition(
+                'Sentry\\State\\Hub',
+                array(new Reference($clientId))
+            );
+
+            // can't set the hub to the current hub, getting into a recursion otherwise...
+            //$hub->addMethodCall('setCurrent', array($hub));
+
+            $definition->setArguments(array(
+                $hub,
+                $handler['level'],
+                $handler['bubble'],
+            ));
+            break;
+
         case 'raven':
             if (null !== $handler['client_id']) {
                 $clientId = $handler['client_id'];
@@ -854,6 +899,7 @@ class MonologExtension extends Extension
             'socket' => 'Monolog\Handler\SocketHandler',
             'pushover' => 'Monolog\Handler\PushoverHandler',
             'raven' => 'Monolog\Handler\RavenHandler',
+            'sentry' => 'Sentry\Monolog\Handler',
             'newrelic' => 'Monolog\Handler\NewRelicHandler',
             'hipchat' => 'Monolog\Handler\HipChatHandler',
             'slack' => 'Monolog\Handler\SlackHandler',

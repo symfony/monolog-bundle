@@ -194,13 +194,14 @@ use Monolog\Logger;
  *   - [timeout]: float
  *   - [connection_timeout]: float
  *
- * - raven:
+ * - raven / sentry:
  *   - dsn: connection string
  *   - client_id: Raven client custom service id (optional)
  *   - [release]: release number of the application that will be attached to logs, defaults to null
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
  *   - [auto_log_stacks]: bool, defaults to false
+ *   - [environment]: string, default to null (no env specified)
  *
  * - newrelic:
  *   - [level]: level name or int value, defaults to DEBUG
@@ -620,11 +621,11 @@ class Configuration implements ConfigurationInterface
                             ->scalarNode('store')->defaultNull()->end() // deduplication
                             ->scalarNode('connection_timeout')->end() // socket_handler, logentries, pushover, hipchat & slack
                             ->booleanNode('persistent')->end() // socket_handler
-                            ->scalarNode('dsn')->end() // raven_handler
-                            ->scalarNode('client_id')->defaultNull()->end() // raven_handler
+                            ->scalarNode('dsn')->end() // raven_handler, sentry_handler
+                            ->scalarNode('client_id')->defaultNull()->end() // raven_handler, sentry_handler
                             ->scalarNode('auto_log_stacks')->defaultFalse()->end() // raven_handler
-                            ->scalarNode('release')->defaultNull()->end() // raven_handler
-                            ->scalarNode('environment')->defaultNull()->end() // raven_handler
+                            ->scalarNode('release')->defaultNull()->end() // raven_handler, sentry_handler
+                            ->scalarNode('environment')->defaultNull()->end() // raven_handler, sentry_handler
                             ->scalarNode('message_type')->defaultValue(0)->end() // error_log
                             ->arrayNode('tags') // loggly
                                 ->beforeNormalization()
@@ -836,6 +837,10 @@ class Configuration implements ConfigurationInterface
                         ->validate()
                             ->ifTrue(function ($v) { return 'raven' === $v['type'] && !array_key_exists('dsn', $v) && null === $v['client_id']; })
                             ->thenInvalid('The DSN has to be specified to use a RavenHandler')
+                        ->end()
+                        ->validate()
+                            ->ifTrue(function ($v) { return 'sentry' === $v['type'] && !array_key_exists('dsn', $v) && null === $v['client_id']; })
+                            ->thenInvalid('The DSN has to be specified to use Sentry\'s handler')
                         ->end()
                         ->validate()
                             ->ifTrue(function ($v) { return 'hipchat' === $v['type'] && (empty($v['token']) || empty($v['room'])); })
