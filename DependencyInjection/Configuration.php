@@ -295,6 +295,13 @@ use Monolog\Logger;
  *   - [timeout]: float
  *   - [connection_timeout]: float
  *
+ * - insightops:
+ *   - token: Log token supplied by InsightOps
+ *   - region: Region where InsightOps account is hosted. Could be 'us' or 'eu'. Defaults to 'us'
+ *   - [use_ssl]: whether or not SSL encryption should be used, defaults to true
+ *   - [level]: level name or int value, defaults to DEBUG
+ *   - [bubble]: bool, defaults to true
+ *
  * - flowdock:
  *   - token: flowdock api token
  *   - source: human readable identifier of the application
@@ -455,9 +462,10 @@ class Configuration implements ConfigurationInterface
                             ->scalarNode('team')->end() // slackbot
                             ->scalarNode('notify')->defaultFalse()->end() // hipchat
                             ->scalarNode('nickname')->defaultValue('Monolog')->end() // hipchat
-                            ->scalarNode('token')->end() // pushover & hipchat & loggly & logentries & flowdock & rollbar & slack & slackbot
+                            ->scalarNode('token')->end() // pushover & hipchat & loggly & logentries & flowdock & rollbar & slack & slackbot & insightops
+                            ->scalarNode('region')->end() // insightops
                             ->scalarNode('source')->end() // flowdock
-                            ->booleanNode('use_ssl')->defaultTrue()->end() // logentries & hipchat
+                            ->booleanNode('use_ssl')->defaultTrue()->end() // logentries & hipchat & insightops
                             ->variableNode('user') // pushover
                                 ->validate()
                                     ->ifTrue(function ($v) {
@@ -896,6 +904,10 @@ class Configuration implements ConfigurationInterface
                         ->validate()
                             ->ifTrue(function ($v) { return 'logentries' === $v['type'] && empty($v['token']); })
                             ->thenInvalid('The token has to be specified to use a LogEntriesHandler')
+                        ->end()
+                        ->validate()
+                            ->ifTrue(function ($v) { return 'insightops' === $v['type'] && empty($v['token']); })
+                            ->thenInvalid('The token has to be specified to use a InsightOpsHandler')
                         ->end()
                         ->validate()
                             ->ifTrue(function ($v) { return 'flowdock' === $v['type'] && empty($v['token']); })

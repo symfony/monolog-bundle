@@ -764,6 +764,16 @@ class MonologExtension extends Extension
             }
             break;
 
+        case 'insightops':
+            $definition->setArguments(array(
+                $handler['token'],
+                $handler['region'] ? $handler['region'] : 'us',
+                $handler['use_ssl'],
+                $handler['level'],
+                $handler['bubble'],
+            ));
+            break;
+
         case 'flowdock':
             $definition->setArguments(array(
                 $handler['token'],
@@ -918,6 +928,7 @@ class MonologExtension extends Extension
             'server_log' => 'Symfony\Bridge\Monolog\Handler\ServerLogHandler',
             'redis' => 'Monolog\Handler\RedisHandler',
             'predis' => 'Monolog\Handler\RedisHandler',
+            'insightops' => 'Monolog\Handler\InsightOpsHandler',
         );
 
         if (!isset($typeToClassMapping[$handlerType])) {

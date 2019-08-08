@@ -89,6 +89,7 @@
         <xsd:attribute name="content-type" type="xsd:string" />
         <xsd:attribute name="webhook-url" type="xsd:string" />
         <xsd:attribute name="slack-team" type="xsd:string" />
+        <xsd:attribute name="region" type="xsd:string" />
     </xsd:complexType>
 
     <xsd:simpleType name="level">
