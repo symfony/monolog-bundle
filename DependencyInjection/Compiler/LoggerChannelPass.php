@@ -11,13 +11,13 @@
 
 namespace Symfony\Bundle\MonologBundle\DependencyInjection\Compiler;
 
+use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Argument\BoundArgument;
-use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\DependencyInjection\ChildDefinition;
-use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
-use Symfony\Component\DependencyInjection\DefinitionDecorator;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
+use Symfony\Component\DependencyInjection\Reference;
 
 /**
  * Replaces the default logger by another one with its own channel for tagged services.
@@ -28,6 +28,9 @@ class LoggerChannelPass implements CompilerPassInterface
 {
     protected $channels = array('app');
 
+    /**
+     * {@inheritDoc}
+     */
     public function process(ContainerBuilder $container)
     {
         if (!$container->hasDefinition('monolog.logger')) {
@@ -105,11 +108,19 @@ class LoggerChannelPass implements CompilerPassInterface
         }
     }
 
+    /**
+     * @return array
+     */
     public function getChannels()
     {
         return $this->channels;
     }
 
+    /**
+     * @param array $configuration
+     *
+     * @return array
+     */
     protected function processChannels($configuration)
     {
         if (null === $configuration) {
@@ -123,6 +134,13 @@ class LoggerChannelPass implements CompilerPassInterface
         return array_diff($this->channels, $configuration['elements']);
     }
 
+    /**
+     * Create new logger from th monolog.logger_prototype
+     *
+     * @param string $channel
+     * @param string $loggerId
+     * @param ContainerBuilder $container
+     */
     protected function createLogger($channel, $loggerId, ContainerBuilder $container)
     {
         if (!in_array($channel, $this->channels)) {
@@ -130,6 +148,11 @@ class LoggerChannelPass implements CompilerPassInterface
             $logger->replaceArgument(0, $channel);
             $container->setDefinition($loggerId, $logger);
             $this->channels[] = $channel;
+        }
+
+        // Allows only for Symfony 4.2+
+        if (\method_exists($container, 'registerAliasForArgument')) {
+            $container->registerAliasForArgument($loggerId, LoggerInterface::class);
         }
     }
 
