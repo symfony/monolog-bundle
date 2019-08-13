@@ -1,0 +1,45 @@
+---------------------------------------------------------------------------
+
+by Taluu at 2019-08-08T14:04:03Z
+
+Removed the check for the class on the config (e.g for raven it was going berserk, as the package is not required to make the tests run). I did the same for sentry 2.0's handler.
+
+---------------------------------------------------------------------------
+
+by lyrixx at 2019-08-09T14:04:10Z
+
+> This change as is makes the older Sentry no longer compatible. IDK if you want to proceed like this.
+
+yes it is,
+* raven is for the old one
+* sentry is for the new one
+
+Or I missed something?
+
+---------------------------------------------------------------------------
+
+by Jean85 at 2019-08-09T14:22:24Z
+
+That's correct, but Sentry 2.0 is pretty recent, so Raven\1.x is still pretty widespread.
+
+---------------------------------------------------------------------------
+
+by Taluu at 2019-08-09T14:25:33Z
+
+Then nothing prevents you from using the `raven` while you're still on the 1.0 ?
+
+I could add something in the doc or somewhere else that says that you can use only one of them at a time, not both.
+
+---------------------------------------------------------------------------
+
+by lyrixx at 2019-08-13T08:42:50Z
+
+Could you add a note in the CHANGELOG?
+It will be part of 3.5.0
+Thanks
+
+---------------------------------------------------------------------------
+
+by Taluu at 2019-08-13T09:10:32Z
+
+Done
