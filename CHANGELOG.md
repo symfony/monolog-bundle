@@ -1,6 +1,7 @@
 ## 3.5.0 (xxxx-xx-xx)
 
-* Add `sentry` type to use sentry 2.0 client
+* Added `sentry` type to use sentry 2.0 client
+* Added `insightops` handler
 
 ## 3.4.0 (2019-06-20)
 
