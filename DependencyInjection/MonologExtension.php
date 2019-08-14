@@ -681,7 +681,10 @@ class MonologExtension extends Extension
             } else {
                 $options = new Definition(
                     'Sentry\\Options',
-                    [['dsn' => $handler['dsn']]]
+                    [[
+                        'dsn' => $handler['dsn'],
+                        'default_integrations' => false, // prevent sentry from registering shutdown functions
+                    ]]
                 );
 
                 if (!empty($handler['environment'])) {
@@ -709,9 +712,6 @@ class MonologExtension extends Extension
                 'Sentry\\State\\Hub',
                 [new Reference($clientId)]
             );
-
-            // can't set the hub to the current hub, getting into a recursion otherwise...
-            //$hub->addMethodCall('setCurrent', array($hub));
 
             $definition->setArguments([
                 $hub,
