@@ -143,11 +143,10 @@ class ConfigurationTest extends TestCase
         $this->assertEquals('D', $config['handlers']['bar']['channels']['elements'][1]);
     }
 
-    /**
-     * @expectedException Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
-     */
     public function testInvalidArrays()
     {
+        $this->expectException(\Symfony\Component\Config\Definition\Exception\InvalidConfigurationException::class);
+
         $configs = array(
             array(
                 'handlers' => array(
@@ -163,11 +162,10 @@ class ConfigurationTest extends TestCase
         $config = $this->process($configs);
     }
 
-    /**
-     * @expectedException Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
-     */
     public function testMergingInvalidChannels()
     {
+        $this->expectException(\Symfony\Component\Config\Definition\Exception\InvalidConfigurationException::class);
+
         $configs = array(
             array(
                 'handlers' => array(

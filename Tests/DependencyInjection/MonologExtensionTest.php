@@ -114,88 +114,80 @@ class MonologExtensionTest extends DependencyInjectionTest
         $this->assertDICConstructorArguments($handler, array('foo', false));
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     */
     public function testExceptionWhenInvalidHandler()
     {
+        $this->expectException(\InvalidArgumentException::class);
+
         $container = new ContainerBuilder();
         $loader = new MonologExtension();
 
         $loader->load(array(array('handlers' => array('main' => array('type' => 'invalid_handler')))), $container);
     }
 
-    /**
-     * @expectedException Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
-     */
     public function testExceptionWhenUsingFingerscrossedWithoutHandler()
     {
+        $this->expectException(\Symfony\Component\Config\Definition\Exception\InvalidConfigurationException::class);
+
         $container = new ContainerBuilder();
         $loader = new MonologExtension();
 
         $loader->load(array(array('handlers' => array('main' => array('type' => 'fingers_crossed')))), $container);
     }
 
-    /**
-     * @expectedException Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
-     */
     public function testExceptionWhenUsingFilterWithoutHandler()
     {
+        $this->expectException(\Symfony\Component\Config\Definition\Exception\InvalidConfigurationException::class);
+
         $container = new ContainerBuilder();
         $loader = new MonologExtension();
 
         $loader->load(array(array('handlers' => array('main' => array('type' => 'filter')))), $container);
     }
 
-    /**
-     * @expectedException Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
-     */
     public function testExceptionWhenUsingBufferWithoutHandler()
     {
+        $this->expectException(\Symfony\Component\Config\Definition\Exception\InvalidConfigurationException::class);
+
         $container = new ContainerBuilder();
         $loader = new MonologExtension();
 
         $loader->load(array(array('handlers' => array('main' => array('type' => 'buffer')))), $container);
     }
 
-    /**
-     * @expectedException Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
-     */
     public function testExceptionWhenUsingGelfWithoutPublisher()
     {
+        $this->expectException(\Symfony\Component\Config\Definition\Exception\InvalidConfigurationException::class);
+
         $container = new ContainerBuilder();
         $loader = new MonologExtension();
 
         $loader->load(array(array('handlers' => array('gelf' => array('type' => 'gelf')))), $container);
     }
 
-    /**
-     * @expectedException Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
-     */
     public function testExceptionWhenUsingGelfWithoutPublisherHostname()
     {
+        $this->expectException(\Symfony\Component\Config\Definition\Exception\InvalidConfigurationException::class);
+
         $container = new ContainerBuilder();
         $loader = new MonologExtension();
 
         $loader->load(array(array('handlers' => array('gelf' => array('type' => 'gelf', 'publisher' => array())))), $container);
     }
 
-    /**
-     * @expectedException Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
-     */
     public function testExceptionWhenUsingServiceWithoutId()
     {
+        $this->expectException(\Symfony\Component\Config\Definition\Exception\InvalidConfigurationException::class);
+
         $container = new ContainerBuilder();
         $loader = new MonologExtension();
 
         $loader->load(array(array('handlers' => array('main' => array('type' => 'service')))), $container);
     }
 
-    /**
-     * @expectedException Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
-     */
     public function testExceptionWhenUsingDebugName()
     {
+        $this->expectException(\Symfony\Component\Config\Definition\Exception\InvalidConfigurationException::class);
+
         // logger
         $container = new ContainerBuilder();
         $loader = new MonologExtension();

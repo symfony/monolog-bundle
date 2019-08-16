@@ -26,7 +26,7 @@ class AddSwiftMailerTransportPassTest extends TestCase
 
     private $definition;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->compilerPass = new AddSwiftMailerTransportPass();
         $this->definition = $this->getMockBuilder('\Symfony\Component\DependencyInjection\Definition')->getMock();

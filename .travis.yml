@@ -11,30 +11,28 @@ cache:
 env:
     global:
         - SYMFONY_PHPUNIT_DIR=.phpunit
+        - SYMFONY_PHPUNIT_VERSION=8.3
 
 matrix:
   fast_finish: true
   include:
-    - php: 5.6
-      env: COMPOSER_FLAGS="--prefer-lowest" SYMFONY_DEPRECATIONS_HELPER=weak
+    - php: '7.1'
+      env: COMPOSER_FLAGS="--prefer-lowest" SYMFONY_DEPRECATIONS_HELPER=weak SYMFONY_PHPUNIT_VERSION=7.5
     # Test against Symfony LTS versions
-    - php: 5.6
-      env: SYMFONY_VERSION="3.4.*"
-    - php: 7.0
-    - php: 7.1
-      # There is a bug in PHPUnit 5.7
-      env: SYMFONY_PHPUNIT_VERSION=6.5
-    - php: 7.2
-    - php: 7.3
+    - php: '7.1'
+      env: SYMFONY_VERSION="3.4.*" SYMFONY_PHPUNIT_VERSION=7.5
+    - php: '7.2'
+    - php: '7.3'
     # Test against dev versions
-    - php: nightly
+    - php: '7.4snapshot'
       env: DEPENDENCIES=dev
   allow_failures:
     - env: DEPENDENCIES=dev
 
 before_install:
     - composer self-update
-    - if [ "$DEPENDENCIES" = "dev" ]; then perl -pi -e 's/^}$/,"minimum-stability":"dev"}/' composer.json; fi;
+    - if [ "$DEPENDENCIES" = "dev" ]; then composer config minimum-stability dev; fi;
+    - if [ "$DEPENDENCIES" = "dev" ]; then pecl install xdebug-beta; fi;
     - if [ "$SYMFONY_VERSION" != "" ]; then composer require --dev --no-update symfony/symfony:"$SYMFONY_VERSION"; fi
 
 install:
