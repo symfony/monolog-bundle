@@ -30,22 +30,24 @@ abstract class FixtureMonologExtensionTest extends DependencyInjectionTest
 
         $logger = $container->getDefinition('monolog.logger');
         $this->assertCount(4, $logger->getMethodCalls());
-        $this->assertDICDefinitionMethodCallAt(3, $logger, 'pushHandler', array(new Reference('monolog.handler.custom')));
-        $this->assertDICDefinitionMethodCallAt(2, $logger, 'pushHandler', array(new Reference('monolog.handler.main')));
-        $this->assertDICDefinitionMethodCallAt(1, $logger, 'pushHandler', array(new Reference('monolog.handler.filtered')));
-        $this->assertDICDefinitionMethodCallAt(0, $logger, 'useMicrosecondTimestamps', array('%monolog.use_microseconds%'));
+        $this->assertDICDefinitionMethodCallAt(3, $logger, 'pushHandler', [new Reference('monolog.handler.custom')]);
+        $this->assertDICDefinitionMethodCallAt(2, $logger, 'pushHandler', [new Reference('monolog.handler.main')]);
+        $this->assertDICDefinitionMethodCallAt(1, $logger, 'pushHandler', [new Reference('monolog.handler.filtered')]);
+        $this->assertDICDefinitionMethodCallAt(0, $logger, 'useMicrosecondTimestamps', ['%monolog.use_microseconds%']);
 
         $handler = $container->getDefinition('monolog.handler.custom');
         $this->assertDICDefinitionClass($handler, 'Monolog\Handler\StreamHandler');
-        $this->assertDICConstructorArguments($handler, array('/tmp/symfony.log', \Monolog\Logger::ERROR, false, 0666, false));
+        $this->assertDICConstructorArguments($handler, ['/tmp/symfony.log', \Monolog\Logger::ERROR, false, 0666, false]);
 
         $handler = $container->getDefinition('monolog.handler.main');
         $this->assertDICDefinitionClass($handler, 'Monolog\Handler\FingersCrossedHandler');
-        $this->assertDICConstructorArguments($handler, array(new Reference('monolog.handler.nested'), \Monolog\Logger::ERROR, 0, true, true, \Monolog\Logger::NOTICE));
+        $this->assertDICConstructorArguments($handler, [new Reference('monolog.handler.nested'), \Monolog\Logger::ERROR, 0, true, true, \Monolog\Logger::NOTICE]
+        );
 
         $handler = $container->getDefinition('monolog.handler.filtered');
         $this->assertDICDefinitionClass($handler, 'Monolog\Handler\FilterHandler');
-        $this->assertDICConstructorArguments($handler, array(new Reference('monolog.handler.nested2'), array(\Monolog\Logger::WARNING, \Monolog\Logger::ERROR), \Monolog\Logger::EMERGENCY, true));
+        $this->assertDICConstructorArguments($handler, [new Reference('monolog.handler.nested2'), [\Monolog\Logger::WARNING, \Monolog\Logger::ERROR], \Monolog\Logger::EMERGENCY, true]
+        );
     }
 
     public function testLoadWithOverwriting()
@@ -59,17 +61,19 @@ abstract class FixtureMonologExtensionTest extends DependencyInjectionTest
 
         $logger = $container->getDefinition('monolog.logger');
         $this->assertCount(3, $logger->getMethodCalls());
-        $this->assertDICDefinitionMethodCallAt(2, $logger, 'pushHandler', array(new Reference('monolog.handler.custom')));
-        $this->assertDICDefinitionMethodCallAt(1, $logger, 'pushHandler', array(new Reference('monolog.handler.main')));
-        $this->assertDICDefinitionMethodCallAt(0, $logger, 'useMicrosecondTimestamps', array('%monolog.use_microseconds%'));
+        $this->assertDICDefinitionMethodCallAt(2, $logger, 'pushHandler', [new Reference('monolog.handler.custom')]);
+        $this->assertDICDefinitionMethodCallAt(1, $logger, 'pushHandler', [new Reference('monolog.handler.main')]);
+        $this->assertDICDefinitionMethodCallAt(0, $logger, 'useMicrosecondTimestamps', ['%monolog.use_microseconds%']);
 
         $handler = $container->getDefinition('monolog.handler.custom');
         $this->assertDICDefinitionClass($handler, 'Monolog\Handler\StreamHandler');
-        $this->assertDICConstructorArguments($handler, array('/tmp/symfony.log', \Monolog\Logger::WARNING, true, null, false));
+        $this->assertDICConstructorArguments($handler, ['/tmp/symfony.log', \Monolog\Logger::WARNING, true, null, false]
+        );
 
         $handler = $container->getDefinition('monolog.handler.main');
         $this->assertDICDefinitionClass($handler, 'Monolog\Handler\FingersCrossedHandler');
-        $this->assertDICConstructorArguments($handler, array(new Reference('monolog.handler.nested'), \Monolog\Logger::ERROR, 0, true, true, null));
+        $this->assertDICConstructorArguments($handler, [new Reference('monolog.handler.nested'), \Monolog\Logger::ERROR, 0, true, true, null]
+        );
     }
 
     public function testLoadWithNewAtEnd()
@@ -84,14 +88,14 @@ abstract class FixtureMonologExtensionTest extends DependencyInjectionTest
 
         $logger = $container->getDefinition('monolog.logger');
         $this->assertCount(4, $logger->getMethodCalls());
-        $this->assertDICDefinitionMethodCallAt(3, $logger, 'pushHandler', array(new Reference('monolog.handler.custom')));
-        $this->assertDICDefinitionMethodCallAt(2, $logger, 'pushHandler', array(new Reference('monolog.handler.main')));
-        $this->assertDICDefinitionMethodCallAt(1, $logger, 'pushHandler', array(new Reference('monolog.handler.new')));
-        $this->assertDICDefinitionMethodCallAt(0, $logger, 'useMicrosecondTimestamps', array('%monolog.use_microseconds%'));
+        $this->assertDICDefinitionMethodCallAt(3, $logger, 'pushHandler', [new Reference('monolog.handler.custom')]);
+        $this->assertDICDefinitionMethodCallAt(2, $logger, 'pushHandler', [new Reference('monolog.handler.main')]);
+        $this->assertDICDefinitionMethodCallAt(1, $logger, 'pushHandler', [new Reference('monolog.handler.new')]);
+        $this->assertDICDefinitionMethodCallAt(0, $logger, 'useMicrosecondTimestamps', ['%monolog.use_microseconds%']);
 
         $handler = $container->getDefinition('monolog.handler.new');
         $this->assertDICDefinitionClass($handler, 'Monolog\Handler\StreamHandler');
-        $this->assertDICConstructorArguments($handler, array('/tmp/monolog.log', \Monolog\Logger::ERROR, true, null, false));
+        $this->assertDICConstructorArguments($handler, ['/tmp/monolog.log', \Monolog\Logger::ERROR, true, null, false]);
     }
 
     public function testLoadWithNewAndPriority()
@@ -107,23 +111,24 @@ abstract class FixtureMonologExtensionTest extends DependencyInjectionTest
 
         $logger = $container->getDefinition('monolog.logger');
         $this->assertCount(5, $logger->getMethodCalls());
-        $this->assertDICDefinitionMethodCallAt(4, $logger, 'pushHandler', array(new Reference('monolog.handler.first')));
-        $this->assertDICDefinitionMethodCallAt(3, $logger, 'pushHandler', array(new Reference('monolog.handler.custom')));
-        $this->assertDICDefinitionMethodCallAt(2, $logger, 'pushHandler', array(new Reference('monolog.handler.main')));
-        $this->assertDICDefinitionMethodCallAt(1, $logger, 'pushHandler', array(new Reference('monolog.handler.last')));
-        $this->assertDICDefinitionMethodCallAt(0, $logger, 'useMicrosecondTimestamps', array('%monolog.use_microseconds%'));
+        $this->assertDICDefinitionMethodCallAt(4, $logger, 'pushHandler', [new Reference('monolog.handler.first')]);
+        $this->assertDICDefinitionMethodCallAt(3, $logger, 'pushHandler', [new Reference('monolog.handler.custom')]);
+        $this->assertDICDefinitionMethodCallAt(2, $logger, 'pushHandler', [new Reference('monolog.handler.main')]);
+        $this->assertDICDefinitionMethodCallAt(1, $logger, 'pushHandler', [new Reference('monolog.handler.last')]);
+        $this->assertDICDefinitionMethodCallAt(0, $logger, 'useMicrosecondTimestamps', ['%monolog.use_microseconds%']);
 
         $handler = $container->getDefinition('monolog.handler.main');
         $this->assertDICDefinitionClass($handler, 'Monolog\Handler\BufferHandler');
-        $this->assertDICConstructorArguments($handler, array(new Reference('monolog.handler.nested'), 0, \Monolog\Logger::INFO, true, false));
+        $this->assertDICConstructorArguments($handler, [new Reference('monolog.handler.nested'), 0, \Monolog\Logger::INFO, true, false]
+        );
 
         $handler = $container->getDefinition('monolog.handler.first');
         $this->assertDICDefinitionClass($handler, 'Monolog\Handler\RotatingFileHandler');
-        $this->assertDICConstructorArguments($handler, array('/tmp/monolog.log', 0, \Monolog\Logger::ERROR, true, null));
+        $this->assertDICConstructorArguments($handler, ['/tmp/monolog.log', 0, \Monolog\Logger::ERROR, true, null]);
 
         $handler = $container->getDefinition('monolog.handler.last');
         $this->assertDICDefinitionClass($handler, 'Monolog\Handler\StreamHandler');
-        $this->assertDICConstructorArguments($handler, array('/tmp/last.log', \Monolog\Logger::ERROR, true, null, false));
+        $this->assertDICConstructorArguments($handler, ['/tmp/last.log', \Monolog\Logger::ERROR, true, null, false]);
     }
 
     public function testHandlersWithChannels()
@@ -131,12 +136,12 @@ abstract class FixtureMonologExtensionTest extends DependencyInjectionTest
         $container = $this->getContainer('handlers_with_channels');
 
         $this->assertEquals(
-            array(
-                'monolog.handler.custom' => array('type' => 'inclusive', 'elements' => array('foo')),
-                'monolog.handler.main' => array('type' => 'exclusive', 'elements' => array('foo', 'bar')),
+            [
+                'monolog.handler.custom' => ['type' => 'inclusive', 'elements' => ['foo']],
+                'monolog.handler.main' => ['type' => 'exclusive', 'elements' => ['foo', 'bar']],
                 'monolog.handler.extra' => null,
-                'monolog.handler.more' => array('type' => 'inclusive', 'elements' => array('security', 'doctrine')),
-            ),
+                'monolog.handler.more' => ['type' => 'inclusive', 'elements' => ['security', 'doctrine']],
+            ],
             $container->getParameter('monolog.handlers_to_channels')
         );
     }
@@ -145,13 +150,14 @@ abstract class FixtureMonologExtensionTest extends DependencyInjectionTest
     {
         $container = $this->getContainer('single_email_recipient');
 
-        $this->assertEquals(array(
+        $this->assertEquals(
+            [
             new Reference('mailer'),
             'error@example.com', // from
-            array('error@example.com'), // to
+            ['error@example.com'], // to
             'An Error Occurred!', // subject
             null,
-        ), $container->getDefinition('monolog.handler.swift.mail_message_factory')->getArguments());
+            ], $container->getDefinition('monolog.handler.swift.mail_message_factory')->getArguments());
     }
 
     public function testServerLog()
@@ -162,24 +168,26 @@ abstract class FixtureMonologExtensionTest extends DependencyInjectionTest
 
         $container = $this->getContainer('server_log');
 
-        $this->assertEquals(array(
+        $this->assertEquals(
+            [
             '0:9911',
             100,
             true,
-        ), $container->getDefinition('monolog.handler.server_log')->getArguments());
+            ], $container->getDefinition('monolog.handler.server_log')->getArguments());
     }
 
     public function testMultipleEmailRecipients()
     {
         $container = $this->getContainer('multiple_email_recipients');
 
-        $this->assertEquals(array(
+        $this->assertEquals(
+            [
             new Reference('mailer'),
             'error@example.com',
-            array('dev1@example.com', 'dev2@example.com'),
+            ['dev1@example.com', 'dev2@example.com'],
             'An Error Occurred!',
             null
-        ), $container->getDefinition('monolog.handler.swift.mail_message_factory')->getArguments());
+            ], $container->getDefinition('monolog.handler.swift.mail_message_factory')->getArguments());
     }
 
     public function testChannelParametersResolved()
@@ -187,9 +195,9 @@ abstract class FixtureMonologExtensionTest extends DependencyInjectionTest
         $container = $this->getContainer('parameterized_handlers');
 
         $this->assertEquals(
-            array(
-                'monolog.handler.custom' => array('type' => 'inclusive', 'elements' => array('some_channel')),
-            ),
+            [
+                'monolog.handler.custom' => ['type' => 'inclusive', 'elements' => ['some_channel']],
+            ],
             $container->getParameter('monolog.handlers_to_channels')
         );
     }
@@ -202,7 +210,7 @@ abstract class FixtureMonologExtensionTest extends DependencyInjectionTest
 
         $methodCalls = $logger->getMethodCalls();
 
-        $this->assertContains(array('pushProcessor', array(new Reference('monolog.processor.psr_log_message'))), $methodCalls, 'The PSR-3 processor should be enabled', false, false);
+        $this->assertContains(['pushProcessor', [new Reference('monolog.processor.psr_log_message')]], $methodCalls, 'The PSR-3 processor should be enabled', false, false);
     }
 
     public function testPsr3MessageProcessingDisabled()
@@ -213,7 +221,7 @@ abstract class FixtureMonologExtensionTest extends DependencyInjectionTest
 
         $methodCalls = $logger->getMethodCalls();
 
-        $this->assertNotContains(array('pushProcessor', array(new Reference('monolog.processor.psr_log_message'))), $methodCalls, 'The PSR-3 processor should not be enabled', false, false);
+        $this->assertNotContains(['pushProcessor', [new Reference('monolog.processor.psr_log_message')]], $methodCalls, 'The PSR-3 processor should not be enabled', false, false);
     }
 
     public function testNativeMailer()
@@ -234,8 +242,8 @@ abstract class FixtureMonologExtensionTest extends DependencyInjectionTest
 
         $this->loadFixture($container, $fixture);
 
-        $container->getCompilerPassConfig()->setOptimizationPasses(array());
-        $container->getCompilerPassConfig()->setRemovingPasses(array());
+        $container->getCompilerPassConfig()->setOptimizationPasses([]);
+        $container->getCompilerPassConfig()->setRemovingPasses([]);
         $container->addCompilerPass(new LoggerChannelPass());
         $container->compile();
 

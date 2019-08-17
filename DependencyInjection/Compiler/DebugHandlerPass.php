@@ -46,13 +46,13 @@ class DebugHandlerPass implements CompilerPassInterface
             return;
         }
 
-        $debugHandler = new Definition('Symfony\Bridge\Monolog\Handler\DebugHandler', array(Logger::DEBUG, true));
+        $debugHandler = new Definition('Symfony\Bridge\Monolog\Handler\DebugHandler', [Logger::DEBUG, true]);
         $container->setDefinition('monolog.handler.debug', $debugHandler);
 
         foreach ($this->channelPass->getChannels() as $channel) {
             $container
                 ->getDefinition($channel === 'app' ? 'monolog.logger' : 'monolog.logger.'.$channel)
-                ->addMethodCall('pushHandler', array(new Reference('monolog.handler.debug')));
+                ->addMethodCall('pushHandler', [new Reference('monolog.handler.debug')]);
         }
     }
 }

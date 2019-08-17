@@ -28,12 +28,12 @@ class AddProcessorsPassTest extends TestCase
         $service = $container->getDefinition('monolog.handler.test');
         $calls = $service->getMethodCalls();
         $this->assertCount(1, $calls);
-        $this->assertEquals(array('pushProcessor', array(new Reference('test'))), $calls[0]);
+        $this->assertEquals(['pushProcessor', [new Reference('test')]], $calls[0]);
 
         $service = $container->getDefinition('handler_test');
         $calls = $service->getMethodCalls();
         $this->assertCount(1, $calls);
-        $this->assertEquals(array('pushProcessor', array(new Reference('test2'))), $calls[0]);
+        $this->assertEquals(['pushProcessor', [new Reference('test2')]], $calls[0]);
     }
 
     protected function getContainer()
@@ -43,22 +43,22 @@ class AddProcessorsPassTest extends TestCase
         $loader->load('monolog.xml');
 
         $definition = $container->getDefinition('monolog.logger_prototype');
-        $container->setDefinition('monolog.handler.test', new Definition('%monolog.handler.null.class%', array(100, false)));
-        $container->setDefinition('handler_test', new Definition('%monolog.handler.null.class%', array(100, false)));
+        $container->setDefinition('monolog.handler.test', new Definition('%monolog.handler.null.class%', [100, false]));
+        $container->setDefinition('handler_test', new Definition('%monolog.handler.null.class%', [100, false]));
         $container->setAlias('monolog.handler.test2', 'handler_test');
-        $definition->addMethodCall('pushHandler', array(new Reference('monolog.handler.test')));
-        $definition->addMethodCall('pushHandler', array(new Reference('monolog.handler.test2')));
+        $definition->addMethodCall('pushHandler', [new Reference('monolog.handler.test')]);
+        $definition->addMethodCall('pushHandler', [new Reference('monolog.handler.test2')]);
 
-        $service = new Definition('TestClass', array('false', new Reference('logger')));
-        $service->addTag('monolog.processor', array('handler' => 'test'));
+        $service = new Definition('TestClass', ['false', new Reference('logger')]);
+        $service->addTag('monolog.processor', ['handler' => 'test']);
         $container->setDefinition('test', $service);
 
-        $service = new Definition('TestClass', array('false', new Reference('logger')));
-        $service->addTag('monolog.processor', array('handler' => 'test2'));
+        $service = new Definition('TestClass', ['false', new Reference('logger')]);
+        $service->addTag('monolog.processor', ['handler' => 'test2']);
         $container->setDefinition('test2', $service);
 
-        $container->getCompilerPassConfig()->setOptimizationPasses(array());
-        $container->getCompilerPassConfig()->setRemovingPasses(array());
+        $container->getCompilerPassConfig()->setOptimizationPasses([]);
+        $container->getCompilerPassConfig()->setRemovingPasses([]);
         $container->addCompilerPass(new AddProcessorsPass());
         $container->compile();
 

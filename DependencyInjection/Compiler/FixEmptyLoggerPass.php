@@ -49,7 +49,7 @@ class FixEmptyLoggerPass implements CompilerPassInterface
                 }
             }
 
-            $def->addMethodCall('pushHandler', array(new Reference('monolog.handler.null_internal')));
+            $def->addMethodCall('pushHandler', [new Reference('monolog.handler.null_internal')]);
         }
     }
 }

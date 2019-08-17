@@ -35,11 +35,11 @@ class AddSwiftMailerTransportPassTest extends TestCase
             ->with(0)
             ->will($this->returnValue(new Reference('swiftmailer')));
         $this->container = $this->getMockBuilder('\Symfony\Component\DependencyInjection\ContainerBuilder')
-            ->setMethods(array('getParameter', 'getDefinition', 'hasDefinition', 'addMethodCall'))->getMock();
+            ->setMethods(['getParameter', 'getDefinition', 'hasDefinition', 'addMethodCall'])->getMock();
         $this->container->expects($this->any())
             ->method('getParameter')
             ->with('monolog.swift_mailer.handlers')
-            ->will($this->returnValue(array('foo')));
+            ->will($this->returnValue(['foo']));
         $this->container->expects($this->any())
             ->method('getDefinition')
             ->with('foo')
@@ -58,7 +58,7 @@ class AddSwiftMailerTransportPassTest extends TestCase
             ->method('addMethodCall')
             ->with(
                 'setTransport',
-                $this->equalTo(array(new Reference('swiftmailer.transport.real')))
+                $this->equalTo([new Reference('swiftmailer.transport.real')])
             );
 
         $this->compilerPass->process($this->container);
@@ -70,17 +70,17 @@ class AddSwiftMailerTransportPassTest extends TestCase
             ->expects($this->any())
             ->method('hasDefinition')
             ->will($this->returnValueMap(
-                array(
-                    array('swiftmailer.transport.real', false),
-                    array('swiftmailer.transport', true),
-                )
+                [
+                    ['swiftmailer.transport.real', false],
+                    ['swiftmailer.transport', true],
+                ]
             ));
         $this->definition
             ->expects($this->once())
             ->method('addMethodCall')
             ->with(
                 'setTransport',
-                $this->equalTo(array(new Reference('swiftmailer.transport')))
+                $this->equalTo([new Reference('swiftmailer.transport')])
             );
 
         $this->compilerPass->process($this->container);

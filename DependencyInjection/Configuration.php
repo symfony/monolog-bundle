@@ -421,10 +421,10 @@ class Configuration implements ConfigurationInterface
                                              */
 
                                             if (is_array($value)) {
-                                                return isset($value['code']) ? $value : array('code' => key($value), 'urls' => current($value));
+                                                return isset($value['code']) ? $value : ['code' => key($value), 'urls' => current($value)];
                                             }
 
-                                            return array('code' => $value, 'urls' => array());
+                                            return ['code' => $value, 'urls' => []];
                                         }, $values);
                                     })
                                 ->end()
@@ -481,7 +481,7 @@ class Configuration implements ConfigurationInterface
                                 ->canBeUnset()
                                 ->beforeNormalization()
                                     ->ifString()
-                                    ->then(function ($v) { return array('id' => $v); })
+                                    ->then(function ($v) { return ['id' => $v]; })
                                 ->end()
                                 ->children()
                                     ->scalarNode('id')->end()
@@ -500,7 +500,7 @@ class Configuration implements ConfigurationInterface
                                 ->canBeUnset()
                                 ->beforeNormalization()
                                     ->ifString()
-                                    ->then(function ($v) { return array('id' => $v); })
+                                    ->then(function ($v) { return ['id' => $v]; })
                                 ->end()
                                 ->children()
                                     ->scalarNode('id')->end()
@@ -528,7 +528,7 @@ class Configuration implements ConfigurationInterface
                                 ->canBeUnset()
                                 ->beforeNormalization()
                                     ->ifString()
-                                    ->then(function ($v) { return array('id' => $v); })
+                                    ->then(function ($v) { return ['id' => $v]; })
                                 ->end()
                                 ->children()
                                     ->scalarNode('id')->end()
@@ -552,7 +552,7 @@ class Configuration implements ConfigurationInterface
                                 ->canBeUnset()
                                 ->beforeNormalization()
                                     ->ifString()
-                                    ->then(function ($v) { return array('id' => $v); })
+                                    ->then(function ($v) { return ['id' => $v]; })
                                 ->end()
                                 ->children()
                                     ->scalarNode('id')->end()
@@ -573,7 +573,7 @@ class Configuration implements ConfigurationInterface
                                 ->canBeUnset()
                                 ->beforeNormalization()
                                     ->ifString()
-                                    ->then(function ($v) { return array('id' => $v); })
+                                    ->then(function ($v) { return ['id' => $v]; })
                                 ->end()
                                 ->children()
                                     ->scalarNode('id')->end()
@@ -600,7 +600,7 @@ class Configuration implements ConfigurationInterface
                                 ->prototype('scalar')->end()
                                 ->beforeNormalization()
                                     ->ifString()
-                                    ->then(function ($v) { return array($v); })
+                                    ->then(function ($v) { return [$v]; })
                                 ->end()
                             ->end()
                             ->scalarNode('subject')->end() // swift_mailer and native_mailer
@@ -614,7 +614,7 @@ class Configuration implements ConfigurationInterface
                                 ->canBeUnset()
                                 ->beforeNormalization()
                                     ->ifString()
-                                    ->then(function ($v) { return array('id' => $v); })
+                                    ->then(function ($v) { return ['id' => $v]; })
                                 ->end()
                                 ->children()
                                     ->scalarNode('id')->isRequired()->end()
@@ -660,8 +660,8 @@ class Configuration implements ConfigurationInterface
                                 ->beforeNormalization()
                                     ->ifArray()
                                     ->then(function ($v) {
-                                        $map = array();
-                                        $verbosities = array('VERBOSITY_QUIET', 'VERBOSITY_NORMAL', 'VERBOSITY_VERBOSE', 'VERBOSITY_VERY_VERBOSE', 'VERBOSITY_DEBUG');
+                                        $map = [];
+                                        $verbosities = ['VERBOSITY_QUIET', 'VERBOSITY_NORMAL', 'VERBOSITY_VERBOSE', 'VERBOSITY_VERY_VERBOSE', 'VERBOSITY_DEBUG'];
                                         // allow numeric indexed array with ascendning verbosity and lowercase names of the constants
                                         foreach ($v as $verbosity => $level) {
                                             if (is_int($verbosity) && isset($verbosities[$verbosity])) {
@@ -683,7 +683,7 @@ class Configuration implements ConfigurationInterface
                                 ->end()
                                 ->validate()
                                     ->always(function ($v) {
-                                        $map = array();
+                                        $map = [];
                                         foreach ($v as $verbosity => $level) {
                                             $verbosityConstant = 'Symfony\Component\Console\Output\OutputInterface::'.$verbosity;
 
@@ -718,11 +718,11 @@ class Configuration implements ConfigurationInterface
                                 ->canBeUnset()
                                 ->beforeNormalization()
                                     ->ifString()
-                                    ->then(function ($v) { return array('elements' => array($v)); })
+                                    ->then(function ($v) { return ['elements' => [$v]]; })
                                 ->end()
                                 ->beforeNormalization()
                                     ->ifTrue(function ($v) { return is_array($v) && is_numeric(key($v)); })
-                                    ->then(function ($v) { return array('elements' => $v); })
+                                    ->then(function ($v) { return ['elements' => $v]; })
                                 ->end()
                                 ->validate()
                                     ->ifTrue(function ($v) { return empty($v); })
@@ -735,7 +735,7 @@ class Configuration implements ConfigurationInterface
                                             $isExclusive = 'exclusive' === $v['type'];
                                         }
 
-                                        $elements = array();
+                                        $elements = [];
                                         foreach ($v['elements'] as $element) {
                                             if (0 === strpos($element, '!')) {
                                                 if (false === $isExclusive) {
@@ -756,13 +756,13 @@ class Configuration implements ConfigurationInterface
                                             return null;
                                         }
 
-                                        return array('type' => $isExclusive ? 'exclusive' : 'inclusive', 'elements' => $elements);
+                                        return ['type' => $isExclusive ? 'exclusive' : 'inclusive', 'elements' => $elements];
                                     })
                                 ->end()
                                 ->children()
                                     ->scalarNode('type')
                                         ->validate()
-                                            ->ifNotInArray(array('inclusive', 'exclusive'))
+                                            ->ifNotInArray(['inclusive', 'exclusive'])
                                             ->thenInvalid('The type of channels has to be inclusive or exclusive')
                                         ->end()
                                     ->end()
@@ -855,11 +855,12 @@ class Configuration implements ConfigurationInterface
                             ->thenInvalid('The token and room have to be specified to use a HipChatHandler')
                         ->end()
                         ->validate()
-                            ->ifTrue(function ($v) { return 'hipchat' === $v['type'] && !in_array($v['message_format'], array('text', 'html')); })
+                            ->ifTrue(function ($v) { return 'hipchat' === $v['type'] && !in_array($v['message_format'], ['text', 'html']
+                                ); })
                             ->thenInvalid('The message_format has to be "text" or "html" in a HipChatHandler')
                         ->end()
                         ->validate()
-                            ->ifTrue(function ($v) { return 'hipchat' === $v['type'] && null !== $v['api_version'] && !in_array($v['api_version'], array('v1', 'v2'), true); })
+                            ->ifTrue(function ($v) { return 'hipchat' === $v['type'] && null !== $v['api_version'] && !in_array($v['api_version'], ['v1', 'v2'], true); })
                             ->thenInvalid('The api_version has to be "v1" or "v2" in a HipChatHandler')
                         ->end()
                         ->validate()
@@ -938,25 +939,27 @@ class Configuration implements ConfigurationInterface
                         ->ifTrue(function ($v) { return isset($v['debug']); })
                         ->thenInvalid('The "debug" name cannot be used as it is reserved for the handler of the profiler')
                     ->end()
-                    ->example(array(
-                        'syslog' => array(
+                    ->example(
+                        [
+                        'syslog' => [
                             'type' => 'stream',
                             'path' => '/var/log/symfony.log',
                             'level' => 'ERROR',
                             'bubble' => 'false',
                             'formatter' => 'my_formatter',
-                            ),
-                        'main' => array(
+                        ],
+                        'main' => [
                             'type' => 'fingers_crossed',
                             'action_level' => 'WARNING',
                             'buffer_size' => 30,
                             'handler' => 'custom',
-                            ),
-                        'custom' => array(
+                        ],
+                        'custom' => [
                             'type' => 'service',
                             'id' => 'my_handler',
-                            )
-                        ))
+                        ]
+                        ]
+                    )
                 ->end()
             ->end()
         ;
