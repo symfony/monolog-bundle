@@ -152,7 +152,9 @@ class LoggerChannelPass implements CompilerPassInterface
 
         // Allows only for Symfony 4.2+
         if (\method_exists($container, 'registerAliasForArgument')) {
-            $container->registerAliasForArgument($loggerId, LoggerInterface::class);
+            $parameterName = $channel . 'Logger';
+
+            $container->registerAliasForArgument($loggerId, LoggerInterface::class, $parameterName);
         }
     }
 
