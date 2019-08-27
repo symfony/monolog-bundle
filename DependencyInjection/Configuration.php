@@ -939,8 +939,7 @@ class Configuration implements ConfigurationInterface
                         ->ifTrue(function ($v) { return isset($v['debug']); })
                         ->thenInvalid('The "debug" name cannot be used as it is reserved for the handler of the profiler')
                     ->end()
-                    ->example(
-                        [
+                    ->example([
                         'syslog' => [
                             'type' => 'stream',
                             'path' => '/var/log/symfony.log',
@@ -958,8 +957,7 @@ class Configuration implements ConfigurationInterface
                             'type' => 'service',
                             'id' => 'my_handler',
                         ]
-                        ]
-                    )
+                    ])
                 ->end()
             ->end()
         ;

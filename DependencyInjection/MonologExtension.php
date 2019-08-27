@@ -89,8 +89,7 @@ class MonologExtension extends Extension
             $container->setParameter('monolog.handlers_to_channels', $handlersToChannels);
 
             if (PHP_VERSION_ID < 70000) {
-                $this->addClassesToCompile(
-                    [
+                $this->addClassesToCompile([
                     'Monolog\\Formatter\\FormatterInterface',
                     'Monolog\\Formatter\\LineFormatter',
                     'Monolog\\Handler\\HandlerInterface',
@@ -104,8 +103,7 @@ class MonologExtension extends Extension
                     'Symfony\\Bridge\\Monolog\\Logger',
                     'Monolog\\Handler\\FingersCrossed\\ActivationStrategyInterface',
                     'Monolog\\Handler\\FingersCrossed\\ErrorLevelActivationStrategy',
-                    ]
-                );
+                ]);
             }
         }
 
@@ -178,36 +176,30 @@ class MonologExtension extends Extension
 
         switch ($handler['type']) {
         case 'stream':
-            $definition->setArguments(
-                [
+            $definition->setArguments([
                 $handler['path'],
                 $handler['level'],
                 $handler['bubble'],
                 $handler['file_permission'],
                 $handler['use_locking'],
-                ]
-            );
+            ]);
             break;
 
         case 'console':
-            $definition->setArguments(
-                [
+            $definition->setArguments([
                 null,
                 $handler['bubble'],
                 isset($handler['verbosity_levels']) ? $handler['verbosity_levels'] : [],
                 $handler['console_formater_options']
-                ]
-            );
+            ]);
             $definition->addTag('kernel.event_subscriber');
             break;
 
         case 'firephp':
-            $definition->setArguments(
-                [
+            $definition->setArguments([
                 $handler['level'],
                 $handler['bubble'],
-                ]
-            );
+            ]);
             $definition->addTag('kernel.event_listener', ['event' => 'kernel.response', 'method' => 'onKernelResponse']);
             break;
 
@@ -239,13 +231,11 @@ class MonologExtension extends Extension
                 throw new \RuntimeException('The gelf handler requires the graylog2/gelf-php package to be installed');
             }
 
-            $definition->setArguments(
-                [
+            $definition->setArguments([
                 $publisher,
                 $handler['level'],
                 $handler['bubble'],
-                ]
-            );
+            ]);
             break;
 
         case 'mongo':
@@ -268,15 +258,13 @@ class MonologExtension extends Extension
                 $client->setPublic(false);
             }
 
-            $definition->setArguments(
-                [
+            $definition->setArguments([
                 $client,
                 $handler['mongo']['database'],
                 $handler['mongo']['collection'],
                 $handler['level'],
                 $handler['bubble'],
-                ]
-            );
+            ]);
             break;
 
         case 'elasticsearch':
@@ -302,18 +290,15 @@ class MonologExtension extends Extension
                     );
                 }
 
-                $elasticaClient->setArguments(
-                    [
+                $elasticaClient->setArguments([
                     $elasticaClientArguments
-                    ]
-                );
+                ]);
 
                 $elasticaClient->setPublic(false);
             }
 
             // elastica handler definition
-            $definition->setArguments(
-                [
+            $definition->setArguments([
                 $elasticaClient,
                 [
                     'index' => $handler['index'],
@@ -322,8 +307,7 @@ class MonologExtension extends Extension
                 ],
                 $handler['level'],
                 $handler['bubble'],
-                ]
-            );
+            ]);
             break;
         case 'redis':
         case 'predis':
@@ -347,46 +331,38 @@ class MonologExtension extends Extension
                 }
 
                 $client = new Definition(\Predis\Client::class);
-                $client->setArguments(
-                    [
+                $client->setArguments([
                     $handler['redis']['host'],
-                    ]
-                );
+                ]);
                 $client->setPublic(false);
 
                 $clientId = uniqid('monolog.predis.client.', true);
                 $container->setDefinition($clientId, $client);
             }
-            $definition->setArguments(
-                [
+            $definition->setArguments([
                 new Reference($clientId),
                 $handler['redis']['key_name'],
                 $handler['level'],
                 $handler['bubble'],
-                ]
-            );
+            ]);
             break;
 
         case 'chromephp':
-            $definition->setArguments(
-                [
+            $definition->setArguments([
                 $handler['level'],
                 $handler['bubble'],
-                ]
-            );
+            ]);
             $definition->addTag('kernel.event_listener', ['event' => 'kernel.response', 'method' => 'onKernelResponse']);
             break;
 
         case 'rotating_file':
-            $definition->setArguments(
-                [
+            $definition->setArguments([
                 $handler['path'],
                 $handler['max_files'],
                 $handler['level'],
                 $handler['bubble'],
                 $handler['file_permission'],
-                ]
-            );
+            ]);
             $definition->addMethodCall('setFilenameFormat', [
                 $handler['filename_format'],
                 $handler['date_format'],
@@ -432,16 +408,14 @@ class MonologExtension extends Extension
                 $activation = $handler['action_level'];
             }
 
-            $definition->setArguments(
-                [
+            $definition->setArguments([
                 new Reference($nestedHandlerId),
                 $activation,
                 $handler['buffer_size'],
                 $handler['bubble'],
                 $handler['stop_buffering'],
                 $handler['passthru_level'],
-                ]
-            );
+            ]);
             break;
 
         case 'filter':
@@ -455,29 +429,25 @@ class MonologExtension extends Extension
             $this->markNestedHandler($nestedHandlerId);
             $minLevelOrList = !empty($handler['accepted_levels']) ? $handler['accepted_levels'] : $handler['min_level'];
 
-            $definition->setArguments(
-                [
+            $definition->setArguments([
                 new Reference($nestedHandlerId),
                 $minLevelOrList,
                 $handler['max_level'],
                 $handler['bubble'],
-                ]
-            );
+            ]);
             break;
 
         case 'buffer':
             $nestedHandlerId = $this->getHandlerId($handler['handler']);
             $this->markNestedHandler($nestedHandlerId);
 
-            $definition->setArguments(
-                [
+            $definition->setArguments([
                 new Reference($nestedHandlerId),
                 $handler['buffer_size'],
                 $handler['level'],
                 $handler['bubble'],
                 $handler['flush_on_overflow'],
-                ]
-            );
+            ]);
             break;
 
         case 'deduplication':
@@ -485,15 +455,13 @@ class MonologExtension extends Extension
             $this->markNestedHandler($nestedHandlerId);
             $defaultStore = '%kernel.cache_dir%/monolog_dedup_'.sha1($handlerId);
 
-            $definition->setArguments(
-                [
+            $definition->setArguments([
                 new Reference($nestedHandlerId),
                 isset($handler['store']) ? $handler['store'] : $defaultStore,
                 $handler['deduplication_level'],
                 $handler['time'],
                 $handler['bubble'],
-                ]
-            );
+            ]);
             break;
 
         case 'group':
@@ -505,36 +473,30 @@ class MonologExtension extends Extension
                 $references[] = new Reference($nestedHandlerId);
             }
 
-            $definition->setArguments(
-                [
+            $definition->setArguments([
                 $references,
                 $handler['bubble'],
-                ]
-            );
+            ]);
             break;
 
         case 'syslog':
-            $definition->setArguments(
-                [
+            $definition->setArguments([
                 $handler['ident'],
                 $handler['facility'],
                 $handler['level'],
                 $handler['bubble'],
                 $handler['logopts'],
-                ]
-            );
+            ]);
             break;
 
         case 'syslogudp':
-            $definition->setArguments(
-                [
+            $definition->setArguments([
                 $handler['host'],
                 $handler['port'],
                 $handler['facility'],
                 $handler['level'],
                 $handler['bubble'],
-                ]
-            );
+            ]);
             if ($handler['ident']) {
                 $definition->addArgument($handler['ident']);
             }
@@ -551,29 +513,25 @@ class MonologExtension extends Extension
                 $messageFactory = new Definition('Symfony\Bundle\MonologBundle\SwiftMailer\MessageFactory');
                 $messageFactory->setLazy(true);
                 $messageFactory->setPublic(false);
-                $messageFactory->setArguments(
-                    [
+                $messageFactory->setArguments([
                     new Reference($handler['mailer']),
                     $handler['from_email'],
                     $handler['to_email'],
                     $handler['subject'],
                     $handler['content_type']
-                    ]
-                );
+                ]);
 
                 $messageFactoryId = sprintf('%s.mail_message_factory', $handlerId);
                 $container->setDefinition($messageFactoryId, $messageFactory);
                 // set the prototype as a callable
                 $prototype = [new Reference($messageFactoryId), 'createMessage'];
             }
-            $definition->setArguments(
-                [
+            $definition->setArguments([
                 new Reference($handler['mailer']),
                 $prototype,
                 $handler['level'],
                 $handler['bubble'],
-                ]
-            );
+            ]);
 
             $this->swiftMailerHandlers[] = $handlerId;
             $definition->addTag('kernel.event_listener', ['event' => 'kernel.terminate', 'method' => 'onKernelTerminate']
@@ -582,28 +540,24 @@ class MonologExtension extends Extension
             break;
 
         case 'native_mailer':
-            $definition->setArguments(
-                [
+            $definition->setArguments([
                 $handler['to_email'],
                 $handler['subject'],
                 $handler['from_email'],
                 $handler['level'],
                 $handler['bubble'],
-                ]
-            );
+            ]);
             if (!empty($handler['headers'])) {
                 $definition->addMethodCall('addHeader', [$handler['headers']]);
             }
             break;
 
         case 'socket':
-            $definition->setArguments(
-                [
+            $definition->setArguments([
                 $handler['connection_string'],
                 $handler['level'],
                 $handler['bubble'],
-                ]
-            );
+            ]);
             if (isset($handler['timeout'])) {
                 $definition->addMethodCall('setTimeout', [$handler['timeout']]);
             }
@@ -616,15 +570,13 @@ class MonologExtension extends Extension
             break;
 
         case 'pushover':
-            $definition->setArguments(
-                [
+            $definition->setArguments([
                 $handler['token'],
                 $handler['user'],
                 $handler['title'],
                 $handler['level'],
                 $handler['bubble'],
-                ]
-            );
+            ]);
             if (isset($handler['timeout'])) {
                 $definition->addMethodCall('setTimeout', [$handler['timeout']]);
             }
@@ -634,8 +586,7 @@ class MonologExtension extends Extension
             break;
 
         case 'hipchat':
-            $definition->setArguments(
-                [
+            $definition->setArguments([
                 $handler['token'],
                 $handler['room'],
                 $handler['nickname'],
@@ -646,8 +597,7 @@ class MonologExtension extends Extension
                 $handler['message_format'],
                 !empty($handler['host']) ? $handler['host'] : 'api.hipchat.com',
                 !empty($handler['api_version']) ? $handler['api_version'] : 'v1',
-                ]
-            );
+            ]);
             if (isset($handler['timeout'])) {
                 $definition->addMethodCall('setTimeout', [$handler['timeout']]);
             }
@@ -657,8 +607,7 @@ class MonologExtension extends Extension
             break;
 
         case 'slack':
-            $definition->setArguments(
-                [
+            $definition->setArguments([
                 $handler['token'],
                 $handler['channel'],
                 $handler['bot_name'],
@@ -668,8 +617,7 @@ class MonologExtension extends Extension
                 $handler['bubble'],
                 $handler['use_short_attachment'],
                 $handler['include_extra'],
-                ]
-            );
+            ]);
             if (isset($handler['timeout'])) {
                 $definition->addMethodCall('setTimeout', [$handler['timeout']]);
             }
@@ -679,8 +627,7 @@ class MonologExtension extends Extension
             break;
 
         case 'slackwebhook':
-            $definition->setArguments(
-                [
+            $definition->setArguments([
                 $handler['webhook_url'],
                 $handler['channel'],
                 $handler['bot_name'],
@@ -690,51 +637,42 @@ class MonologExtension extends Extension
                 $handler['include_extra'],
                 $handler['level'],
                 $handler['bubble'],
-                ]
-            );
+            ]);
             break;
 
         case 'slackbot':
-            $definition->setArguments(
-                [
+            $definition->setArguments([
                 $handler['team'],
                 $handler['token'],
                 urlencode($handler['channel']),
                 $handler['level'],
                 $handler['bubble'],
-                ]
-            );
+            ]);
             break;
 
         case 'cube':
-            $definition->setArguments(
-                [
+            $definition->setArguments([
                 $handler['url'],
                 $handler['level'],
                 $handler['bubble'],
-                ]
-            );
+            ]);
             break;
 
         case 'amqp':
-            $definition->setArguments(
-                [
+            $definition->setArguments([
                 new Reference($handler['exchange']),
                 $handler['exchange_name'],
                 $handler['level'],
                 $handler['bubble'],
-                ]
-            );
+            ]);
             break;
 
         case 'error_log':
-            $definition->setArguments(
-                [
+            $definition->setArguments([
                 $handler['message_type'],
                 $handler['level'],
                 $handler['bubble'],
-                ]
-            );
+            ]);
             break;
 
         case 'sentry':
@@ -775,13 +713,11 @@ class MonologExtension extends Extension
             // can't set the hub to the current hub, getting into a recursion otherwise...
             //$hub->addMethodCall('setCurrent', array($hub));
 
-            $definition->setArguments(
-                [
+            $definition->setArguments([
                 $hub,
                 $handler['level'],
                 $handler['bubble'],
-                ]
-            );
+            ]);
             break;
 
         case 'raven':
@@ -800,40 +736,34 @@ class MonologExtension extends Extension
                 $clientId = 'monolog.raven.client.'.sha1($handler['dsn']);
                 $container->setDefinition($clientId, $client);
             }
-            $definition->setArguments(
-                [
+            $definition->setArguments([
                 new Reference($clientId),
                 $handler['level'],
                 $handler['bubble'],
-                ]
-            );
+            ]);
             if (!empty($handler['release'])) {
                 $definition->addMethodCall('setRelease', [$handler['release']]);
             }
             break;
 
         case 'loggly':
-            $definition->setArguments(
-                [
+            $definition->setArguments([
                 $handler['token'],
                 $handler['level'],
                 $handler['bubble'],
-                ]
-            );
+            ]);
             if (!empty($handler['tags'])) {
                 $definition->addMethodCall('setTag', [implode(',', $handler['tags'])]);
             }
             break;
 
         case 'logentries':
-            $definition->setArguments(
-                [
+            $definition->setArguments([
                 $handler['token'],
                 $handler['use_ssl'],
                 $handler['level'],
                 $handler['bubble'],
-                ]
-            );
+            ]);
             if (isset($handler['timeout'])) {
                 $definition->addMethodCall('setTimeout', [$handler['timeout']]);
             }
@@ -843,25 +773,21 @@ class MonologExtension extends Extension
             break;
 
         case 'insightops':
-            $definition->setArguments(
-                [
+            $definition->setArguments([
                 $handler['token'],
                 $handler['region'] ? $handler['region'] : 'us',
                 $handler['use_ssl'],
                 $handler['level'],
                 $handler['bubble'],
-                ]
-            );
+            ]);
             break;
 
         case 'flowdock':
-            $definition->setArguments(
-                [
+            $definition->setArguments([
                 $handler['token'],
                 $handler['level'],
                 $handler['bubble'],
-                ]
-            );
+            ]);
 
             if (empty($handler['formatter'])) {
                 $formatter = new Definition("Monolog\Formatter\FlowdockFormatter", [
@@ -892,35 +818,29 @@ class MonologExtension extends Extension
                 $container->setDefinition($rollbarId, $rollbar);
             }
 
-            $definition->setArguments(
-                [
+            $definition->setArguments([
                 new Reference($rollbarId),
                 $handler['level'],
                 $handler['bubble'],
-                ]
-            );
+            ]);
             break;
         case 'newrelic':
-            $definition->setArguments(
-                [
+            $definition->setArguments([
                 $handler['level'],
                 $handler['bubble'],
                 $handler['app_name'],
-                ]
-            );
+            ]);
             break;
         case 'server_log':
             if (!class_exists('Symfony\Bridge\Monolog\Handler\ServerLogHandler')) {
                 throw new \RuntimeException('The ServerLogHandler is not available. Please update "symfony/monolog-bridge" to 3.3.');
             }
 
-            $definition->setArguments(
-                [
+            $definition->setArguments([
                 $handler['host'],
                 $handler['level'],
                 $handler['bubble'],
-                ]
-            );
+            ]);
             break;
 
         // Handlers using the constructor of AbstractHandler without adding their own arguments
@@ -928,12 +848,10 @@ class MonologExtension extends Extension
         case 'test':
         case 'null':
         case 'debug':
-            $definition->setArguments(
-                [
+            $definition->setArguments([
                 $handler['level'],
                 $handler['bubble'],
-                ]
-            );
+            ]);
             break;
 
         default:
