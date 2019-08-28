@@ -211,8 +211,7 @@ class MonologExtension extends Extension
                     $handler['publisher']['hostname'],
                     $handler['publisher']['port'],
                     $handler['publisher']['chunk_size'],
-                ]
-                );
+                ]);
                 $transport->setPublic(false);
 
                 $publisher = new Definition('Gelf\Publisher', []);
@@ -223,8 +222,7 @@ class MonologExtension extends Extension
                     $handler['publisher']['hostname'],
                     $handler['publisher']['port'],
                     $handler['publisher']['chunk_size'],
-                ]
-                );
+                ]);
 
                 $publisher->setPublic(false);
             } else {
@@ -252,8 +250,7 @@ class MonologExtension extends Extension
 
                 $client = new Definition('MongoClient', [
                     $server,
-                ]
-                );
+                ]);
 
                 $client->setPublic(false);
             }
@@ -366,8 +363,7 @@ class MonologExtension extends Extension
             $definition->addMethodCall('setFilenameFormat', [
                 $handler['filename_format'],
                 $handler['date_format'],
-            ]
-            );
+            ]);
             break;
 
         case 'fingers_crossed':
@@ -388,8 +384,7 @@ class MonologExtension extends Extension
                     new Reference('request_stack'),
                     $handler['excluded_404s'],
                     $handler['action_level']
-                ]
-                );
+                ]);
                 $container->setDefinition($handlerId.'.not_found_strategy', $activationDef);
                 $activation = new Reference($handlerId.'.not_found_strategy');
             } elseif (!empty($handler['excluded_http_codes'])) {
@@ -400,8 +395,7 @@ class MonologExtension extends Extension
                     new Reference('request_stack'),
                     $handler['excluded_http_codes'],
                     $handler['action_level']
-                ]
-                );
+                ]);
                 $container->setDefinition($handlerId.'.http_code_strategy', $activationDef);
                 $activation = new Reference($handlerId.'.http_code_strategy');
             } else {
@@ -534,8 +528,7 @@ class MonologExtension extends Extension
             ]);
 
             $this->swiftMailerHandlers[] = $handlerId;
-            $definition->addTag('kernel.event_listener', ['event' => 'kernel.terminate', 'method' => 'onKernelTerminate']
-            );
+            $definition->addTag('kernel.event_listener', ['event' => 'kernel.terminate', 'method' => 'onKernelTerminate']);
             $definition->addTag('kernel.event_listener', ['event' => 'console.terminate', 'method' => 'onCliTerminate']);
             break;
 
@@ -730,8 +723,7 @@ class MonologExtension extends Extension
                         'auto_log_stacks' => $handler['auto_log_stacks'],
                         'environment' => $handler['environment']
                     ]
-                ]
-                );
+                ]);
                 $client->setPublic(false);
                 $clientId = 'monolog.raven.client.'.sha1($handler['dsn']);
                 $container->setDefinition($clientId, $client);
@@ -793,8 +785,7 @@ class MonologExtension extends Extension
                 $formatter = new Definition("Monolog\Formatter\FlowdockFormatter", [
                     $handler['source'],
                     $handler['from_email'],
-                ]
-                );
+                ]);
                 $formatterId = 'monolog.flowdock.formatter.'.sha1($handler['source'].'|'.$handler['from_email']);
                 $formatter->setPublic(false);
                 $container->setDefinition($formatterId, $formatter);
@@ -811,8 +802,7 @@ class MonologExtension extends Extension
                 $config['access_token'] = $handler['token'];
                 $rollbar = new Definition('RollbarNotifier', [
                     $config,
-                ]
-                );
+                ]);
                 $rollbarId = 'monolog.rollbar.notifier.'.sha1(json_encode($config));
                 $rollbar->setPublic(false);
                 $container->setDefinition($rollbarId, $rollbar);
