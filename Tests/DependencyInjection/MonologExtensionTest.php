@@ -33,23 +33,15 @@ class MonologExtensionTest extends DependencyInjectionTest
 
         $handler = $container->getDefinition('monolog.handler.main');
         $this->assertDICDefinitionClass($handler, 'Monolog\Handler\StreamHandler');
-        $this->assertDICConstructorArguments($handler, ['%kernel.logs_dir%/%kernel.environment%.log', \Monolog\Logger::DEBUG, true, null, false]
-        );
-        $this->assertDICDefinitionMethodCallAt(0, $handler, 'pushProcessor', [new Reference('monolog.processor.psr_log_message')]
-        );
+        $this->assertDICConstructorArguments($handler, ['%kernel.logs_dir%/%kernel.environment%.log', \Monolog\Logger::DEBUG, true, null, false]);
+        $this->assertDICDefinitionMethodCallAt(0, $handler, 'pushProcessor', [new Reference('monolog.processor.psr_log_message')]);
     }
 
     public function testLoadWithCustomValues()
     {
-        $container = $this->getContainer(
-            [
-                [
-                    'handlers' => [
+        $container = $this->getContainer([['handlers' => [
             'custom' => ['type' => 'stream', 'path' => '/tmp/symfony.log', 'bubble' => false, 'level' => 'ERROR', 'file_permission' => '0666', 'use_locking' => true]
-                    ]
-                ]
-            ]
-        );
+        ]]]);
         $this->assertTrue($container->hasDefinition('monolog.logger'));
         $this->assertTrue($container->hasDefinition('monolog.handler.custom'));
 
@@ -64,16 +56,10 @@ class MonologExtensionTest extends DependencyInjectionTest
 
     public function testLoadWithNestedHandler()
     {
-        $container = $this->getContainer(
-            [
-                [
-                    'handlers' => [
+        $container = $this->getContainer([['handlers' => [
             'custom' => ['type' => 'stream', 'path' => '/tmp/symfony.log', 'bubble' => false, 'level' => 'ERROR', 'file_permission' => '0666'],
             'nested' => ['type' => 'stream', 'path' => '/tmp/symfony.log', 'bubble' => false, 'level' => 'ERROR', 'file_permission' => '0666', 'nested' => true]
-                    ]
-                ]
-            ]
-        );
+        ]]]);
         $this->assertTrue($container->hasDefinition('monolog.logger'));
         $this->assertTrue($container->hasDefinition('monolog.handler.custom'));
         $this->assertTrue($container->hasDefinition('monolog.handler.nested'));
@@ -275,18 +261,10 @@ class MonologExtensionTest extends DependencyInjectionTest
             $this->assertContains('connection_string', $e->getMessage());
         }
 
-        $container = $this->getContainer(
-            [
-                [
-                    'handlers' => [
-                        'socket' => [
+        $container = $this->getContainer([['handlers' => ['socket' => [
             'type' => 'socket', 'timeout' => 1, 'persistent' => true,
             'connection_string' => 'localhost:50505', 'connection_timeout' => '0.6'
-                        ]
-                    ]
-                ]
-            ]
-        );
+        ]]]]);
         $this->assertTrue($container->hasDefinition('monolog.logger'));
         $this->assertTrue($container->hasDefinition('monolog.handler.socket'));
 
@@ -297,8 +275,7 @@ class MonologExtensionTest extends DependencyInjectionTest
         $handler = $container->getDefinition('monolog.handler.socket');
         $this->assertDICDefinitionClass($handler, 'Monolog\Handler\SocketHandler');
         $this->assertDICConstructorArguments($handler, ['localhost:50505', \Monolog\Logger::DEBUG, true]);
-        $this->assertDICDefinitionMethodCallAt(0, $handler, 'pushProcessor', [new Reference('monolog.processor.psr_log_message')]
-        );
+        $this->assertDICDefinitionMethodCallAt(0, $handler, 'pushProcessor', [new Reference('monolog.processor.psr_log_message')]);
         $this->assertDICDefinitionMethodCallAt(1, $handler, 'setTimeout', ['1']);
         $this->assertDICDefinitionMethodCallAt(2, $handler, 'setConnectionTimeout', ['0.6']);
         $this->assertDICDefinitionMethodCallAt(3, $handler, 'setPersistent', [true]);
@@ -318,17 +295,9 @@ class MonologExtensionTest extends DependencyInjectionTest
     {
         $dsn = 'http://43f6017361224d098402974103bfc53d:a6a0538fc2934ba2bed32e08741b2cd3@marca.python.live.cheggnet.com:9000/1';
 
-        $container = $this->getContainer(
-            [
-                [
-                    'handlers' => [
-                        'raven' => [
+        $container = $this->getContainer([['handlers' => ['raven' => [
             'type' => 'raven', 'dsn' => $dsn
-                        ]
-                    ]
-                ]
-            ]
-        );
+        ]]]]);
         $this->assertTrue($container->hasDefinition('monolog.logger'));
         $this->assertTrue($container->hasDefinition('monolog.handler.raven'));
 
@@ -344,17 +313,9 @@ class MonologExtensionTest extends DependencyInjectionTest
 
     public function testRavenHandlerWhenADSNAndAClientAreSpecified()
     {
-        $container = $this->getContainer(
-            [
-                [
-                    'handlers' => [
-                        'raven' => [
+        $container = $this->getContainer([['handlers' => ['raven' => [
             'type' => 'raven', 'dsn' => 'foobar', 'client_id' => 'raven.client'
-                        ]
-                    ]
-                ]
-            ]
-        );
+        ]]]]);
 
         $this->assertFalse($container->hasDefinition('raven.client'));
 
@@ -368,17 +329,9 @@ class MonologExtensionTest extends DependencyInjectionTest
 
     public function testRavenHandlerWhenAClientIsSpecified()
     {
-        $container = $this->getContainer(
-            [
-                [
-                    'handlers' => [
-                        'raven' => [
+        $container = $this->getContainer([['handlers' => ['raven' => [
             'type' => 'raven', 'client_id' => 'raven.client'
-                        ]
-                    ]
-                ]
-            ]
-        );
+        ]]]]);
 
         $this->assertFalse($container->hasDefinition('raven.client'));
 
@@ -404,17 +357,9 @@ class MonologExtensionTest extends DependencyInjectionTest
     {
         $dsn = 'http://43f6017361224d098402974103bfc53d:a6a0538fc2934ba2bed32e08741b2cd3@marca.python.live.cheggnet.com:9000/1';
 
-        $container = $this->getContainer(
-            [
-                [
-                    'handlers' => [
-                        'sentry' => [
+        $container = $this->getContainer([['handlers' => ['sentry' => [
             'type' => 'sentry', 'dsn' => $dsn
-                        ]
-                    ]
-                ]
-            ]
-        );
+        ]]]]);
         $this->assertTrue($container->hasDefinition('monolog.logger'));
         $this->assertTrue($container->hasDefinition('monolog.handler.sentry'));
 
@@ -491,33 +436,17 @@ class MonologExtensionTest extends DependencyInjectionTest
         }
 
         try {
-            $this->getContainer(
-                [
-                    [
-                        'handlers' => [
-                            'loggly' => [
+            $this->getContainer([['handlers' => ['loggly' => [
                 'type' => 'loggly', 'token' => $token, 'tags' => 'x, 1zone ,www.loggly.com,-us,apache$'
-                            ]
-                        ]
-                    ]
-                ]
-            );
+            ]]]]);
             $this->fail();
         } catch (InvalidConfigurationException $e) {
             $this->assertContains('-us, apache$', $e->getMessage());
         }
 
-        $container = $this->getContainer(
-            [
-                [
-                    'handlers' => [
-                        'loggly' => [
+        $container = $this->getContainer([['handlers' => ['loggly' => [
             'type' => 'loggly', 'token' => $token
-                        ]
-                    ]
-                ]
-            ]
-        );
+        ]]]]);
         $this->assertTrue($container->hasDefinition('monolog.logger'));
         $this->assertTrue($container->hasDefinition('monolog.handler.loggly'));
 
@@ -530,17 +459,9 @@ class MonologExtensionTest extends DependencyInjectionTest
         $this->assertDICDefinitionMethodCallAt(0, $handler, 'pushProcessor', [new Reference('monolog.processor.psr_log_message')]
         );
 
-        $container = $this->getContainer(
-            [
-                [
-                    'handlers' => [
-                        'loggly' => [
+        $container = $this->getContainer([['handlers' => ['loggly' => [
             'type' => 'loggly', 'token' => $token, 'tags' => [' ', 'foo', '', 'bar']
-                        ]
-                    ]
-                ]
-            ]
-        );
+        ]]]]);
         $handler = $container->getDefinition('monolog.handler.loggly');
         $this->assertDICDefinitionMethodCallAt(0, $handler, 'pushProcessor', [new Reference('monolog.processor.psr_log_message')]
         );
@@ -550,16 +471,10 @@ class MonologExtensionTest extends DependencyInjectionTest
     /** @group legacy */
     public function testFingersCrossedHandlerWhenExcluded404sAreSpecified()
     {
-        $container = $this->getContainer(
-            [
-                [
-                    'handlers' => [
+        $container = $this->getContainer([['handlers' => [
             'main' => ['type' => 'fingers_crossed', 'handler' => 'nested', 'excluded_404s' => ['^/foo', '^/bar']],
             'nested' => ['type' => 'stream', 'path' => '/tmp/symfony.log']
-                    ]
-                ]
-            ]
-        );
+        ]]]);
 
         $this->assertTrue($container->hasDefinition('monolog.logger'));
         $this->assertTrue($container->hasDefinition('monolog.handler.main'));
@@ -587,20 +502,14 @@ class MonologExtensionTest extends DependencyInjectionTest
             $this->markTestSkipped('Symfony Monolog 4.1+ is needed.');
         }
 
-        $container = $this->getContainer(
-            [
-                [
-                    'handlers' => [
+        $container = $this->getContainer([['handlers' => [
             'main' => [
                 'type' => 'fingers_crossed',
                 'handler' => 'nested',
                 'excluded_http_codes' => [403, 404, [405 => ['^/foo', '^/bar']]]
             ],
             'nested' => ['type' => 'stream', 'path' => '/tmp/symfony.log']
-                    ]
-                ]
-            ]
-        );
+        ]]]);
 
         $this->assertTrue($container->hasDefinition('monolog.logger'));
         $this->assertTrue($container->hasDefinition('monolog.handler.main'));
