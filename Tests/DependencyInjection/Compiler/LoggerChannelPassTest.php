@@ -177,8 +177,7 @@ class LoggerChannelPassTest extends TestCase
                 'type' => 'exclusive',
                 'elements' => ['foo']
             ]
-        ]
-        );
+        ]);
 
         $container->getCompilerPassConfig()->setOptimizationPasses([]);
         $container->getCompilerPassConfig()->setRemovingPasses([]);

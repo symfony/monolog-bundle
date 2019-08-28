@@ -232,8 +232,7 @@ class MonologExtensionTest extends DependencyInjectionTest
 
         $handler = $container->getDefinition('monolog.handler.main');
         $this->assertDICDefinitionClass($handler, 'Monolog\Handler\RollbarHandler');
-        $this->assertDICConstructorArguments($handler, [new Reference('monolog.rollbar.notifier.1c8e6a67728dff6a209f828427128dd8b3c2b746'), \Monolog\Logger::DEBUG, true]
-        );
+        $this->assertDICConstructorArguments($handler, [new Reference('monolog.rollbar.notifier.1c8e6a67728dff6a209f828427128dd8b3c2b746'), \Monolog\Logger::DEBUG, true]);
     }
 
     public function testRollbarHandlerReusesNotifier()
@@ -456,15 +455,13 @@ class MonologExtensionTest extends DependencyInjectionTest
         $handler = $container->getDefinition('monolog.handler.loggly');
         $this->assertDICDefinitionClass($handler, 'Monolog\Handler\LogglyHandler');
         $this->assertDICConstructorArguments($handler, [$token, \Monolog\Logger::DEBUG, true]);
-        $this->assertDICDefinitionMethodCallAt(0, $handler, 'pushProcessor', [new Reference('monolog.processor.psr_log_message')]
-        );
+        $this->assertDICDefinitionMethodCallAt(0, $handler, 'pushProcessor', [new Reference('monolog.processor.psr_log_message')]);
 
         $container = $this->getContainer([['handlers' => ['loggly' => [
             'type' => 'loggly', 'token' => $token, 'tags' => [' ', 'foo', '', 'bar']
         ]]]]);
         $handler = $container->getDefinition('monolog.handler.loggly');
-        $this->assertDICDefinitionMethodCallAt(0, $handler, 'pushProcessor', [new Reference('monolog.processor.psr_log_message')]
-        );
+        $this->assertDICDefinitionMethodCallAt(0, $handler, 'pushProcessor', [new Reference('monolog.processor.psr_log_message')]);
         $this->assertDICDefinitionMethodCallAt(1, $handler, 'setTag', ['foo,bar']);
     }
 
@@ -487,13 +484,11 @@ class MonologExtensionTest extends DependencyInjectionTest
 
         $strategy = $container->getDefinition('monolog.handler.main.not_found_strategy');
         $this->assertDICDefinitionClass($strategy, 'Symfony\Bridge\Monolog\Handler\FingersCrossed\NotFoundActivationStrategy');
-        $this->assertDICConstructorArguments($strategy, [new Reference('request_stack'), ['^/foo', '^/bar'], \Monolog\Logger::WARNING]
-        );
+        $this->assertDICConstructorArguments($strategy, [new Reference('request_stack'), ['^/foo', '^/bar'], \Monolog\Logger::WARNING]);
 
         $handler = $container->getDefinition('monolog.handler.main');
         $this->assertDICDefinitionClass($handler, 'Monolog\Handler\FingersCrossedHandler');
-        $this->assertDICConstructorArguments($handler, [new Reference('monolog.handler.nested'), new Reference('monolog.handler.main.not_found_strategy'), 0, true, true, null]
-        );
+        $this->assertDICConstructorArguments($handler, [new Reference('monolog.handler.nested'), new Reference('monolog.handler.main.not_found_strategy'), 0, true, true, null]);
     }
 
     public function testFingersCrossedHandlerWhenExcludedHttpCodesAreSpecified()
@@ -535,8 +530,7 @@ class MonologExtensionTest extends DependencyInjectionTest
 
         $handler = $container->getDefinition('monolog.handler.main');
         $this->assertDICDefinitionClass($handler, 'Monolog\Handler\FingersCrossedHandler');
-        $this->assertDICConstructorArguments($handler, [new Reference('monolog.handler.nested'), new Reference('monolog.handler.main.http_code_strategy'), 0, true, true, null]
-        );
+        $this->assertDICConstructorArguments($handler, [new Reference('monolog.handler.nested'), new Reference('monolog.handler.main.http_code_strategy'), 0, true, true, null]);
     }
 
     protected function getContainer(array $config = [], array $thirdPartyDefinitions = [])
