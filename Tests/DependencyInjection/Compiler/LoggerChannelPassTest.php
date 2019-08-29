@@ -52,14 +52,16 @@ class LoggerChannelPassTest extends TestCase
         }
 
         $this->assertNotNull($container->getDefinition('monolog.logger.additional'));
+    }
 
-        // test below acceptable only for Symfony 4.2+
+    public function testTypeHintedAliasesExistForEachChannel()
+    {
         if (!\method_exists(ContainerBuilder::class, 'registerAliasForArgument')) {
-            return;
+            $this->markTestSkipped('Need DependencyInjection 4.2+ to register type-hinted aliases for channels.');
         }
 
-        $expectedChannels = \array_keys($expected);
-        $expectedChannels[] = 'additional';
+        $container = $this->getContainer();
+        $expectedChannels = array('test', 'foo', 'bar', 'additional');
 
         foreach ($expectedChannels as $channelName) {
             $aliasName = LoggerInterface::class.' $' .$channelName.'Logger';

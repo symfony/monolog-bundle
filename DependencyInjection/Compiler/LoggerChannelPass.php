@@ -135,7 +135,7 @@ class LoggerChannelPass implements CompilerPassInterface
     }
 
     /**
-     * Create new logger from th monolog.logger_prototype
+     * Create new logger from the monolog.logger_prototype
      *
      * @param string $channel
      * @param string $loggerId
