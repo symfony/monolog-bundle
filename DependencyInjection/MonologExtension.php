@@ -481,6 +481,7 @@ class MonologExtension extends Extension
                 $handler['bubble'],
             ]);
             break;
+
         case 'syslog':
             $definition->setArguments([
                 $handler['ident'],
@@ -939,27 +940,27 @@ class MonologExtension extends Extension
             'insightops' => 'Monolog\Handler\InsightOpsHandler',
         ];
 
-        $typeToClassMappingV2Added = [
+        $v2HandlerTypesAdded = [
             'fallbackgroup' => 'Monolog\Handler\FallbackGroupHandler',
         ];
 
-        $typeToClassMappingV2Removed = [
+        $v2HandlerTypesRemoved = [
             'hipchat',
             'raven',
         ];
 
         if (Logger::API === 2) {
-            $typeToClassMapping = array_merge($typeToClassMapping, $typeToClassMappingV2Added);
+            $typeToClassMapping = array_merge($typeToClassMapping, $v2HandlerTypesAdded);
 
-            foreach($typeToClassMappingV2Removed as $key) {
-                unset($typeToClassMapping[$key]);
+            foreach($v2HandlerTypesRemoved as $handlerType) {
+                unset($typeToClassMapping[$handlerType]);
             }
         }
 
         if (!isset($typeToClassMapping[$handlerType])) {
-            if (array_key_exists($handlerType, $typeToClassMappingV2Added)) {
+            if (array_key_exists($handlerType, $v2HandlerTypesAdded)) {
                 throw new InvalidArgumentException(
-                    sprintf('"%s" was added in MonoLog 2.', $handlerType)
+                    sprintf('"%s" was added in MonoLog 2, please upgrade if you wish to use.', $handlerType)
                 );
             }
 
