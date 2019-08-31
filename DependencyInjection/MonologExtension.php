@@ -11,6 +11,7 @@
 
 namespace Symfony\Bundle\MonologBundle\DependencyInjection;
 
+use InvalidArgumentException;
 use Monolog\Logger;
 use Monolog\Processor\ProcessorInterface;
 use Monolog\ResettableInterface;
@@ -467,6 +468,7 @@ class MonologExtension extends Extension
 
         case 'group':
         case 'whatfailuregroup':
+        case 'fallbackgroup':
             $references = [];
             foreach ($handler['members'] as $nestedHandler) {
                 $nestedHandlerId = $this->getHandlerId($nestedHandler);
@@ -479,7 +481,6 @@ class MonologExtension extends Extension
                 $handler['bubble'],
             ]);
             break;
-
         case 'syslog':
             $definition->setArguments([
                 $handler['ident'],
@@ -857,7 +858,7 @@ class MonologExtension extends Extension
                 $nullWarning = ', if you meant to define a null handler in a yaml config, make sure you quote "null" so it does not get converted to a php null';
             }
 
-            throw new \InvalidArgumentException(sprintf('Invalid handler type "%s" given for handler "%s"' . $nullWarning, $handler['type'], $name));
+            throw new InvalidArgumentException(sprintf('Invalid handler type "%s" given for handler "%s"' . $nullWarning, $handler['type'], $name));
         }
 
         if (!empty($handler['nested']) && true === $handler['nested']) {
@@ -938,8 +939,33 @@ class MonologExtension extends Extension
             'insightops' => 'Monolog\Handler\InsightOpsHandler',
         ];
 
+        $typeToClassMappingV2Added = [
+            'fallbackgroup' => 'Monolog\Handler\FallbackGroupHandler',
+        ];
+
+        $typeToClassMappingV2Removed = [
+            'hipchat',
+            'raven',
+        ];
+
+        if (Logger::API === 2) {
+            $typeToClassMapping = array_merge($typeToClassMapping, $typeToClassMappingV2Added);
+
+            foreach($typeToClassMappingV2Removed as $key) {
+                unset($typeToClassMapping[$key]);
+            }
+        }
+
         if (!isset($typeToClassMapping[$handlerType])) {
-            throw new \InvalidArgumentException(sprintf('There is no handler class defined for handler "%s".', $handlerType));
+            if (array_key_exists($handlerType, $typeToClassMappingV2Added)) {
+                throw new InvalidArgumentException(
+                    sprintf('"%s" was added in MonoLog 2.', $handlerType)
+                );
+            }
+
+            throw new InvalidArgumentException(
+                sprintf('There is no handler class defined for handler "%s".', $handlerType)
+            );
         }
 
         return $typeToClassMapping[$handlerType];
