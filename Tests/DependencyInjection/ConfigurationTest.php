@@ -264,8 +264,7 @@ class ConfigurationTest extends TestCase
         $config = $this->process($configs);
 
         $this->assertSame('console', $config['handlers']['console']['type']);
-        $this->assertSame(
-            [
+        $this->assertSame([
             OutputInterface::VERBOSITY_NORMAL => Logger::NOTICE,
             OutputInterface::VERBOSITY_VERBOSE => Logger::INFO,
             OutputInterface::VERBOSITY_VERY_VERBOSE => 150,

@@ -525,8 +525,7 @@ class MonologExtensionTest extends DependencyInjectionTest
                 ['code' => 405, 'urls' => ['^/foo', '^/bar']]
             ],
             \Monolog\Logger::WARNING
-        ]
-        );
+        ]);
 
         $handler = $container->getDefinition('monolog.handler.main');
         $this->assertDICDefinitionClass($handler, 'Monolog\Handler\FingersCrossedHandler');
