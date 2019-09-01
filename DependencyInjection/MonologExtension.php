@@ -951,16 +951,21 @@ class MonologExtension extends Extension
 
         if (Logger::API === 2) {
             $typeToClassMapping = array_merge($typeToClassMapping, $v2HandlerTypesAdded);
-
             foreach($v2HandlerTypesRemoved as $handlerType) {
                 unset($typeToClassMapping[$handlerType]);
             }
         }
 
         if (!isset($typeToClassMapping[$handlerType])) {
-            if (array_key_exists($handlerType, $v2HandlerTypesAdded)) {
+            if (Logger::API === 1 && array_key_exists($handlerType, $v2HandlerTypesAdded)) {
                 throw new InvalidArgumentException(
-                    sprintf('"%s" was added in MonoLog 2, please upgrade if you wish to use.', $handlerType)
+                    sprintf('"%s" was added in MonoLog v2, please upgrade if you wish to use.', $handlerType)
+                );
+            }
+
+            if (Logger::API === 2 && array_key_exists($handlerType, $v2HandlerTypesRemoved)) {
+                throw new InvalidArgumentException(
+                    sprintf('"%s" was removed in MonoLog v2.', $handlerType)
                 );
             }
 
