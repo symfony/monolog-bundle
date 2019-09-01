@@ -855,8 +855,7 @@ class Configuration implements ConfigurationInterface
                             ->thenInvalid('The token and room have to be specified to use a HipChatHandler')
                         ->end()
                         ->validate()
-                            ->ifTrue(function ($v) { return 'hipchat' === $v['type'] && !in_array($v['message_format'], ['text', 'html']
-                                ); })
+                            ->ifTrue(function ($v) { return 'hipchat' === $v['type'] && !in_array($v['message_format'], ['text', 'html']); })
                             ->thenInvalid('The message_format has to be "text" or "html" in a HipChatHandler')
                         ->end()
                         ->validate()
