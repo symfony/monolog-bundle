@@ -61,7 +61,7 @@ class LoggerChannelPassTest extends TestCase
         }
 
         $container = $this->getContainer();
-        $expectedChannels = array('test', 'foo', 'bar', 'additional');
+        $expectedChannels = ['test', 'foo', 'bar', 'additional'];
 
         foreach ($expectedChannels as $channelName) {
             $aliasName = LoggerInterface::class.' $' .$channelName.'Logger';
