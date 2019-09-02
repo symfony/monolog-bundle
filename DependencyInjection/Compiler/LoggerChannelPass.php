@@ -26,7 +26,7 @@ use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
  */
 class LoggerChannelPass implements CompilerPassInterface
 {
-    protected $channels = array('app');
+    protected $channels = ['app'];
 
     public function process(ContainerBuilder $container)
     {
@@ -100,7 +100,7 @@ class LoggerChannelPass implements CompilerPassInterface
                     $msg = 'Monolog configuration error: The logging channel "'.$channel.'" assigned to the "'.substr($handler, 16).'" handler does not exist.';
                     throw new \InvalidArgumentException($msg, 0, $e);
                 }
-                $logger->addMethodCall('pushHandler', array(new Reference($handler)));
+                $logger->addMethodCall('pushHandler', [new Reference($handler)]);
             }
         }
     }

@@ -47,12 +47,12 @@ class AddProcessorsPass implements CompilerPassInterface
                 }
 
                 if (!empty($tag['method'])) {
-                    $processor = array(new Reference($id), $tag['method']);
+                    $processor = [new Reference($id), $tag['method']];
                 } else {
                     // If no method is defined, fallback to use __invoke
                     $processor = new Reference($id);
                 }
-                $definition->addMethodCall('pushProcessor', array($processor));
+                $definition->addMethodCall('pushProcessor', [$processor]);
             }
         }
     }
