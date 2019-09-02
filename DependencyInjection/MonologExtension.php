@@ -947,13 +947,21 @@ class MonologExtension extends Extension
         $v2HandlerTypesRemoved = [
             'hipchat',
             'raven',
+            'slackbot',
         ];
 
         if (Logger::API === 2) {
             $typeToClassMapping = array_merge($typeToClassMapping, $v2HandlerTypesAdded);
-            foreach($v2HandlerTypesRemoved as $handlerType) {
-                unset($typeToClassMapping[$handlerType]);
+            foreach($v2HandlerTypesRemoved as $v2HandlerTypeRemoved) {
+                unset($typeToClassMapping[$v2HandlerTypeRemoved]);
             }
+        }
+
+        if (Logger::API === 1 && array_key_exists($handlerType, $v2HandlerTypesRemoved)) {
+            @trigger_error(
+                sprintf('"%s" is deprecated and will be removed in MonoLog v2.', $handlerType),
+                E_USER_DEPRECATED
+            );
         }
 
         if (!isset($typeToClassMapping[$handlerType])) {

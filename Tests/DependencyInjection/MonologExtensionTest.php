@@ -11,6 +11,7 @@
 
 namespace Symfony\Bundle\MonologBundle\Tests\DependencyInjection;
 
+use Monolog\Logger;
 use Symfony\Bundle\MonologBundle\DependencyInjection\MonologExtension;
 use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\LoggerChannelPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -530,6 +531,35 @@ class MonologExtensionTest extends DependencyInjectionTest
         $handler = $container->getDefinition('monolog.handler.main');
         $this->assertDICDefinitionClass($handler, 'Monolog\Handler\FingersCrossedHandler');
         $this->assertDICConstructorArguments($handler, [new Reference('monolog.handler.nested'), new Reference('monolog.handler.main.http_code_strategy'), 0, true, true, null]);
+    }
+
+    /**
+     * @param string $handlerType
+     * @dataProvider v2RemovedDataProvider
+     */
+    public function testMonologV2RemovedOnV1($handlerType)
+    {
+        if (Logger::API === 2) {
+            $this->doesNotPerformAssertions();
+
+            return;
+        }
+
+        $this->expectException(InvalidConfigurationException::class);
+
+        $container = new ContainerBuilder();
+        $loader = new MonologExtension();
+
+        $loader->load([['handlers' => ['main' => ['type' => $handlerType]]]], $container);
+    }
+
+    public function v2RemovedDataProvider()
+    {
+        return [
+            ['hipchat'],
+            ['raven'],
+            ['slackbot'],
+        ];
     }
 
     protected function getContainer(array $config = [], array $thirdPartyDefinitions = [])
