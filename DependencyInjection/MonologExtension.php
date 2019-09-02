@@ -11,17 +11,20 @@
 
 namespace Symfony\Bundle\MonologBundle\DependencyInjection;
 
+use Monolog\Logger;
 use Monolog\Processor\ProcessorInterface;
 use Monolog\ResettableInterface;
 use Symfony\Bridge\Monolog\Handler\FingersCrossed\HttpCodeActivationStrategy;
 use Symfony\Bridge\Monolog\Processor\TokenProcessor;
 use Symfony\Bridge\Monolog\Processor\WebProcessor;
+use Symfony\Bundle\FullStack;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
+use Symfony\Component\HttpKernel\Kernel;
 
 /**
  * MonologExtension is an extension for the Monolog library.
@@ -48,6 +51,10 @@ class MonologExtension extends Extension
      */
     public function load(array $configs, ContainerBuilder $container)
     {
+        if (class_exists(FullStack::class) && Kernel::MAJOR_VERSION < 5 && Logger::API >= 2) {
+            throw new \RuntimeException('Symfony 5 is required for Monolog 2 support. Please downgrade Monolog to version 1.');
+        }
+
         $configuration = $this->getConfiguration($configs, $container);
         $config = $this->processConfiguration($configuration, $configs);
 
