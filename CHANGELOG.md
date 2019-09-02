@@ -2,6 +2,7 @@
 
 * Added `sentry` type to use sentry 2.0 client
 * Added `insightops` handler
+* Added support for Monolog 2.0
 
 ## 3.4.0 (2019-06-20)
 
