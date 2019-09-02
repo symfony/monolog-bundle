@@ -11,6 +11,7 @@
 
 namespace Symfony\Bundle\MonologBundle\Tests\DependencyInjection;
 
+use InvalidArgumentException;
 use Monolog\Logger;
 use Symfony\Bundle\MonologBundle\DependencyInjection\MonologExtension;
 use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\LoggerChannelPass;
@@ -537,15 +538,16 @@ class MonologExtensionTest extends DependencyInjectionTest
      * @param string $handlerType
      * @dataProvider v2RemovedDataProvider
      */
-    public function testMonologV2RemovedOnV1($handlerType)
+    public function testV2Removed($handlerType)
     {
-        if (Logger::API === 2) {
-            $this->doesNotPerformAssertions();
+        if (Logger::API === 1) {
+            $this->markTestSkipped('Not valid for V1');
 
             return;
         }
 
-        $this->expectException(InvalidConfigurationException::class);
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage(sprintf('"%s" was removed in MonoLog v2.', $handlerType));
 
         $container = new ContainerBuilder();
         $loader = new MonologExtension();
@@ -561,6 +563,37 @@ class MonologExtensionTest extends DependencyInjectionTest
             ['slackbot'],
         ];
     }
+
+    /**
+     * @param string $handlerType
+     * @dataProvider v1AddedDataProvider
+     */
+    public function testV2AddedOnV1($handlerType)
+    {
+        if (Logger::API === 2) {
+            $this->markTestSkipped('Not valid for V2');
+
+            return;
+        }
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage(
+            sprintf('"%s" was added in MonoLog v2, please upgrade if you wish to use.', $handlerType)
+        );
+
+        $container = new ContainerBuilder();
+        $loader = new MonologExtension();
+
+        $loader->load([['handlers' => ['main' => ['type' => $handlerType]]]], $container);
+    }
+
+    public function v1AddedDataProvider()
+    {
+        return [
+            ['fallbackgroup'],
+        ];
+    }
+
 
     protected function getContainer(array $config = [], array $thirdPartyDefinitions = [])
     {
