@@ -31,11 +31,11 @@ class LoggerChannelPassTest extends TestCase
         $this->assertEquals('monolog.logger.test', (string) $service->getArgument(1), '->process replaces the logger by the new one');
 
         // pushHandlers for service "test"
-        $expected = array(
-            'test' => array('monolog.handler.a', 'monolog.handler.b', 'monolog.handler.c'),
-            'foo'  => array('monolog.handler.b'),
-            'bar'  => array('monolog.handler.b', 'monolog.handler.c'),
-        );
+        $expected = [
+            'test' => ['monolog.handler.a', 'monolog.handler.b', 'monolog.handler.c'],
+            'foo'  => ['monolog.handler.b'],
+            'bar'  => ['monolog.handler.b', 'monolog.handler.c'],
+        ];
 
         foreach ($expected as $serviceName => $handlers) {
             $service = $container->getDefinition($serviceName);
@@ -90,7 +90,7 @@ class LoggerChannelPassTest extends TestCase
         $dummyService = $container->register('dummy_service', 'Symfony\Bundle\MonologBundle\Tests\DependencyInjection\Compiler\DummyService')
             ->setAutowired(true)
             ->setPublic(true)
-            ->addTag('monolog.logger', array('channel' => 'test'));
+            ->addTag('monolog.logger', ['channel' => 'test']);
 
         $container->compile();
 
@@ -112,7 +112,7 @@ class LoggerChannelPassTest extends TestCase
             ->setAutowired(true)
             ->setAutoconfigured(true)
             ->setPublic(true)
-            ->addTag('monolog.logger', array('channel' => 'test'));
+            ->addTag('monolog.logger', ['channel' => 'test']);
 
         $container->compile();
 
@@ -130,7 +130,7 @@ class LoggerChannelPassTest extends TestCase
         $dummyService = $container->register('dummy_service', 'Symfony\Bundle\MonologBundle\Tests\DependencyInjection\Compiler\DummyService')
             ->setAutowired(true)
             ->addArgument(new Reference('monolog.logger'))
-            ->addTag('monolog.logger', array('channel' => 'test'));
+            ->addTag('monolog.logger', ['channel' => 'test']);
 
         $container->compile();
 
@@ -142,18 +142,18 @@ class LoggerChannelPassTest extends TestCase
         $container = $this->getFunctionalContainer();
 
         $dummyService = $container->register('dummy_service', 'stdClass')
-            ->addTag('monolog.logger', array('channel' => 'test'));
+            ->addTag('monolog.logger', ['channel' => 'test']);
 
         $container->compile();
 
-        $this->assertEquals(array(), $dummyService->getArguments());
+        $this->assertEquals([], $dummyService->getArguments());
     }
 
     public function testChannelsConfigurationOptionSupportsAppChannel()
     {
         $container = $this->getFunctionalContainer();
 
-        $container->setParameter('monolog.additional_channels', array('app'));
+        $container->setParameter('monolog.additional_channels', ['app']);
         $container->compile();
 
         // the test ensures that the validation does not fail (i.e. it does not throw any exceptions)
@@ -166,36 +166,36 @@ class LoggerChannelPassTest extends TestCase
         $loader = new XmlFileLoader($container, new FileLocator(__DIR__.'/../../../Resources/config'));
         $loader->load('monolog.xml');
         $definition = $container->getDefinition('monolog.logger_prototype');
-        $container->set('monolog.handler.test', new Definition('%monolog.handler.null.class%', array(100, false)));
-        $definition->addMethodCall('pushHandler', array(new Reference('monolog.handler.test')));
+        $container->set('monolog.handler.test', new Definition('%monolog.handler.null.class%', [100, false]));
+        $definition->addMethodCall('pushHandler', [new Reference('monolog.handler.test')]);
 
         // Handlers
-        $container->set('monolog.handler.a', new Definition('%monolog.handler.null.class%', array(100, false)));
-        $container->set('monolog.handler.b', new Definition('%monolog.handler.null.class%', array(100, false)));
-        $container->set('monolog.handler.c', new Definition('%monolog.handler.null.class%', array(100, false)));
+        $container->set('monolog.handler.a', new Definition('%monolog.handler.null.class%', [100, false]));
+        $container->set('monolog.handler.b', new Definition('%monolog.handler.null.class%', [100, false]));
+        $container->set('monolog.handler.c', new Definition('%monolog.handler.null.class%', [100, false]));
 
         // Channels
-        foreach (array('test', 'foo', 'bar') as $name) {
-            $service = new Definition('TestClass', array('false', new Reference('logger')));
-            $service->addTag('monolog.logger', array('channel' => $name));
+        foreach (['test', 'foo', 'bar'] as $name) {
+            $service = new Definition('TestClass', ['false', new Reference('logger')]);
+            $service->addTag('monolog.logger', ['channel' => $name]);
             $container->setDefinition($name, $service);
         }
 
-        $container->setParameter('monolog.additional_channels', array('additional'));
-        $container->setParameter('monolog.handlers_to_channels', array(
-            'monolog.handler.a' => array(
+        $container->setParameter('monolog.additional_channels', ['additional']);
+        $container->setParameter('monolog.handlers_to_channels', [
+            'monolog.handler.a' => [
                 'type' => 'inclusive',
-                'elements' => array('test')
-            ),
+                'elements' => ['test']
+            ],
             'monolog.handler.b' => null,
-            'monolog.handler.c' => array(
+            'monolog.handler.c' => [
                 'type' => 'exclusive',
-                'elements' => array('foo')
-            )
-        ));
+                'elements' => ['foo']
+            ]
+        ]);
 
-        $container->getCompilerPassConfig()->setOptimizationPasses(array());
-        $container->getCompilerPassConfig()->setRemovingPasses(array());
+        $container->getCompilerPassConfig()->setOptimizationPasses([]);
+        $container->getCompilerPassConfig()->setRemovingPasses([]);
         $container->addCompilerPass(new LoggerChannelPass());
         $container->compile();
 
@@ -208,20 +208,20 @@ class LoggerChannelPassTest extends TestCase
         $loader = new XmlFileLoader($container, new FileLocator(__DIR__.'/../../../Resources/config'));
         $loader->load('monolog.xml');
         $definition = $container->getDefinition('monolog.logger_prototype');
-        $container->set('monolog.handler.test', new Definition('%monolog.handler.null.class%', array(100, false)));
-        $definition->addMethodCall('pushHandler', array(new Reference('monolog.handler.test')));
+        $container->set('monolog.handler.test', new Definition('%monolog.handler.null.class%', [100, false]));
+        $definition->addMethodCall('pushHandler', [new Reference('monolog.handler.test')]);
 
         // Channels
         $service = new Definition('TestClass');
-        $service->addTag('monolog.logger', array('channel' => 'test'));
-        $service->addMethodCall('setLogger', array(new Reference('logger')));
+        $service->addTag('monolog.logger', ['channel' => 'test']);
+        $service->addMethodCall('setLogger', [new Reference('logger')]);
         $container->setDefinition('foo', $service);
 
-        $container->setParameter('monolog.additional_channels', array('additional'));
-        $container->setParameter('monolog.handlers_to_channels', array());
+        $container->setParameter('monolog.additional_channels', ['additional']);
+        $container->setParameter('monolog.handlers_to_channels', []);
 
-        $container->getCompilerPassConfig()->setOptimizationPasses(array());
-        $container->getCompilerPassConfig()->setRemovingPasses(array());
+        $container->getCompilerPassConfig()->setOptimizationPasses([]);
+        $container->getCompilerPassConfig()->setRemovingPasses([]);
         $container->addCompilerPass(new LoggerChannelPass());
         $container->compile();
 
@@ -234,8 +234,8 @@ class LoggerChannelPassTest extends TestCase
     private function getFunctionalContainer()
     {
         $container = new ContainerBuilder();
-        $container->setParameter('monolog.additional_channels', array());
-        $container->setParameter('monolog.handlers_to_channels', array());
+        $container->setParameter('monolog.additional_channels', []);
+        $container->setParameter('monolog.handlers_to_channels', []);
         $container->setParameter('monolog.use_microseconds', true);
 
         $loader = new XmlFileLoader($container, new FileLocator(__DIR__.'/../../../Resources/config'));
@@ -244,7 +244,7 @@ class LoggerChannelPassTest extends TestCase
         $container->addCompilerPass(new LoggerChannelPass());
 
         // disable removing passes to be able to inspect the container before all the inlining optimizations
-        $container->getCompilerPassConfig()->setRemovingPasses(array());
+        $container->getCompilerPassConfig()->setRemovingPasses([]);
 
         return $container;
     }

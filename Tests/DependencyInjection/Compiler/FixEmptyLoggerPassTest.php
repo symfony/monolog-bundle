@@ -20,7 +20,7 @@ class FixEmptyLoggerPassTest extends TestCase
     public function testProcess()
     {
         $loggerChannelPass = $this->getMockBuilder('Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\LoggerChannelPass')->getMock();
-        $loggerChannelPass->expects($this->any())->method('getChannels')->will($this->returnValue(array('foo', 'bar')));
+        $loggerChannelPass->expects($this->any())->method('getChannels')->will($this->returnValue(['foo', 'bar']));
 
         $container = new ContainerBuilder();
         $container->register('monolog.logger.foo', 'Monolog\Logger');
