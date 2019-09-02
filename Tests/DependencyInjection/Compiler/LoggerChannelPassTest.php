@@ -13,12 +13,12 @@ namespace Symfony\Bundle\MonologBundle\Tests\DependencyInjection\Compiler;
 
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\DependencyInjection\Reference;
-use Symfony\Component\DependencyInjection\Definition;
-use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\LoggerChannelPass;
 use Symfony\Component\Config\FileLocator;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
+use Symfony\Component\DependencyInjection\Reference;
 
 class LoggerChannelPassTest extends TestCase
 {
@@ -51,7 +51,22 @@ class LoggerChannelPassTest extends TestCase
             }
         }
 
-        $this->assertNotNull($container->getDefinition('monolog.logger.manualchan'));
+        $this->assertNotNull($container->getDefinition('monolog.logger.additional'));
+    }
+
+    public function testTypeHintedAliasesExistForEachChannel()
+    {
+        if (!\method_exists(ContainerBuilder::class, 'registerAliasForArgument')) {
+            $this->markTestSkipped('Need DependencyInjection 4.2+ to register type-hinted aliases for channels.');
+        }
+
+        $container = $this->getContainer();
+        $expectedChannels = ['test', 'foo', 'bar', 'additional'];
+
+        foreach ($expectedChannels as $channelName) {
+            $aliasName = LoggerInterface::class.' $' .$channelName.'Logger';
+            $this->assertTrue($container->hasAlias($aliasName), 'type-hinted alias should be exists for each logger channel');
+        }
     }
 
     public function testProcessSetters()
@@ -166,7 +181,7 @@ class LoggerChannelPassTest extends TestCase
             $container->setDefinition($name, $service);
         }
 
-        $container->setParameter('monolog.additional_channels', ['manualchan']);
+        $container->setParameter('monolog.additional_channels', ['additional']);
         $container->setParameter('monolog.handlers_to_channels', [
             'monolog.handler.a' => [
                 'type' => 'inclusive',
@@ -202,7 +217,7 @@ class LoggerChannelPassTest extends TestCase
         $service->addMethodCall('setLogger', [new Reference('logger')]);
         $container->setDefinition('foo', $service);
 
-        $container->setParameter('monolog.additional_channels', ['manualchan']);
+        $container->setParameter('monolog.additional_channels', ['additional']);
         $container->setParameter('monolog.handlers_to_channels', []);
 
         $container->getCompilerPassConfig()->setOptimizationPasses([]);
