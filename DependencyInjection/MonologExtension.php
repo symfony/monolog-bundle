@@ -957,13 +957,6 @@ class MonologExtension extends Extension
             }
         }
 
-        if (Logger::API === 1 && array_key_exists($handlerType, $v2HandlerTypesRemoved)) {
-            @trigger_error(
-                sprintf('"%s" is deprecated and will be removed in MonoLog v2.', $handlerType),
-                E_USER_DEPRECATED
-            );
-        }
-
         if (!isset($typeToClassMapping[$handlerType])) {
             if (Logger::API === 1 && array_key_exists($handlerType, $v2HandlerTypesAdded)) {
                 throw new InvalidArgumentException(
