@@ -105,7 +105,7 @@ use Monolog\Logger;
  *
  * - fingers_crossed:
  *   - handler: the wrapped handler's name
- *   - [action_level|activation_strategy]: minimum level or service id to activate the handler, defaults to WARNING
+ *   - [action_level|activation_strategy]: minimum level or service id to activate the handler, defaults to null
  *   - [excluded_404s]: if set, the strategy will be changed to one that excludes 404s coming from URLs matching any of those patterns
  *   - [excluded_http_codes]: if set, the strategy will be changed to one that excludes specific HTTP codes (requires Symfony Monolog bridge 4.1+)
  *   - [buffer_size]: defaults to 0 (unlimited)
@@ -328,6 +328,105 @@ use Monolog\Logger;
  */
 class Configuration implements ConfigurationInterface
 {
+    private $acceptedParamsByHandlerType = [
+        'stream' => ['path', 'level', 'bubble', 'file_permission', 'use_locking'],
+        'console' => ['verbosity_levels', 'level', 'bubble', 'console_formater_options'],
+        'firephp' => ['bubble', 'level'],
+        'browser_console' => ['bubble', 'level'],
+        'gelf' => ['publisher', 'bubble', 'level'],
+        'chromephp' => ['bubble', 'level'],
+        'rotating_file' => ['path', 'max_files', 'level', 'bubble', 'file_permission', 'filename_format', 'date_format'],
+        'mongo' => ['mongo', 'level', 'bubble'],
+        'elasticsearch' => ['elasticsearch', 'index', 'document_type', 'level', 'bubble'],
+        'redis' => ['redis'],
+        'predis' => ['redis'],
+        'fingers_crossed' => [
+            'handler',
+            'action_level',
+            'activation_strategy',
+            'excluded_404s',
+            'excluded_http_codes',
+            'buffer_size',
+            'stop_buffering',
+            'passthru_level',
+            'bubble'
+        ],
+        'filter' => ['handler', 'accepted_levels', 'min_level', 'max_level', 'bubble'],
+        'buffer' => ['handler', 'buffer_size', 'level', 'bubble', 'flush_on_overflow'],
+        'deduplication' => ['handler', 'store', 'deduplication_level', 'time', 'bubble'],
+        'group' => ['members', 'bubble'],
+        'whatfailuregroup' => ['members', 'bubble'],
+        'syslog' => ['ident', 'facility', 'logopts', 'level', 'bubble'],
+        'syslogudp' => ['host', 'port', 'facility', 'logopts', 'level', 'bubble', 'ident'],
+        'swift_mailer' => [
+            'from_email',
+            'to_email',
+            'subject',
+            'email_prototype',
+            'content_type',
+            'mailer',
+            'level',
+            'bubble',
+            'lazy'
+        ],
+        'native_mailer' => ['from_email', 'to_email', 'subject', 'level', 'bubble', 'headers'],
+        'socket' => ['connection_string', 'timeout', 'connection_timeout', 'persistent', 'level', 'bubble'],
+        'pushover' => ['token', 'user', 'title', 'level', 'bubble', 'timeout', 'connection_timeout'],
+        'raven' => ['dsn', 'client_id', 'release', 'level', 'bubble', 'auto_log_stacks', 'environment'],
+        'sentry' => ['dsn', 'client_id', 'release', 'level', 'bubble', 'auto_log_stacks', 'environment'],
+        'newrelic' => ['level', 'bubble', 'app_name'],
+        'hipchat' => [
+            'token',
+            'room',
+            'notify',
+            'nickname',
+            'level',
+            'bubble',
+            'use_ssl',
+            'message_format',
+            'host',
+            'api_version',
+            'timeout',
+            'connection_timeout'
+        ],
+        'slack' => [
+            'token',
+            'channel',
+            'bot_name',
+            'icon_emoji',
+            'use_attachment',
+            'use_short_attachment',
+            'include_extra',
+            'level',
+            'bubble',
+            'timeout',
+            'connection_timeout'
+        ],
+        'slackwebhook' => [
+            'webhook_url',
+            'channel',
+            'bot_name',
+            'icon_emoji',
+            'use_attachment',
+            'use_short_attachment',
+            'include_extra',
+            'level',
+            'bubble'
+        ],
+        'slackbot' => ['team', 'token', 'channel', 'level', 'bubble'],
+        'cube' => ['url', 'level', 'bubble'],
+        'amqp' => ['exchange', 'exchange_name', 'level', 'bubble'],
+        'error_log' => ['message_type', 'level', 'bubble'],
+        'null' => ['level', 'bubble'],
+        'test' => ['level', 'bubble'],
+        'debug' => ['level', 'bubble'],
+        'loggly' => ['token', 'level', 'bubble', 'tags'],
+        'logentries' => ['token', 'use_ssl', 'level', 'bubble', 'timeout', 'connection_timeout'],
+        'insightops' => ['token', 'region', 'use_ssl', 'level', 'bubble'],
+        'flowdock' => ['token', 'source', 'from_email', 'level', 'bubble'],
+        'server_log' => ['host', 'level', 'bubble'],
+    ];
+
     /**
      * Generates the configuration tree builder.
      *
@@ -774,6 +873,10 @@ class Configuration implements ConfigurationInterface
                             ->scalarNode('formatter')->end()
                             ->booleanNode('nested')->defaultFalse()->end()
                         ->end()
+                        ->beforeNormalization()
+                            ->always()
+                            ->then(function ($v) { return $this->handlerTypeAcceptedOptionsValidation($v); })
+                        ->end()
                         ->validate()
                             ->ifTrue(function ($v) { return 'service' === $v['type'] && !empty($v['formatter']); })
                             ->thenInvalid('Service handlers can not have a formatter configured in the bundle, you must reconfigure the service itself instead')
@@ -793,10 +896,6 @@ class Configuration implements ConfigurationInterface
                         ->validate()
                             ->ifTrue(function ($v) { return 'fingers_crossed' === $v['type'] && !empty($v['excluded_http_codes']) && !empty($v['excluded_404s']); })
                             ->thenInvalid('You can not use excluded_http_codes together with excluded_404s in a FingersCrossedHandler')
-                        ->end()
-                        ->validate()
-                            ->ifTrue(function ($v) { return 'fingers_crossed' !== $v['type'] && (!empty($v['excluded_http_codes']) || !empty($v['excluded_404s'])); })
-                            ->thenInvalid('You can only use excluded_http_codes/excluded_404s with a FingersCrossedHandler definition')
                         ->end()
                         ->validate()
                             ->ifTrue(function ($v) { return 'filter' === $v['type'] && "DEBUG" !== $v['min_level'] && !empty($v['accepted_levels']); })
@@ -962,5 +1061,120 @@ class Configuration implements ConfigurationInterface
         ;
 
         return $treeBuilder;
+    }
+
+    private function handlerTypeAcceptedOptionsValidation(array $v)
+    {
+        if (!array_key_exists('type', $v)) {
+            return $v;
+        }
+
+        if (!array_key_exists(strtolower($v['type']), $this->acceptedParamsByHandlerType)) {
+            return $v;
+        }
+
+        // @todo array_keys should be converted to lowercase?
+        $acceptableParamsForHandlers = array_intersect($this->provideAllConfigurationParams(), array_keys($v));
+        $unacceptableParamForHandler = array_diff(
+            $acceptableParamsForHandlers,
+            $this->acceptedParamsByHandlerType[strtolower($v['type'])]
+        );
+        if (!empty($unacceptableParamForHandler)) {
+            throw new InvalidConfigurationException(sprintf(
+                'The handler type %s does not support %s %s',
+                strtolower($v['type']),
+                implode(', ', $unacceptableParamForHandler),
+                count($unacceptableParamForHandler) == 1 ? 'parameter' : 'parameters'
+            ));
+        }
+
+        return $v;
+    }
+
+    private function provideAllConfigurationParams()
+    {
+        return [
+            'accepted_levels',
+            'action_level',
+            'activation_strategy',
+            'api_version',
+            'app_name',
+            'auto_log_stacks',
+            'bubble',
+            'bot_name',
+            'buffer_size',
+            'channel',
+            'client_id',
+            'config',
+            'connection_string',
+            'connection_timeout',
+            'console_formater_options',
+            'content_type',
+            'date_format',
+            'deduplication_level',
+            'document_type',
+            'dsn',
+            'elasticsearch',
+            'email_prototype',
+            'environment',
+            'exchange',
+            'exchange_name',
+            'excluded_404s',
+            'excluded_http_codes',
+            'facility',
+            'filename_format',
+            'file_permission',
+            'flush_on_overflow',
+            'from_email',
+            'handler',
+            'headers',
+            'host',
+            'icon_emoji',
+            'id',
+            'ident',
+            'include_extra',
+            'index',
+            'lazy',
+            'level',
+            'logopts',
+            'mailer',
+            'max_files',
+            'max_level',
+            'message_format',
+            'message_type',
+            'min_level',
+            'members',
+            'mongo',
+            'nickname',
+            'notify',
+            'path',
+            'passthru_level',
+            'persistent',
+            'port',
+            'publisher',
+            'redis',
+            'release',
+            'region',
+            'room',
+            'source',
+            'stop_buffering',
+            'store',
+            'subject',
+            'tags',
+            'team',
+            'time',
+            'timeout',
+            'title',
+            'token',
+            'to_email',
+            'url',
+            'user',
+            'use_attachment',
+            'use_locking',
+            'use_short_attachment',
+            'use_ssl',
+            'verbosity_levels',
+            'webhook_url',
+        ];
     }
 }
