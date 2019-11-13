@@ -1,4 +1,4 @@
-## 3.5.0 (xxxx-xx-xx)
+## 3.5.0 (2019-11-13)
 
 * Added support for Monolog 2.0
 * Added `sentry` type to use sentry 2.0 client
