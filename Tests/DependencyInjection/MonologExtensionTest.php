@@ -11,6 +11,8 @@
 
 namespace Symfony\Bundle\MonologBundle\Tests\DependencyInjection;
 
+use InvalidArgumentException;
+use Monolog\Logger;
 use Symfony\Bundle\MonologBundle\DependencyInjection\MonologExtension;
 use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\LoggerChannelPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -531,6 +533,67 @@ class MonologExtensionTest extends DependencyInjectionTest
         $this->assertDICDefinitionClass($handler, 'Monolog\Handler\FingersCrossedHandler');
         $this->assertDICConstructorArguments($handler, [new Reference('monolog.handler.nested'), new Reference('monolog.handler.main.http_code_strategy'), 0, true, true, null]);
     }
+
+    /**
+     * @param string $handlerType
+     * @dataProvider v2RemovedDataProvider
+     */
+    public function testV2Removed($handlerType)
+    {
+        if (Logger::API === 1) {
+            $this->markTestSkipped('Not valid for V1');
+
+            return;
+        }
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage(sprintf('"%s" was removed in Monolog v2.', $handlerType));
+
+        $container = new ContainerBuilder();
+        $loader = new MonologExtension();
+
+        $loader->load([['handlers' => ['main' => ['type' => $handlerType]]]], $container);
+    }
+
+    public function v2RemovedDataProvider()
+    {
+        return [
+            ['hipchat'],
+            ['raven'],
+            ['slackbot'],
+        ];
+    }
+
+    /**
+     * @param string $handlerType
+     * @dataProvider v1AddedDataProvider
+     */
+    public function testV2AddedOnV1($handlerType)
+    {
+        if (Logger::API === 2) {
+            $this->markTestSkipped('Not valid for V2');
+
+            return;
+        }
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage(
+            sprintf('"%s" was added in Monolog v2, please upgrade if you wish to use it.', $handlerType)
+        );
+
+        $container = new ContainerBuilder();
+        $loader = new MonologExtension();
+
+        $loader->load([['handlers' => ['main' => ['type' => $handlerType]]]], $container);
+    }
+
+    public function v1AddedDataProvider()
+    {
+        return [
+            ['fallbackgroup'],
+        ];
+    }
+
 
     protected function getContainer(array $config = [], array $thirdPartyDefinitions = [])
     {

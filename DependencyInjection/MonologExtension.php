@@ -467,6 +467,7 @@ class MonologExtension extends Extension
 
         case 'group':
         case 'whatfailuregroup':
+        case 'fallbackgroup':
             $references = [];
             foreach ($handler['members'] as $nestedHandler) {
                 $nestedHandlerId = $this->getHandlerId($nestedHandler);
@@ -938,7 +939,40 @@ class MonologExtension extends Extension
             'insightops' => 'Monolog\Handler\InsightOpsHandler',
         ];
 
+        $v2HandlerTypesAdded = [
+            'elasticsearch' => 'Monolog\Handler\ElasticaHandler',
+            'fallbackgroup' => 'Monolog\Handler\FallbackGroupHandler',
+            'logmatic' => 'Monolog\Handler\LogmaticHandler',
+            'noop' => 'Monolog\Handler\NoopHandler',
+            'overflow' => 'Monolog\Handler\OverflowHandler',
+            'process' => 'Monolog\Handler\ProcessHandler',
+            'sendgrid' => 'Monolog\Handler\SendGridHandler',
+            'sqs' => 'Monolog\Handler\SqsHandler',
+            'telegram' => 'Monolog\Handler\TelegramBotHandler',
+        ];
+
+        $v2HandlerTypesRemoved = [
+            'hipchat',
+            'raven',
+            'slackbot',
+        ];
+
+        if (Logger::API === 2) {
+            $typeToClassMapping = array_merge($typeToClassMapping, $v2HandlerTypesAdded);
+            foreach($v2HandlerTypesRemoved as $v2HandlerTypeRemoved) {
+                unset($typeToClassMapping[$v2HandlerTypeRemoved]);
+            }
+        }
+
         if (!isset($typeToClassMapping[$handlerType])) {
+            if (Logger::API === 1 && array_key_exists($handlerType, $v2HandlerTypesAdded)) {
+                throw new \InvalidArgumentException(sprintf('"%s" was added in Monolog v2, please upgrade if you wish to use it.', $handlerType));
+            }
+
+            if (Logger::API === 2 && array_key_exists($handlerType, $v2HandlerTypesRemoved)) {
+                throw new \InvalidArgumentException(sprintf('"%s" was removed in Monolog v2.', $handlerType));
+            }
+
             throw new \InvalidArgumentException(sprintf('There is no handler class defined for handler "%s".', $handlerType));
         }
 
