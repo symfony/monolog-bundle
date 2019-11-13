@@ -11,7 +11,6 @@
 
 namespace Symfony\Bundle\MonologBundle\DependencyInjection;
 
-use InvalidArgumentException;
 use Monolog\Logger;
 use Monolog\Processor\ProcessorInterface;
 use Monolog\ResettableInterface;
@@ -859,7 +858,7 @@ class MonologExtension extends Extension
                 $nullWarning = ', if you meant to define a null handler in a yaml config, make sure you quote "null" so it does not get converted to a php null';
             }
 
-            throw new InvalidArgumentException(sprintf('Invalid handler type "%s" given for handler "%s"' . $nullWarning, $handler['type'], $name));
+            throw new \InvalidArgumentException(sprintf('Invalid handler type "%s" given for handler "%s"' . $nullWarning, $handler['type'], $name));
         }
 
         if (!empty($handler['nested']) && true === $handler['nested']) {
@@ -967,20 +966,14 @@ class MonologExtension extends Extension
 
         if (!isset($typeToClassMapping[$handlerType])) {
             if (Logger::API === 1 && array_key_exists($handlerType, $v2HandlerTypesAdded)) {
-                throw new InvalidArgumentException(
-                    sprintf('"%s" was added in MonoLog v2, please upgrade if you wish to use.', $handlerType)
-                );
+                throw new \InvalidArgumentException(sprintf('"%s" was added in Monolog v2, please upgrade if you wish to use it.', $handlerType));
             }
 
             if (Logger::API === 2 && array_key_exists($handlerType, $v2HandlerTypesRemoved)) {
-                throw new InvalidArgumentException(
-                    sprintf('"%s" was removed in MonoLog v2.', $handlerType)
-                );
+                throw new \InvalidArgumentException(sprintf('"%s" was removed in Monolog v2.', $handlerType));
             }
 
-            throw new InvalidArgumentException(
-                sprintf('There is no handler class defined for handler "%s".', $handlerType)
-            );
+            throw new \InvalidArgumentException(sprintf('There is no handler class defined for handler "%s".', $handlerType));
         }
 
         return $typeToClassMapping[$handlerType];

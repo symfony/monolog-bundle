@@ -547,7 +547,7 @@ class MonologExtensionTest extends DependencyInjectionTest
         }
 
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage(sprintf('"%s" was removed in MonoLog v2.', $handlerType));
+        $this->expectExceptionMessage(sprintf('"%s" was removed in Monolog v2.', $handlerType));
 
         $container = new ContainerBuilder();
         $loader = new MonologExtension();
@@ -578,7 +578,7 @@ class MonologExtensionTest extends DependencyInjectionTest
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage(
-            sprintf('"%s" was added in MonoLog v2, please upgrade if you wish to use.', $handlerType)
+            sprintf('"%s" was added in Monolog v2, please upgrade if you wish to use it.', $handlerType)
         );
 
         $container = new ContainerBuilder();
