@@ -36,5 +36,9 @@
         <service id="monolog.formatter.logstash" class="Monolog\Formatter\LogstashFormatter" public="false">
             <argument index="0">app</argument>
         </service>
+
+        <service id="monolog.http_client" class="Symfony\Contracts\HttpClient\HttpClientInterface" public="false">
+            <factory class="Symfony\Component\HttpClient\HttpClient" method="create" />
+        </service>
     </services>
 </container>
