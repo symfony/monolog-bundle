@@ -13,18 +13,21 @@ namespace Symfony\Bundle\MonologBundle\DependencyInjection;
 
 use Monolog\Logger;
 use Monolog\Processor\ProcessorInterface;
+use Monolog\Handler\HandlerInterface;
 use Monolog\ResettableInterface;
 use Symfony\Bridge\Monolog\Handler\FingersCrossed\HttpCodeActivationStrategy;
 use Symfony\Bridge\Monolog\Processor\TokenProcessor;
 use Symfony\Bridge\Monolog\Processor\WebProcessor;
 use Symfony\Bundle\FullStack;
-use Symfony\Component\HttpKernel\DependencyInjection\Extension;
-use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
-use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Config\FileLocator;
+use Symfony\Component\DependencyInjection\Argument\BoundArgument;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
+use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 use Symfony\Component\DependencyInjection\Reference;
+use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use Symfony\Component\HttpKernel\Kernel;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 /**
  * MonologExtension is an extension for the Monolog library.
@@ -126,6 +129,12 @@ class MonologExtension extends Extension
             }
             $container->registerForAutoconfiguration(TokenProcessor::class)
                 ->addTag('monolog.processor');
+            if (interface_exists(HttpClientInterface::class)) {
+                $handlerAutoconfiguration = $container->registerForAutoconfiguration(HandlerInterface::class);
+                $handlerAutoconfiguration->setBindings($handlerAutoconfiguration->getBindings() + [
+                    HttpClientInterface::class => new BoundArgument(new Reference('monolog.http_client'), false),
+                ]);
+            }
         }
     }
 
