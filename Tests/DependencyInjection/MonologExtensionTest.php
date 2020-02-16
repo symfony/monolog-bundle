@@ -15,6 +15,8 @@ use InvalidArgumentException;
 use Monolog\Handler\RollbarHandler;
 use Monolog\Logger;
 use Monolog\Processor\UidProcessor;
+use Symfony\Bridge\Monolog\Handler\FingersCrossed\HttpCodeActivationStrategy;
+use Symfony\Bridge\Monolog\Processor\SwitchUserTokenProcessor;
 use Symfony\Bundle\MonologBundle\DependencyInjection\MonologExtension;
 use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\LoggerChannelPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -496,8 +498,12 @@ class MonologExtensionTest extends DependencyInjectionTest
     }
 
     /** @group legacy */
-    public function testFingersCrossedHandlerWhenExcluded404sAreSpecified()
+    public function testLegacyFingersCrossedHandlerWhenExcluded404sAreSpecified()
     {
+        if (\class_exists(SwitchUserTokenProcessor::class)) {
+            $this->markTestSkipped('Symfony Monolog < 5.2 is needed.');
+        }
+
         $container = $this->getContainer([['handlers' => [
             'main' => ['type' => 'fingers_crossed', 'handler' => 'nested', 'excluded_404s' => ['^/foo', '^/bar']],
             'nested' => ['type' => 'stream', 'path' => '/tmp/symfony.log']
@@ -521,10 +527,44 @@ class MonologExtensionTest extends DependencyInjectionTest
         $this->assertDICConstructorArguments($handler, [new Reference('monolog.handler.nested'), new Reference('monolog.handler.main.not_found_strategy'), 0, true, true, null]);
     }
 
-    public function testFingersCrossedHandlerWhenExcludedHttpCodesAreSpecified()
+    /** @group legacy */
+    public function testFingersCrossedHandlerWhenExcluded404sAreSpecified()
     {
-        if (!class_exists('Symfony\Bridge\Monolog\Handler\FingersCrossed\HttpCodeActivationStrategy')) {
+        if (!\class_exists(SwitchUserTokenProcessor::class)) {
+            $this->markTestSkipped('Symfony Monolog 5.2+ is needed.');
+        }
+
+        $container = $this->getContainer([['handlers' => [
+            'main' => ['type' => 'fingers_crossed', 'handler' => 'nested', 'excluded_404s' => ['^/foo', '^/bar']],
+            'nested' => ['type' => 'stream', 'path' => '/tmp/symfony.log']
+        ]]], ['request_stack' => new Definition(RequestStack::class)]);
+
+        $this->assertTrue($container->hasDefinition('monolog.logger'));
+        $this->assertTrue($container->hasDefinition('monolog.handler.main'));
+        $this->assertTrue($container->hasDefinition('monolog.handler.nested'));
+        $this->assertTrue($container->hasDefinition('monolog.handler.main.not_found_strategy'));
+
+        $logger = $container->getDefinition('monolog.logger');
+        $this->assertDICDefinitionMethodCallAt(0, $logger, 'useMicrosecondTimestamps', ['%monolog.use_microseconds%']);
+        $this->assertDICDefinitionMethodCallAt(1, $logger, 'pushHandler', [new Reference('monolog.handler.main')]);
+
+        $strategy = $container->getDefinition('monolog.handler.main.not_found_strategy');
+        $this->assertDICDefinitionClass($strategy, 'Symfony\Bridge\Monolog\Handler\FingersCrossed\NotFoundActivationStrategy');
+        $this->assertDICConstructorArguments($strategy, [new Reference('request_stack'), ['^/foo', '^/bar'], new Definition('Monolog\Handler\FingersCrossed\ErrorLevelActivationStrategy', [\Monolog\Logger::WARNING])]);
+
+        $handler = $container->getDefinition('monolog.handler.main');
+        $this->assertDICDefinitionClass($handler, 'Monolog\Handler\FingersCrossedHandler');
+        $this->assertDICConstructorArguments($handler, [new Reference('monolog.handler.nested'), new Reference('monolog.handler.main.not_found_strategy'), 0, true, true, null]);
+    }
+
+    /** @group legacy */
+    public function testLegacyFingersCrossedHandlerWhenExcludedHttpCodesAreSpecified()
+    {
+        if (!class_exists(HttpCodeActivationStrategy::class)) {
             $this->markTestSkipped('Symfony Monolog 4.1+ is needed.');
+        }
+        if (\class_exists(SwitchUserTokenProcessor::class)) {
+            $this->markTestSkipped('Symfony Monolog < 5.2 is needed.');
         }
 
         $container = $this->getContainer([['handlers' => [
@@ -555,6 +595,50 @@ class MonologExtensionTest extends DependencyInjectionTest
                 ['code' => 405, 'urls' => ['^/foo', '^/bar']]
             ],
             \Monolog\Logger::WARNING
+        ]);
+
+        $handler = $container->getDefinition('monolog.handler.main');
+        $this->assertDICDefinitionClass($handler, 'Monolog\Handler\FingersCrossedHandler');
+        $this->assertDICConstructorArguments($handler, [new Reference('monolog.handler.nested'), new Reference('monolog.handler.main.http_code_strategy'), 0, true, true, null]);
+    }
+
+    public function testFingersCrossedHandlerWhenExcludedHttpCodesAreSpecified()
+    {
+        if (!class_exists(HttpCodeActivationStrategy::class)) {
+            $this->markTestSkipped('Symfony Monolog 4.1+ is needed.');
+        }
+        if (!\class_exists(SwitchUserTokenProcessor::class)) {
+            $this->markTestSkipped('Symfony Monolog 5.2+ is needed.');
+        }
+
+        $container = $this->getContainer([['handlers' => [
+            'main' => [
+                'type' => 'fingers_crossed',
+                'handler' => 'nested',
+                'excluded_http_codes' => [403, 404, [405 => ['^/foo', '^/bar']]]
+            ],
+            'nested' => ['type' => 'stream', 'path' => '/tmp/symfony.log']
+        ]]], ['request_stack' => new Definition(RequestStack::class)]);
+
+        $this->assertTrue($container->hasDefinition('monolog.logger'));
+        $this->assertTrue($container->hasDefinition('monolog.handler.main'));
+        $this->assertTrue($container->hasDefinition('monolog.handler.nested'));
+        $this->assertTrue($container->hasDefinition('monolog.handler.main.http_code_strategy'));
+
+        $logger = $container->getDefinition('monolog.logger');
+        $this->assertDICDefinitionMethodCallAt(0, $logger, 'useMicrosecondTimestamps', ['%monolog.use_microseconds%']);
+        $this->assertDICDefinitionMethodCallAt(1, $logger, 'pushHandler', [new Reference('monolog.handler.main')]);
+
+        $strategy = $container->getDefinition('monolog.handler.main.http_code_strategy');
+        $this->assertDICDefinitionClass($strategy, 'Symfony\Bridge\Monolog\Handler\FingersCrossed\HttpCodeActivationStrategy');
+        $this->assertDICConstructorArguments($strategy, [
+            new Reference('request_stack'),
+            [
+                ['code' => 403, 'urls' => []],
+                ['code' => 404, 'urls' => []],
+                ['code' => 405, 'urls' => ['^/foo', '^/bar']]
+            ],
+            new Definition('Monolog\Handler\FingersCrossed\ErrorLevelActivationStrategy', [\Monolog\Logger::WARNING])
         ]);
 
         $handler = $container->getDefinition('monolog.handler.main');

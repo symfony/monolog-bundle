@@ -16,6 +16,7 @@ use Monolog\Processor\ProcessorInterface;
 use Monolog\Handler\HandlerInterface;
 use Monolog\ResettableInterface;
 use Symfony\Bridge\Monolog\Handler\FingersCrossed\HttpCodeActivationStrategy;
+use Symfony\Bridge\Monolog\Processor\SwitchUserTokenProcessor;
 use Symfony\Bridge\Monolog\Processor\TokenProcessor;
 use Symfony\Bridge\Monolog\Processor\WebProcessor;
 use Symfony\Bundle\FullStack;
@@ -399,32 +400,60 @@ class MonologExtension extends Extension
             $nestedHandlerId = $this->getHandlerId($handler['handler']);
             $this->markNestedHandler($nestedHandlerId);
 
+            $isLegacyBridge = !\class_exists(SwitchUserTokenProcessor::class);
+
             if (isset($handler['activation_strategy'])) {
                 $activation = new Reference($handler['activation_strategy']);
             } elseif (!empty($handler['excluded_404s'])) {
                 if (class_exists(HttpCodeActivationStrategy::class)) {
                     @trigger_error('The "excluded_404s" option is deprecated in MonologBundle since version 3.4.0, you should rely on the "excluded_http_codes" option instead.', E_USER_DEPRECATED);
                 }
-                $activationDef = new Definition('Symfony\Bridge\Monolog\Handler\FingersCrossed\NotFoundActivationStrategy', [
-                    new Reference('request_stack'),
-                    $handler['excluded_404s'],
-                    $handler['action_level']
-                ]);
+                if ($isLegacyBridge) {
+                    $activationDef = new Definition('Symfony\Bridge\Monolog\Handler\FingersCrossed\NotFoundActivationStrategy', [
+                        new Reference('request_stack'),
+                        $handler['excluded_404s'],
+                        $handler['action_level']
+                    ]);
+                } else {
+                    $activationDef = new Definition('Symfony\Bridge\Monolog\Handler\FingersCrossed\NotFoundActivationStrategy', [
+                        new Reference('request_stack'),
+                        $handler['excluded_404s'],
+                        new Definition('Monolog\Handler\FingersCrossed\ErrorLevelActivationStrategy', [
+                            $handler['action_level']
+                        ])
+                    ]);
+                }
                 $container->setDefinition($handlerId.'.not_found_strategy', $activationDef);
                 $activation = new Reference($handlerId.'.not_found_strategy');
             } elseif (!empty($handler['excluded_http_codes'])) {
                 if (!class_exists('Symfony\Bridge\Monolog\Handler\FingersCrossed\HttpCodeActivationStrategy')) {
                     throw new \LogicException('"excluded_http_codes" cannot be used as your version of Monolog bridge does not support it.');
                 }
-                $activationDef = new Definition('Symfony\Bridge\Monolog\Handler\FingersCrossed\HttpCodeActivationStrategy', [
-                    new Reference('request_stack'),
-                    $handler['excluded_http_codes'],
-                    $handler['action_level']
-                ]);
+                if ($isLegacyBridge) {
+                    $activationDef = new Definition('Symfony\Bridge\Monolog\Handler\FingersCrossed\HttpCodeActivationStrategy', [
+                        new Reference('request_stack'),
+                        $handler['excluded_http_codes'],
+                        $handler['action_level']
+                    ]);
+                } else {
+                    $activationDef = new Definition('Symfony\Bridge\Monolog\Handler\FingersCrossed\HttpCodeActivationStrategy', [
+                        new Reference('request_stack'),
+                        $handler['excluded_http_codes'],
+                        new Definition('Monolog\Handler\FingersCrossed\ErrorLevelActivationStrategy', [
+                            $handler['action_level']
+                        ])
+                    ]);
+                }
                 $container->setDefinition($handlerId.'.http_code_strategy', $activationDef);
                 $activation = new Reference($handlerId.'.http_code_strategy');
             } else {
-                $activation = $handler['action_level'];
+                if ($isLegacyBridge) {
+                    $activation = $handler['action_level'];
+                } else {
+                    $activation = new Definition('Monolog\Handler\FingersCrossed\ErrorLevelActivationStrategy', [
+                        $handler['action_level']
+                    ]);
+                }
             }
 
             $definition->setArguments([

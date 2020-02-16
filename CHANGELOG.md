@@ -2,6 +2,7 @@
 
 * Register resettable processors (`ResettableInterface`) for autoconfiguration (tag: `kernel.reset`)
 * Drop support for Symfony 3.4
+* Handle composed monolog-bridge activation strategy
 
 ## 3.6.0 (2020-10-06)
 
