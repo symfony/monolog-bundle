@@ -29,7 +29,7 @@ use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\FixEmptyLoggerPass
  */
 class MonologBundle extends Bundle
 {
-    public function build(ContainerBuilder $container)
+    public function build(ContainerBuilder $container) : void
     {
         parent::build($container);
 
@@ -45,7 +45,7 @@ class MonologBundle extends Bundle
     /**
      * @internal
      */
-    public static function includeStacktraces(HandlerInterface $handler)
+    public static function includeStacktraces(HandlerInterface $handler) : void
     {
         $formatter = $handler->getFormatter();
         if ($formatter instanceof LineFormatter || $formatter instanceof JsonFormatter) {
