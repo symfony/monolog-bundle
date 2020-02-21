@@ -11,16 +11,18 @@
 
 namespace Symfony\Bundle\MonologBundle;
 
+
+use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\AddProcessorsPass;
+use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\AddSwiftMailerTransportPass;
+use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\DebugHandlerPass;
+use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\FixEmptyLoggerPass;
+use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\LoggerChannelPass;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\HttpKernel\Bundle\Bundle;
 use Monolog\Formatter\JsonFormatter;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\HandlerInterface;
-use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\AddSwiftMailerTransportPass;
-use Symfony\Component\HttpKernel\Bundle\Bundle;
-use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\LoggerChannelPass;
-use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\DebugHandlerPass;
-use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\AddProcessorsPass;
-use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\FixEmptyLoggerPass;
+
 
 /**
  * Bundle.
