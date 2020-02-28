@@ -170,9 +170,9 @@ class LoggerChannelPassTest extends TestCase
         $definition->addMethodCall('pushHandler', [new Reference('monolog.handler.test')]);
 
         // Handlers
-        $container->set('monolog.handler.a', new Definition('%monolog.handler.null.class%', [100, false]));
-        $container->set('monolog.handler.b', new Definition('%monolog.handler.null.class%', [100, false]));
-        $container->set('monolog.handler.c', new Definition('%monolog.handler.null.class%', [100, false]));
+        $container->set('monolog.handler.a', new Definition('%monolog.handler.null.class%', [100, false]))
+            ->set('monolog.handler.b', new Definition('%monolog.handler.null.class%', [100, false]))
+            ->set('monolog.handler.c', new Definition('%monolog.handler.null.class%', [100, false]));
 
         // Channels
         foreach (['test', 'foo', 'bar'] as $name) {
@@ -233,10 +233,10 @@ class LoggerChannelPassTest extends TestCase
      */
     private function getFunctionalContainer()
     {
-        $container = new ContainerBuilder();
-        $container->setParameter('monolog.additional_channels', []);
-        $container->setParameter('monolog.handlers_to_channels', []);
-        $container->setParameter('monolog.use_microseconds', true);
+        $container = new ContainerBuilder()
+            ->setParameter('monolog.additional_channels', [])
+            ->setParameter('monolog.handlers_to_channels', [])
+            ->setParameter('monolog.use_microseconds', true);
 
         $loader = new XmlFileLoader($container, new FileLocator(__DIR__.'/../../../Resources/config'));
         $loader->load('monolog.xml');
