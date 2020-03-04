@@ -162,6 +162,7 @@ use Monolog\Logger;
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
  *   - [ident]: string, defaults to
+ *   - [rfc]: string, defaults to
  *
  * - swift_mailer:
  *   - from_email: optional if email_prototype is given
@@ -494,6 +495,7 @@ class Configuration implements ConfigurationInterface
                             ->scalarNode('title')->defaultNull()->end() // pushover
                             ->scalarNode('host')->defaultNull()->end() // syslogudp & hipchat
                             ->scalarNode('port')->defaultValue(514)->end() // syslogudp
+                            ->scalarNode('rfc')->defaultNull()->end() // syslogudp
                             ->arrayNode('publisher')
                                 ->canBeUnset()
                                 ->beforeNormalization()
