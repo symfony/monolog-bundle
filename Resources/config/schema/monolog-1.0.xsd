@@ -45,6 +45,7 @@
         <xsd:attribute name="host" type="xsd:string" />
         <xsd:attribute name="source" type="xsd:string" />
         <xsd:attribute name="port" type="xsd:integer" />
+        <xsd:attribute name="rfc" type="xsd:integer" />
         <xsd:attribute name="action-level" type="level" />
         <xsd:attribute name="passthru-level" type="level" />
         <xsd:attribute name="min-level" type="level" />

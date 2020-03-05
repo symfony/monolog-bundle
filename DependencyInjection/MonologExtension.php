@@ -522,7 +522,7 @@ class MonologExtension extends Extension
             if ($handler['ident']) {
                 $definition->addArgument($handler['ident']);
             }
-            if ($handler['rfc']) {
+            if (isset($handler['rfc'])) {
                 $definition->addArgument($handler['rfc']);
             }
             break;
