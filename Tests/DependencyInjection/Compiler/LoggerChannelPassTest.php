@@ -54,6 +54,46 @@ class LoggerChannelPassTest extends TestCase
         $this->assertNotNull($container->getDefinition('monolog.logger.additional'));
     }
 
+    public function testConstructorInjectionWithMultipleTags()
+    {
+        $container = $this->getContainer();
+        $this->assertTrue($container->hasDefinition('monolog.logger.foo'), '->process adds a foo logger service for tagged service');
+        $this->assertTrue($container->hasDefinition('monolog.logger.bar'), '->process adds a bar logger service for tagged service');
+
+        $service = $container->getDefinition('multiple');
+        $this->assertEquals('monolog.logger.foo', (string) $service->getArgument(1), '->process replaces the logger by the new one');
+        $this->assertEquals([
+            'foo' => new Reference('monolog.logger.foo'),
+            'bar' => new Reference('monolog.logger.bar'),
+            'baz' => new Reference('logger'),
+        ], $service->getArgument(2), '->process replaces loggers in the logger collection');
+        $this->assertEquals([
+            'foo' => new Reference('logger'),
+            'bar' => new Reference('another.service'),
+        ], $service->getArgument(3), '->process does not replace loggers in the logger collection');
+    }
+
+    public function testSetterInjectionWithMultipleTags()
+    {
+        $container = $this->getContainerWithSetter();
+        $this->assertTrue($container->hasDefinition('monolog.logger.foo'), '->process adds a foo logger service for tagged service');
+        $this->assertTrue($container->hasDefinition('monolog.logger.bar'), '->process adds a bar logger service for tagged service');
+
+        $service = $container->getDefinition('multiple');
+        $calls = $service->getMethodCalls();
+        $this->assertEquals('monolog.logger.foo', (string) $calls[0][1][0], '->process replaces the logger by the new one in calls (first setter)');
+        $this->assertEquals([
+            'foo' => new Reference('monolog.logger.foo'),
+            'bar' => new Reference('monolog.logger.bar'),
+            'baz' => new Reference('logger'),
+        ], $calls[0][1][1], '->process replaces loggers in the logger collection (calls, first setter)');
+        $this->assertEquals('monolog.logger.foo', (string) $calls[1][1][0], '->process replaces the logger by the new one in calls (second setter)');
+        $this->assertEquals([
+            'foo' => new Reference('logger'),
+            'bar' => new Reference('another.service'),
+        ], $calls[1][1][1], '->process does not replace loggers in the logger collection (calls, second setter)');
+    }
+
     public function testTypeHintedAliasesExistForEachChannel()
     {
         if (!\method_exists(ContainerBuilder::class, 'registerAliasForArgument')) {
@@ -174,10 +214,26 @@ class LoggerChannelPassTest extends TestCase
         $container->set('monolog.handler.b', new Definition('%monolog.handler.null.class%', [100, false]));
         $container->set('monolog.handler.c', new Definition('%monolog.handler.null.class%', [100, false]));
 
+        $container->set('another.service', new Definition(__CLASS__));
+
         // Channels
-        foreach (['test', 'foo', 'bar'] as $name) {
-            $service = new Definition('TestClass', ['false', new Reference('logger')]);
-            $service->addTag('monolog.logger', ['channel' => $name]);
+        $channelsByDef = [
+            'test' => ['test'],
+            'foo' => ['foo'],
+            'bar' => ['bar'],
+            'multiple' => ['foo', 'bar']
+        ];
+
+        foreach ($channelsByDef as $name => $channels) {
+            $service = new Definition('TestClass', [
+                'false',
+                new Reference('logger'),
+                ['foo' => new Reference('logger'), 'bar' => new Reference('logger'), 'baz' => new Reference('logger')],
+                ['foo' => new Reference('logger'), 'bar' => new Reference('another.service')]
+            ]);
+            foreach ($channels as $channelName) {
+                $service->addTag('monolog.logger', ['channel' => $channelName]);
+            }
             $container->setDefinition($name, $service);
         }
 
@@ -211,11 +267,26 @@ class LoggerChannelPassTest extends TestCase
         $container->set('monolog.handler.test', new Definition('%monolog.handler.null.class%', [100, false]));
         $definition->addMethodCall('pushHandler', [new Reference('monolog.handler.test')]);
 
+        $container->set('another.service', new Definition(__CLASS__));
+
         // Channels
         $service = new Definition('TestClass');
         $service->addTag('monolog.logger', ['channel' => 'test']);
         $service->addMethodCall('setLogger', [new Reference('logger')]);
         $container->setDefinition('foo', $service);
+
+        $service2 = new Definition('TestClass');
+        $service2->addTag('monolog.logger', ['channel' => 'foo']);
+        $service2->addTag('monolog.logger', ['channel' => 'bar']);
+        $service2->addMethodCall('setLoggerOk', [
+            new Reference('logger'),
+            ['foo' => new Reference('logger'), 'bar' => new Reference('logger'), 'baz' => new Reference('logger')]
+        ]);
+        $service2->addMethodCall('setLoggerNok', [
+            new Reference('logger'),
+            ['foo' => new Reference('logger'), 'bar' => new Reference('another.service')]
+        ]);
+        $container->setDefinition('multiple', $service2);
 
         $container->setParameter('monolog.additional_channels', ['additional']);
         $container->setParameter('monolog.handlers_to_channels', []);

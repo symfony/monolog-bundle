@@ -39,6 +39,7 @@ class LoggerChannelPass implements CompilerPassInterface
 
         // create channels necessary for the handlers
         foreach ($container->findTaggedServiceIds('monolog.logger') as $id => $tags) {
+            $channelsForTags = [];
             foreach ($tags as $tag) {
                 if (empty($tag['channel']) || 'app' === $tag['channel']) {
                     continue;
@@ -49,36 +50,41 @@ class LoggerChannelPass implements CompilerPassInterface
                 $definition = $container->getDefinition($id);
                 $loggerId = sprintf('monolog.logger.%s', $resolvedChannel);
                 $this->createLogger($resolvedChannel, $loggerId, $container);
+                $channelsForTags[$resolvedChannel] = $loggerId;
+            }
 
-                foreach ($definition->getArguments() as $index => $argument) {
-                    if ($argument instanceof Reference && 'logger' === (string) $argument) {
-                        $definition->replaceArgument($index, $this->changeReference($argument, $loggerId));
+            if (!$channelsForTags) {
+                continue;
+            }
+
+            foreach ($definition->getArguments() as $index => $argument) {
+                if ($replacement = $this->findReplacementForArgument($argument, $channelsForTags)) {
+                    $definition->replaceArgument($index, $replacement);
+                }
+            }
+
+            $calls = $definition->getMethodCalls();
+            foreach ($calls as $i => $call) {
+                foreach ($call[1] as $index => $argument) {
+                    if ($replacement = $this->findReplacementForArgument($argument, $channelsForTags)) {
+                        $calls[$i][1][$index] = $replacement;
                     }
                 }
+            }
+            $definition->setMethodCalls($calls);
 
-                $calls = $definition->getMethodCalls();
-                foreach ($calls as $i => $call) {
-                    foreach ($call[1] as $index => $argument) {
-                        if ($argument instanceof Reference && 'logger' === (string) $argument) {
-                            $calls[$i][1][$index] = $this->changeReference($argument, $loggerId);
-                        }
-                    }
-                }
-                $definition->setMethodCalls($calls);
+            if (\method_exists($definition, 'getBindings')) {
+                $binding = new BoundArgument(new Reference(current($channelsForTags)));
 
-                if (\method_exists($definition, 'getBindings')) {
-                    $binding = new BoundArgument(new Reference($loggerId));
+                // Mark the binding as used already, to avoid reporting it as unused if the service does not use a
+                // logger injected through the LoggerInterface alias.
+                $values = $binding->getValues();
+                $values[2] = true;
+                $binding->setValues($values);
 
-                    // Mark the binding as used already, to avoid reporting it as unused if the service does not use a
-                    // logger injected through the LoggerInterface alias.
-                    $values = $binding->getValues();
-                    $values[2] = true;
-                    $binding->setValues($values);
-
-                    $bindings = $definition->getBindings();
-                    $bindings['Psr\Log\LoggerInterface'] = $binding;
-                    $definition->setBindings($bindings);
-                }
+                $bindings = $definition->getBindings();
+                $bindings['Psr\Log\LoggerInterface'] = $binding;
+                $definition->setBindings($bindings);
             }
         }
 
@@ -106,6 +112,34 @@ class LoggerChannelPass implements CompilerPassInterface
                 $logger->addMethodCall('pushHandler', [new Reference($handler)]);
             }
         }
+    }
+
+    /**
+     * @param array $channelsForTags
+     *
+     * @return string|array|null
+     */
+    private function findReplacementForArgument($argument, $channelsForTags)
+    {
+        if ($argument instanceof Reference && 'logger' === (string) $argument) {
+            return $this->changeReference($argument, (string) current($channelsForTags));
+        }
+
+        if (is_array($argument)) {
+            foreach ($argument as $key => $value) {
+                if (!$value instanceof Reference || 'logger' !== (string) $value) {
+                    return null;
+                }
+
+                if (isset($channelsForTags[$key])) {
+                    $argument[$key] = $this->changeReference($value, $channelsForTags[$key]);
+                }
+            }
+
+            return $argument;
+        }
+
+        return null;
     }
 
     /**
