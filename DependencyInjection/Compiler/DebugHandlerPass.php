@@ -11,6 +11,7 @@
 
 namespace Symfony\Bundle\MonologBundle\DependencyInjection\Compiler;
 
+use Symfony\Component\DependencyInjection\Dumper\Preloader;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
@@ -47,6 +48,11 @@ class DebugHandlerPass implements CompilerPassInterface
         }
 
         $debugHandler = new Definition('Symfony\Bridge\Monolog\Handler\DebugHandler', [Logger::DEBUG, true]);
+
+        if (class_exists(Preloader::class)) {
+            $debugHandler->addTag('container.preload');
+        }
+
         $container->setDefinition('monolog.handler.debug', $debugHandler);
 
         foreach ($this->channelPass->getChannels() as $channel) {

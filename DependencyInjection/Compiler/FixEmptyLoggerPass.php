@@ -13,6 +13,7 @@ namespace Symfony\Bundle\MonologBundle\DependencyInjection\Compiler;
 
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Dumper\Preloader;
 use Symfony\Component\DependencyInjection\Reference;
 
 /**
@@ -40,7 +41,11 @@ class FixEmptyLoggerPass implements CompilerPassInterface
 
     public function process(ContainerBuilder $container)
     {
-        $container->register('monolog.handler.null_internal', 'Monolog\Handler\NullHandler');
+        $nullHandler = $container->register('monolog.handler.null_internal', 'Monolog\Handler\NullHandler');
+        if (class_exists(Preloader::class)) {
+            $nullHandler->addTag('container.preload');
+        }
+
         foreach ($this->channelPass->getChannels() as $channel) {
             $def = $container->getDefinition($channel === 'app' ? 'monolog.logger' : 'monolog.logger.'.$channel);
             foreach ($def->getMethodCalls() as $method) {

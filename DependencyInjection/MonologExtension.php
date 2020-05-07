@@ -23,6 +23,7 @@ use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\Argument\BoundArgument;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
+use Symfony\Component\DependencyInjection\Dumper\Preloader;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
@@ -134,6 +135,11 @@ class MonologExtension extends Extension
                 $handlerAutoconfiguration->setBindings($handlerAutoconfiguration->getBindings() + [
                     HttpClientInterface::class => new BoundArgument(new Reference('monolog.http_client'), false),
                 ]);
+            }
+
+            if (class_exists(Preloader::class)) {
+                $container->registerForAutoconfiguration(HandlerInterface::class)
+                    ->addTag('container.preload');
             }
         }
     }
@@ -880,6 +886,10 @@ class MonologExtension extends Extension
 
         if (!in_array($handlerId, $this->nestedHandlers) && is_subclass_of($handlerClass, ResettableInterface::class)) {
             $definition->addTag('kernel.reset', ['method' => 'reset']);
+        }
+
+        if (class_exists(Preloader::class)) {
+            $definition->addTag('container.preload');
         }
 
         $container->setDefinition($handlerId, $definition);
