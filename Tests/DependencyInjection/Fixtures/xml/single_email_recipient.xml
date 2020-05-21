@@ -14,4 +14,8 @@
             subject="An Error Occurred!"
             level="debug" />
     </monolog:config>
+    <services>
+        <service id="mailer" class="Mailer">
+        </service>
+    </services>
 </container>

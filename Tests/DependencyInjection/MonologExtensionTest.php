@@ -239,7 +239,10 @@ class MonologExtensionTest extends DependencyInjectionTest
 
     public function testRollbarHandlerReusesNotifier()
     {
-        $container = $this->getContainer([['handlers' => ['main' => ['type' => 'rollbar', 'id' => 'my_rollbar_id']]]]);
+        $container = $this->getContainer(
+            [['handlers' => ['main' => ['type' => 'rollbar', 'id' => 'my_rollbar_id']]]],
+            ['my_rollbar_id' => new Definition('my_rollbar_id')]
+        );
 
         $this->assertTrue($container->hasDefinition('monolog.logger'));
         $this->assertTrue($container->hasDefinition('monolog.handler.main'));
@@ -294,6 +297,9 @@ class MonologExtensionTest extends DependencyInjectionTest
 
     public function testRavenHandlerWhenADSNIsSpecified()
     {
+        if (Logger::API === 2) {
+            $this->markTestSkipped('"raven" was removed in Monolog v2');
+        }
         $dsn = 'http://43f6017361224d098402974103bfc53d:a6a0538fc2934ba2bed32e08741b2cd3@marca.python.live.cheggnet.com:9000/1';
 
         $container = $this->getContainer([['handlers' => ['raven' => [
@@ -309,11 +315,16 @@ class MonologExtensionTest extends DependencyInjectionTest
         $this->assertTrue($container->hasDefinition('monolog.raven.client.'.sha1($dsn)));
 
         $handler = $container->getDefinition('monolog.handler.raven');
+
         $this->assertDICDefinitionClass($handler, 'Monolog\Handler\RavenHandler');
     }
 
     public function testRavenHandlerWhenADSNAndAClientAreSpecified()
     {
+        if (Logger::API === 2) {
+            $this->markTestSkipped('"raven" was removed in Monolog v2');
+        }
+
         $container = $this->getContainer([['handlers' => ['raven' => [
             'type' => 'raven', 'dsn' => 'foobar', 'client_id' => 'raven.client'
         ]]]]);
@@ -330,6 +341,10 @@ class MonologExtensionTest extends DependencyInjectionTest
 
     public function testRavenHandlerWhenAClientIsSpecified()
     {
+        if (Logger::API === 2) {
+            $this->markTestSkipped('"raven" was removed in Monolog v2');
+        }
+
         $container = $this->getContainer([['handlers' => ['raven' => [
             'type' => 'raven', 'client_id' => 'raven.client'
         ]]]]);
@@ -470,10 +485,13 @@ class MonologExtensionTest extends DependencyInjectionTest
     /** @group legacy */
     public function testFingersCrossedHandlerWhenExcluded404sAreSpecified()
     {
-        $container = $this->getContainer([['handlers' => [
-            'main' => ['type' => 'fingers_crossed', 'handler' => 'nested', 'excluded_404s' => ['^/foo', '^/bar']],
-            'nested' => ['type' => 'stream', 'path' => '/tmp/symfony.log']
-        ]]]);
+        $container = $this->getContainer(
+            [['handlers' => [
+                'main' => ['type' => 'fingers_crossed', 'handler' => 'nested', 'excluded_404s' => ['^/foo', '^/bar']],
+                'nested' => ['type' => 'stream', 'path' => '/tmp/symfony.log']
+            ]]],
+            ['request_stack' => new Definition('request_stack')]
+            );
 
         $this->assertTrue($container->hasDefinition('monolog.logger'));
         $this->assertTrue($container->hasDefinition('monolog.handler.main'));
@@ -506,7 +524,7 @@ class MonologExtensionTest extends DependencyInjectionTest
                 'excluded_http_codes' => [403, 404, [405 => ['^/foo', '^/bar']]]
             ],
             'nested' => ['type' => 'stream', 'path' => '/tmp/symfony.log']
-        ]]]);
+        ]]], ['request_stack' => new Definition('request_stack')]);
 
         $this->assertTrue($container->hasDefinition('monolog.logger'));
         $this->assertTrue($container->hasDefinition('monolog.handler.main'));
@@ -538,7 +556,7 @@ class MonologExtensionTest extends DependencyInjectionTest
      * @param string $handlerType
      * @dataProvider v2RemovedDataProvider
      */
-    public function testV2Removed($handlerType)
+    public function testV2Removed($handlerParams)
     {
         if (Logger::API === 1) {
             $this->markTestSkipped('Not valid for V1');
@@ -547,20 +565,20 @@ class MonologExtensionTest extends DependencyInjectionTest
         }
 
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage(sprintf('"%s" was removed in Monolog v2.', $handlerType));
+        $this->expectExceptionMessage(sprintf('"%s" was removed in Monolog v2.', $handlerParams['type']));
 
         $container = new ContainerBuilder();
         $loader = new MonologExtension();
 
-        $loader->load([['handlers' => ['main' => ['type' => $handlerType]]]], $container);
+        $loader->load([['handlers' => ['main' => $handlerParams]]], $container);
     }
 
     public function v2RemovedDataProvider()
     {
         return [
-            ['hipchat'],
-            ['raven'],
-            ['slackbot'],
+            [['type' => 'hipchat', 'token' => 'token', 'room' => 'room']],
+            [['type' => 'raven', 'dsn' => 'dsn', 'client_id' => 'client_id']],
+            [['type' => 'slackbot', 'team' => 'team', 'token' => 'token', 'channel' => 'channel']],
         ];
     }
 

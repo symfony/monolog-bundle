@@ -6,3 +6,6 @@ monolog:
             to_email:   [dev1@example.com, dev2@example.com]
             subject:    An Error Occurred!
             level:      debug
+services:
+    mailer:
+        class:     Mailer

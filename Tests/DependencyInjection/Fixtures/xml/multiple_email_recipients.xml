@@ -17,4 +17,8 @@
             <monolog:to-email>dev2@example.com</monolog:to-email>
         </monolog:handler>
     </monolog:config>
+    <services>
+        <service id="mailer" class="Mailer">
+        </service>
+    </services>
 </container>

@@ -978,7 +978,7 @@ class MonologExtension extends Extension
                 throw new \InvalidArgumentException(sprintf('"%s" was added in Monolog v2, please upgrade if you wish to use it.', $handlerType));
             }
 
-            if (Logger::API === 2 && array_key_exists($handlerType, $v2HandlerTypesRemoved)) {
+            if (Logger::API === 2 && in_array($handlerType, $v2HandlerTypesRemoved)) {
                 throw new \InvalidArgumentException(sprintf('"%s" was removed in Monolog v2.', $handlerType));
             }
 
