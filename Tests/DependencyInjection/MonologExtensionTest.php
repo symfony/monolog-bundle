@@ -327,9 +327,9 @@ class MonologExtensionTest extends DependencyInjectionTest
 
         $container = $this->getContainer([['handlers' => ['raven' => [
             'type' => 'raven', 'dsn' => 'foobar', 'client_id' => 'raven.client'
-        ]]]]);
-
-        $this->assertFalse($container->hasDefinition('raven.client'));
+        ]]]],
+            ['raven.client' => new Definition('stdClass', ['foo', false])]
+        );
 
         $logger = $container->getDefinition('monolog.logger');
         $this->assertDICDefinitionMethodCallAt(0, $logger, 'useMicrosecondTimestamps', ['%monolog.use_microseconds%']);
@@ -347,9 +347,9 @@ class MonologExtensionTest extends DependencyInjectionTest
 
         $container = $this->getContainer([['handlers' => ['raven' => [
             'type' => 'raven', 'client_id' => 'raven.client'
-        ]]]]);
-
-        $this->assertFalse($container->hasDefinition('raven.client'));
+        ]]]],
+            ['raven.client' => new Definition('stdClass', ['foo', false])]
+        );
 
         $logger = $container->getDefinition('monolog.logger');
         $this->assertDICDefinitionMethodCallAt(0, $logger, 'useMicrosecondTimestamps', ['%monolog.use_microseconds%']);
