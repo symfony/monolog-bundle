@@ -424,6 +424,7 @@ class Configuration implements ConfigurationInterface
         'logentries' => ['token', 'use_ssl', 'level', 'bubble', 'timeout', 'connection_timeout'],
         'insightops' => ['token', 'region', 'use_ssl', 'level', 'bubble'],
         'flowdock' => ['token', 'source', 'from_email', 'level', 'bubble'],
+        'rollbar' => ['id', 'token', 'config', 'level', 'bubble'],
         'server_log' => ['host', 'level', 'bubble'],
     ];
 
@@ -1069,15 +1070,19 @@ class Configuration implements ConfigurationInterface
             return $v;
         }
 
-        if (!array_key_exists(strtolower($v['type']), $this->acceptedParamsByHandlerType)) {
+// @todo add again, eventually, if we want to raise exception on next if statement
+//        if (in_array($v['type'], ['config', 'id', 'service'])) {
+//            return $v;
+//        }
+
+        if (!array_key_exists($v['type'], $this->acceptedParamsByHandlerType)) {
             return $v;
         }
 
-        // @todo array_keys should be converted to lowercase?
         $acceptableParamsForHandlers = array_intersect($this->provideAllConfigurationParams(), array_keys($v));
         $unacceptableParamForHandler = array_diff(
             $acceptableParamsForHandlers,
-            $this->acceptedParamsByHandlerType[strtolower($v['type'])]
+            $this->acceptedParamsByHandlerType[$v['type']]
         );
         if (!empty($unacceptableParamForHandler)) {
             throw new InvalidConfigurationException(sprintf(
@@ -1093,88 +1098,6 @@ class Configuration implements ConfigurationInterface
 
     private function provideAllConfigurationParams()
     {
-        return [
-            'accepted_levels',
-            'action_level',
-            'activation_strategy',
-            'api_version',
-            'app_name',
-            'auto_log_stacks',
-            'bubble',
-            'bot_name',
-            'buffer_size',
-            'channel',
-            'client_id',
-            'config',
-            'connection_string',
-            'connection_timeout',
-            'console_formater_options',
-            'content_type',
-            'date_format',
-            'deduplication_level',
-            'document_type',
-            'dsn',
-            'elasticsearch',
-            'email_prototype',
-            'environment',
-            'exchange',
-            'exchange_name',
-            'excluded_404s',
-            'excluded_http_codes',
-            'facility',
-            'filename_format',
-            'file_permission',
-            'flush_on_overflow',
-            'from_email',
-            'handler',
-            'headers',
-            'host',
-            'icon_emoji',
-            'id',
-            'ident',
-            'include_extra',
-            'index',
-            'lazy',
-            'level',
-            'logopts',
-            'mailer',
-            'max_files',
-            'max_level',
-            'message_format',
-            'message_type',
-            'min_level',
-            'members',
-            'mongo',
-            'nickname',
-            'notify',
-            'path',
-            'passthru_level',
-            'persistent',
-            'port',
-            'publisher',
-            'redis',
-            'release',
-            'region',
-            'room',
-            'source',
-            'stop_buffering',
-            'store',
-            'subject',
-            'tags',
-            'team',
-            'time',
-            'timeout',
-            'title',
-            'token',
-            'to_email',
-            'url',
-            'user',
-            'use_attachment',
-            'use_locking',
-            'use_short_attachment',
-            'use_ssl',
-            'verbosity_levels',
-            'webhook_url',
-        ];
+        return array_unique(call_user_func_array('array_merge', $this->acceptedParamsByHandlerType));
     }
 }

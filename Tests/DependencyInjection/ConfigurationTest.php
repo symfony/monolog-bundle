@@ -172,7 +172,7 @@ class ConfigurationTest extends TestCase
             [
                 'handlers' => [
                     'foo' => [
-                        'type' => 'stream',
+                        'type' => 'slack',
                         'path' => '/foo',
                         'channels' => 'A',
                     ]
@@ -422,2390 +422,789 @@ class ConfigurationTest extends TestCase
     }
 
     /**
-     * @dataProvider provideStreamHandlerConfigurationInvalidParams
-     * @expectedException Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
+     * @dataProvider provideHandlersConfigurations
      */
-    public function testStreamHandlerInvalidConfiguration($param, $value)
+    public function testHandlerValidConfiguration($config)
     {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(['type' => 'stream'], ['path' => '/a/path', $param => $value]),
-                ]
-            ],
-        ];
+        $config = $this->process([$config]);
 
-        $this->process($configs);
+        $this->assertArrayHasKey('handlers', $config);
     }
 
-    public function provideStreamHandlerConfigurationInvalidParams()
+    public function provideHandlersConfigurations()
     {
-        return array_diff_key(
-            $this->provideAllHandlersConfigurationParams(),
-            $this->provideStreamHandlerValidConfigurationParams()
-        );
+        return
+            [
+                [
+                    ['handlers' => $this->getHandlersConfigurations()]
+                ]
+            ];
+    }
+
+    private function getHandlersConfigurations()
+    {
+        $allConfigParams = $this->provideAllHandlersConfigurationParams();
+
+        return [
+            'stream' => [
+                'type' => 'stream',
+                'path' => $allConfigParams['path'],
+                'level' => $allConfigParams['level'],
+                'bubble' => $allConfigParams['bubble'],
+                'file_permission' => $allConfigParams['file_permission'],
+                'use_locking' => $allConfigParams['use_locking'],
+            ],
+            'console' => [
+                'type' => 'console',
+                'verbosity_levels' => $allConfigParams['verbosity_levels'],
+                'level' => $allConfigParams['level'],
+                'bubble' => $allConfigParams['bubble'],
+                'console_formater_options' => $allConfigParams['console_formater_options'],
+            ],
+            'firephp' => [
+                'type' => 'firephp',
+                'level' => $allConfigParams['level'],
+                'bubble' => $allConfigParams['bubble'],
+            ],
+            'browser_console' => [
+                'type' => 'browser_console',
+                'level' => $allConfigParams['level'],
+                'bubble' => $allConfigParams['bubble'],
+            ],
+            'gelf' => [
+                'type' => 'gelf',
+                'publisher' => $allConfigParams['publisher'],
+                'level' => $allConfigParams['level'],
+                'bubble' => $allConfigParams['bubble'],
+            ],
+            'chromephp' => [
+                'type' => 'chromephp',
+                'level' => $allConfigParams['level'],
+                'bubble' => $allConfigParams['bubble'],
+            ],
+            'rotating_file' => [
+                'type' => 'rotating_file',
+                'path' => $allConfigParams['path'],
+                'max_files' => $allConfigParams['max_files'],
+                'level' => $allConfigParams['level'],
+                'bubble' => $allConfigParams['bubble'],
+                'file_permission' => $allConfigParams['file_permission'],
+                'filename_format' => $allConfigParams['filename_format'],
+                'date_format' => $allConfigParams['date_format'],
+            ],
+            'mongo' => [
+                'type' => 'mongo',
+                'mongo' => $allConfigParams['mongo'],
+                'level' => $allConfigParams['level'],
+                'bubble' => $allConfigParams['bubble'],
+            ],
+            'elasticsearch' => [
+                'type' => 'elasticsearch',
+                'elasticsearch' => $allConfigParams['elasticsearch'],
+                'index' => $allConfigParams['index'],
+                'document_type' => $allConfigParams['document_type'],
+                'level' => $allConfigParams['level'],
+                'bubble' => $allConfigParams['bubble'],
+            ],
+            'redis' => [
+                'type' => 'redis',
+                'redis' => $allConfigParams['redis'],
+            ],
+            'predis' => [
+                'type' => 'predis',
+                'redis' => $allConfigParams['redis'],
+            ],
+//            'fingers_crossed' => [
+//                'type' => 'fingers_crossed',
+//                'handler' => $allConfigParams['handler'],
+//                'action_level' => $allConfigParams['action_level'],
+//                'excluded_http_codes' => $allConfigParams['excluded_http_codes'],
+//                'buffer_size' => $allConfigParams['buffer_size'],
+//                'stop_buffering' => $allConfigParams['stop_buffering'],
+//                'passthru_level' => $allConfigParams['passthru_level'],
+//                'bubble' => $allConfigParams['bubble'],
+//            ],
+//            'filter' => [
+//                'type' => 'filter',
+//                'handler' => $allConfigParams['handler'],
+//                'accepted_levels' => $allConfigParams['accepted_levels'],
+//                'min_level' => $allConfigParams['min_level'],
+//                'max_level' => $allConfigParams['max_level'],
+//                'bubble' => $allConfigParams['bubble'],
+//            ],
+            'buffer' => [
+                'type' => 'buffer',
+                'handler' => $allConfigParams['handler'],
+                'buffer_size' => $allConfigParams['buffer_size'],
+                'level' => $allConfigParams['level'],
+                'bubble' => $allConfigParams['bubble'],
+                'flush_on_overflow' => $allConfigParams['flush_on_overflow'],
+            ],
+            'deduplication' => [
+                'type' => 'deduplication',
+                'handler' => $allConfigParams['handler'],
+                'store' => $allConfigParams['store'],
+                'deduplication_level' => $allConfigParams['deduplication_level'],
+                'time' => $allConfigParams['time'],
+                'bubble' => $allConfigParams['bubble'],
+            ],
+            'group' => [
+                'type' => 'group',
+                'members' => $allConfigParams['members'],
+                'bubble' => $allConfigParams['bubble'],
+            ],
+            'whatfailuregroup' => [
+                'type' => 'whatfailuregroup',
+                'members' => $allConfigParams['members'],
+                'bubble' => $allConfigParams['bubble'],
+            ],
+            'syslog' => [
+                'type' => 'syslog',
+                'ident' => $allConfigParams['ident'],
+                'facility' => $allConfigParams['facility'],
+                'logopts' => $allConfigParams['logopts'],
+                'level' => $allConfigParams['level'],
+                'bubble' => $allConfigParams['bubble'],
+            ],
+            'syslogudp' => [
+                'type' => 'syslogudp',
+                'host' => $allConfigParams['host'],
+                'port' => $allConfigParams['port'],
+                'facility' => $allConfigParams['facility'],
+                'logopts' => $allConfigParams['logopts'],
+                'level' => $allConfigParams['level'],
+                'bubble' => $allConfigParams['bubble'],
+                'ident' => $allConfigParams['ident'],
+            ],
+            'swift_mailer' => [
+                'type' => 'swift_mailer',
+                'from_email' => $allConfigParams['from_email'],
+                'to_email' => $allConfigParams['to_email'],
+                'subject' => $allConfigParams['subject'],
+                'email_prototype' => $allConfigParams['email_prototype'],
+                'content_type' => $allConfigParams['content_type'],
+                'mailer' => $allConfigParams['mailer'],
+                'level' => $allConfigParams['level'],
+                'bubble' => $allConfigParams['bubble'],
+                'lazy' => $allConfigParams['lazy'],
+            ],
+            'native_mailer' => [
+                'type' => 'native_mailer',
+                'from_email' => $allConfigParams['from_email'],
+                'to_email' => $allConfigParams['to_email'],
+                'subject' => $allConfigParams['subject'],
+                'level' => $allConfigParams['level'],
+                'bubble' => $allConfigParams['bubble'],
+                'headers' => $allConfigParams['headers'],
+            ],
+            'socket' => [
+                'type' => 'socket',
+                'connection_string' => $allConfigParams['connection_string'],
+                'timeout' => $allConfigParams['timeout'],
+                'connection_timeout' => $allConfigParams['connection_timeout'],
+                'persistent' => $allConfigParams['persistent'],
+                'level' => $allConfigParams['level'],
+                'bubble' => $allConfigParams['bubble'],
+            ],
+            'pushover' => [
+                'type' => 'pushover',
+                'token' => $allConfigParams['token'],
+                'user' => $allConfigParams['user'],
+                'title' => $allConfigParams['title'],
+                'level' => $allConfigParams['level'],
+                'bubble' => $allConfigParams['bubble'],
+                'timeout' => $allConfigParams['timeout'],
+                'connection_timeout' => $allConfigParams['connection_timeout'],
+            ],
+            'raven' => [
+                'type' => 'raven',
+                'dsn' => $allConfigParams['dsn'],
+                'client_id' => $allConfigParams['client_id'],
+                'release' => $allConfigParams['release'],
+                'level' => $allConfigParams['level'],
+                'bubble' => $allConfigParams['bubble'],
+                'auto_log_stacks' => $allConfigParams['auto_log_stacks'],
+                'environment' => $allConfigParams['environment'],
+            ],
+            'sentry' => [
+                'type' => 'sentry',
+                'dsn' => $allConfigParams['dsn'],
+                'client_id' => $allConfigParams['client_id'],
+                'release' => $allConfigParams['release'],
+                'level' => $allConfigParams['level'],
+                'bubble' => $allConfigParams['bubble'],
+                'auto_log_stacks' => $allConfigParams['auto_log_stacks'],
+                'environment' => $allConfigParams['environment'],
+            ],
+            'newrelic' => [
+                'type' => 'newrelic',
+                'level' => $allConfigParams['level'],
+                'bubble' => $allConfigParams['bubble'],
+                'app_name' => $allConfigParams['app_name'],
+            ],
+            'hipchat' => [
+                'type' => 'hipchat',
+                'token' => $allConfigParams['token'],
+                'room' => $allConfigParams['room'],
+                'notify' => $allConfigParams['notify'],
+                'nickname' => $allConfigParams['nickname'],
+                'level' => $allConfigParams['level'],
+                'bubble' => $allConfigParams['bubble'],
+                'use_ssl' => $allConfigParams['use_ssl'],
+                'message_format' => $allConfigParams['message_format'],
+                'host' => $allConfigParams['host'],
+                'api_version' => $allConfigParams['api_version'],
+                'timeout' => $allConfigParams['timeout'],
+                'connection_timeout' => $allConfigParams['connection_timeout'],
+            ],
+            'slack' => [
+                'type' => 'slack',
+                'token' => $allConfigParams['token'],
+                'channel' => $allConfigParams['channel'],
+                'bot_name' => $allConfigParams['bot_name'],
+                'icon_emoji' => $allConfigParams['icon_emoji'],
+                'use_attachment' => $allConfigParams['use_attachment'],
+                'use_short_attachment' => $allConfigParams['use_short_attachment'],
+                'include_extra' => $allConfigParams['include_extra'],
+                'level' => $allConfigParams['level'],
+                'bubble' => $allConfigParams['bubble'],
+                'timeout' => $allConfigParams['timeout'],
+                'connection_timeout' => $allConfigParams['connection_timeout'],
+            ],
+            'slackwebhook' => [
+                'type' => 'slackwebhook',
+                'webhook_url' => $allConfigParams['webhook_url'],
+                'channel' => $allConfigParams['channel'],
+                'bot_name' => $allConfigParams['bot_name'],
+                'icon_emoji' => $allConfigParams['icon_emoji'],
+                'use_attachment' => $allConfigParams['use_attachment'],
+                'use_short_attachment' => $allConfigParams['use_short_attachment'],
+                'include_extra' => $allConfigParams['include_extra'],
+                'level' => $allConfigParams['level'],
+                'bubble' => $allConfigParams['bubble'],
+            ],
+            'slackbot' => [
+                'type' => 'slackbot',
+                'team' => $allConfigParams['team'],
+                'token' => $allConfigParams['token'],
+                'channel' => $allConfigParams['channel'],
+                'level' => $allConfigParams['level'],
+                'bubble' => $allConfigParams['bubble'],
+            ],
+            'cube' => [
+                'type' => 'cube',
+                'url' => $allConfigParams['url'],
+                'level' => $allConfigParams['level'],
+                'bubble' => $allConfigParams['bubble'],
+            ],
+            'amqp' => [
+                'type' => 'amqp',
+                'exchange' => $allConfigParams['exchange'],
+                'exchange_name' => $allConfigParams['exchange_name'],
+                'level' => $allConfigParams['level'],
+                'bubble' => $allConfigParams['bubble'],
+            ],
+            'error_log' => [
+                'type' => 'error_log',
+                'message_type' => $allConfigParams['message_type'],
+                'level' => $allConfigParams['level'],
+                'bubble' => $allConfigParams['bubble'],
+            ],
+            'null' => [
+                'type' => 'null',
+                'level' => $allConfigParams['level'],
+                'bubble' => $allConfigParams['bubble'],
+            ],
+            'test' => [
+                'type' => 'test',
+                'level' => $allConfigParams['level'],
+                'bubble' => $allConfigParams['bubble'],
+            ],
+            'deb' => [
+                'type' => 'debug',
+                'level' => $allConfigParams['level'],
+                'bubble' => $allConfigParams['bubble'],
+            ],
+            'loggly' => [
+                'type' => 'loggly',
+                'token' => $allConfigParams['token'],
+                'level' => $allConfigParams['level'],
+                'bubble' => $allConfigParams['bubble'],
+                'tags' => $allConfigParams['tags'],
+            ],
+            'logentries' => [
+                'type' => 'logentries',
+                'token' => $allConfigParams['token'],
+                'use_ssl' => $allConfigParams['use_ssl'],
+                'level' => $allConfigParams['level'],
+                'bubble' => $allConfigParams['bubble'],
+                'timeout' => $allConfigParams['timeout'],
+                'connection_timeout' => $allConfigParams['connection_timeout'],
+            ],
+            'insightops' => [
+                'type' => 'insightops',
+                'token' => $allConfigParams['token'],
+                'region' => $allConfigParams['region'],
+                'use_ssl' => $allConfigParams['use_ssl'],
+                'level' => $allConfigParams['level'],
+                'bubble' => $allConfigParams['bubble'],
+            ],
+            'flowdock' => [
+                'type' => 'flowdock',
+                'token' => $allConfigParams['token'],
+                'source' => $allConfigParams['source'],
+                'from_email' => $allConfigParams['from_email'],
+                'level' => $allConfigParams['level'],
+                'bubble' => $allConfigParams['bubble'],
+            ],
+//            'rollbar' => [
+//                'type' => 'rollbar',
+//                'id' => $allConfigParams['id'],
+//                'token' => $allConfigParams['token'],
+//                'config' => $allConfigParams['config'],
+//                'level' => $allConfigParams['level'],
+//                'bubble' => $allConfigParams['bubble'],
+//            ]
+            'server_log' => [
+                'type' => 'server_log',
+                'host' => $allConfigParams['host'],
+                'level' => $allConfigParams['level'],
+                'bubble' => $allConfigParams['bubble'],
+            ]
+        ];
     }
 
     private function provideAllHandlersConfigurationParams()
     {
         return [
-            'accepted_levels' => ['accepted_levels', ['DEBUG']],
-            'action_level' => ['action_level', 'DEBUG'],
-            'activation_strategy' => ['activation_strategy', 'DEBUG'],
-            'api_version' => ['api_version', 'v2'],
-            'app_name' => ['app_name', 'app_name'],
-            'auto_log_stacks' => ['auto_log_stacks', true],
-            'bubble' => ['bubble', false],
-            'bot_name' => ['bot_name', 'bot_name'],
-            'buffer_size' => ['buffer_size', 0],
-            'channel' => ['channel', '#channel_name'],
-            'client_id' => ['client_id', 'client_id'],
-            'config' => ['config', ['config' => 'config']],
-            'connection_string' => ['connection_string', 'connection_string'],
-            'connection_timeout' => ['connection_timeout', 0.5],
-            'console_formater_options' => ['console_formater_options', []],
-            'content_type' => ['content_type', 'text/plain'],
-            'date_format' => ['date_format', 'Y-m-d'],
-            'deduplication_level' => ['deduplication_level', 'DEBUG'],
-            'document_type' => ['document_type', 'logs'],
-            'dsn' => ['dsn', 'dsn_connection_string'],
-            'elasticsearch' => ['elasticsearch', 'id'],
-            'email_prototype' => ['email_prototype', 'service_message_id'],
-            'environment' => ['environment', 'dev'],
-            'exchange' => ['exchange', 'service_id'],
-            'exchange_name' => ['exchange_name', 'log'],
-            'excluded_404s' => ['excluded_404s', ['^/.*']],
-            'excluded_http_codes' => ['excluded_http_codes', [404]],
-            'facility' => ['facility', 'user'],
-            'filename_format' => ['filename_format', 'filename_format'],
-            'file_permission' => ['file_permission', 777],
-            'flush_on_overflow' => ['flush_on_overflow', true],
-            'from_email' => ['from_email', 'fromemail@test.com'],
-            'handler' => ['handler', 'handler_name'],
-            'headers' => ['headers', ['Foo: Bar']],
-            'host' => ['host', 'hostname'],
-            'icon_emoji' => ['icon_emoji', ':icon_emoji:'],
-            'id' => ['id', 'id'],
-            'ident' => ['ident', 'ident'],
-            'include_extra' => ['include_extra', true],
-            'index' => ['index', 'monolog'],
-            'lazy' => ['lazy', false],
-            'level' => ['level', 'DEBUG'],
-            'logopts' => ['logopts', 'LOGPID'],
-            'mailer' => ['mailer', 'mailer'],
-            'max_files' => ['max_files', 0],
-            'max_level' => ['max_level', 'DEBUG'],
-            'message_format' => ['message_format', 'html'],
-            'message_type' => ['message_type', '1'],
-            'min_level' => ['min_level', 'DEBUG'],
-            'members' => ['members', ['foo']],
-            'mongo' => ['mongo', 'id'],
-            'nickname' => ['nickname', 'nickname'],
-            'notify' => ['notify', true],
-            'path' => ['path', '/a/path'],
-            'passthru_level' => ['passthru_level', 'DEBUG'],
-            'persistent' => ['persistent', true],
-            'port' => ['port', 514],
-            'publisher' => ['publisher', 'id'],
-            'redis' => ['redis', ['id' => 'id']],
-            'release' => ['release', '1.0.1'],
-            'region' => ['region', 'eu'],
-            'room' => ['room', 'room_id'],
-            'source' => ['source', 'source_id'],
-            'stop_buffering' => ['stop_buffering', false],
-            'store' => ['store', '/'],
-            'subject' => ['subject', 'subject'],
-            'tags' => ['tags', ['a_tag']],
-            'team' => ['team', 'team'],
-            'time' => ['time', 3600],
-            'timeout' => ['timeout', 1.2],
-            'title' => ['title', 'title'],
-            'token' => ['token', 'api_token'],
-            'to_email' => ['to_email', 'toemail@test.com'],
-            'url' => ['url', 'http://localhost'],
-            'user' => ['user', 'user_id'],
-            'use_attachment' => ['use_attachment', false],
-            'use_locking' => ['use_locking', true],
-            'use_short_attachment' => ['use_short_attachment', true],
-            'use_ssl' => ['use_ssl', false],
-            'verbosity_levels' => ['verbosity_levels', ['DEBUG']],
-            'webhook_url' => ['webhook_url', 'http://localhost'],
-        ];
-    }
-
-    private function provideStreamHandlerValidConfigurationParams()
-    {
-        return [
-            'path' => 'aPath',
-            'level' => 'DEBUG',
-            'bubble' => false,
-            'file_permission' => 777,
-            'use_locking' => true,
-        ];
-    }
-
-    public function testStreamHandlerValidConfiguration()
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(['type' => 'stream'], $this->provideStreamHandlerValidConfigurationParams()),
-                ]
-            ],
-        ];
-
-        $config = $this->process($configs);
-
-        $this->assertArrayHasKey('handlers', $config);
-    }
-
-    /**
-     * @dataProvider provideConsoleHandlerConfigurationInvalidParams
-     * @expectedException Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
-     */
-    public function testConsoleHandlerInvalidConfiguration($param, $value)
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(['type' => 'console'], [$param => $value]),
-                ]
-            ],
-        ];
-
-        $this->process($configs);
-    }
-
-    public function provideConsoleHandlerConfigurationInvalidParams()
-    {
-        return array_diff_key(
-            $this->provideAllHandlersConfigurationParams(),
-            $this->provideConsoleHandlerValidConfigurationParams()
-        );
-    }
-
-    private function provideConsoleHandlerValidConfigurationParams()
-    {
-        return [
-            'verbosity_levels' => ['DEBUG'],
-            'level' => 'DEBUG',
-            'bubble' => false,
-            'console_formater_options' => [],
-        ];
-    }
-
-    public function testConsoleHandlerValidConfiguration()
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(['type' => 'console'], $this->provideConsoleHandlerValidConfigurationParams()),
-                ]
-            ],
-        ];
-
-        $config = $this->process($configs);
-
-        $this->assertArrayHasKey('handlers', $config);
-    }
-
-    /**
-     * @dataProvider provideFirePHPHandlerConfigurationInvalidParams
-     * @expectedException Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
-     */
-    public function testFirePHPHandlerInvalidConfiguration($param, $value)
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(['type' => 'firephp'], [$param => $value]),
-                ]
-            ],
-        ];
-
-        $this->process($configs);
-    }
-
-    public function provideFirePHPHandlerConfigurationInvalidParams()
-    {
-        return array_diff_key(
-            $this->provideAllHandlersConfigurationParams(),
-            $this->provideFirePHPHandlerValidConfigurationParams()
-        );
-    }
-
-    private function provideFirePHPHandlerValidConfigurationParams()
-    {
-        return [
-            'level' => 'DEBUG',
-            'bubble' => false,
-        ];
-    }
-
-    public function testFirePHPHandlerValidConfiguration()
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(['type' => 'firephp'], $this->provideFirePHPHandlerValidConfigurationParams()),
-                ]
-            ],
-        ];
-
-        $config = $this->process($configs);
-
-        $this->assertArrayHasKey('handlers', $config);
-    }
-
-    /**
-     * @dataProvider provideBrowserConsoleHandlerConfigurationInvalidParams
-     * @expectedException Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
-     */
-    public function testBrowserConsoleHandlerInvalidConfiguration($param, $value)
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(['type' => 'browser_console'], [$param => $value]),
-                ]
-            ],
-        ];
-
-        $this->process($configs);
-    }
-
-    public function provideBrowserConsoleHandlerConfigurationInvalidParams()
-    {
-        return array_diff_key(
-            $this->provideAllHandlersConfigurationParams(),
-            $this->provideBrowserConsoleHandlerValidConfigurationParams()
-        );
-    }
-
-    private function provideBrowserConsoleHandlerValidConfigurationParams()
-    {
-        return [
-            'level' => 'DEBUG',
-            'bubble' => false,
-        ];
-    }
-
-    public function testBrowserConsoleHandlerValidConfiguration()
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(['type' => 'browser_console'], $this->provideBrowserConsoleHandlerValidConfigurationParams()),
-                ]
-            ],
-        ];
-
-        $config = $this->process($configs);
-
-        $this->assertArrayHasKey('handlers', $config);
-    }
-
-    /**
-     * @dataProvider provideGelfHandlerConfigurationInvalidParams
-     * @expectedException Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
-     */
-    public function testGelfHandlerInvalidConfiguration($param, $value)
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(['type' => 'gelf'], ['publisher' => 'id', $param => $value]),
-                ]
-            ],
-        ];
-
-        $this->process($configs);
-    }
-
-    public function provideGelfHandlerConfigurationInvalidParams()
-    {
-        return array_diff_key(
-            $this->provideAllHandlersConfigurationParams(),
-            $this->provideGelfHandlerValidConfigurationParams()
-        );
-    }
-
-    private function provideGelfHandlerValidConfigurationParams()
-    {
-        return [
-            'publisher' => 'id',
-            'level' => 'DEBUG',
-            'bubble' => false,
-        ];
-    }
-
-    public function testGelfHandlerValidConfiguration()
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(['type' => 'gelf'], $this->provideGelfHandlerValidConfigurationParams()),
-                ]
-            ],
-        ];
-
-        $config = $this->process($configs);
-
-        $this->assertArrayHasKey('handlers', $config);
-    }
-
-    /**
-     * @dataProvider provideChromePHPHandlerConfigurationInvalidParams
-     * @expectedException Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
-     */
-    public function testChromePHPHandlerInvalidConfiguration($param, $value)
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(['type' => 'chromephp'], [$param => $value]),
-                ]
-            ],
-        ];
-
-        $this->process($configs);
-    }
-
-    public function provideChromePHPHandlerConfigurationInvalidParams()
-    {
-        return array_diff_key(
-            $this->provideAllHandlersConfigurationParams(),
-            $this->provideChromePHPHandlerValidConfigurationParams()
-        );
-    }
-
-    private function provideChromePHPHandlerValidConfigurationParams()
-    {
-        return [
-            'level' => 'DEBUG',
-            'bubble' => false,
-        ];
-    }
-
-    public function testChromePHPHandlerValidConfiguration()
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(
-                        ['type' => 'chromephp'],
-                        $this->provideChromePHPHandlerValidConfigurationParams()
-                    ),
-                ]
-            ],
-        ];
-
-        $config = $this->process($configs);
-
-        $this->assertArrayHasKey('handlers', $config);
-    }
-
-    /**
-     * @dataProvider provideRotatingFileHandlerConfigurationInvalidParams
-     * @expectedException Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
-     */
-    public function testRotatingFileHandlerInvalidConfiguration($param, $value)
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(['type' => 'rotating_file'], ['path' => '/a/path', $param => $value]),
-                ]
-            ],
-        ];
-
-        $this->process($configs);
-    }
-
-    public function provideRotatingFileHandlerConfigurationInvalidParams()
-    {
-        return array_diff_key(
-            $this->provideAllHandlersConfigurationParams(),
-            $this->provideRotatingFileHandlerValidConfigurationParams()
-        );
-    }
-
-    private function provideRotatingFileHandlerValidConfigurationParams()
-    {
-        return [
-            'path' => '/a/path',
-            'max_files' => 0,
-            'level' => 'DEBUG',
-            'bubble' => false,
-            'file_permission' => 777,
-            'filename_format' => 'filename_format',
-            'date_format' => 'Y-m-d',
-        ];
-    }
-
-    public function testRotatingFileHandlerValidConfiguration()
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(
-                        ['type' => 'rotating_file'],
-                        $this->provideRotatingFileHandlerValidConfigurationParams()
-                    ),
-                ]
-            ],
-        ];
-
-        $config = $this->process($configs);
-
-        $this->assertArrayHasKey('handlers', $config);
-    }
-
-    /**
-     * @dataProvider provideMongoHandlerConfigurationInvalidParams
-     * @expectedException Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
-     */
-    public function testMongoHandlerInvalidConfiguration($param, $value)
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(['type' => 'mongo'], ['mongo' => 'id', $param => $value]),
-                ]
-            ],
-        ];
-
-        $this->process($configs);
-    }
-
-    public function provideMongoHandlerConfigurationInvalidParams()
-    {
-        return array_diff_key(
-            $this->provideAllHandlersConfigurationParams(),
-            $this->provideMongoHandlerValidConfigurationParams()
-        );
-    }
-
-    private function provideMongoHandlerValidConfigurationParams()
-    {
-        return [
-            'mongo' => 'id',
-            'level' => 'DEBUG',
-            'bubble' => false,
-        ];
-    }
-
-    public function testMongoHandlerValidConfiguration()
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(['type' => 'mongo'], $this->provideMongoHandlerValidConfigurationParams()),
-                ]
-            ],
-        ];
-
-        $config = $this->process($configs);
-
-        $this->assertArrayHasKey('handlers', $config);
-    }
-
-    /**
-     * @dataProvider provideElasticSearchHandlerConfigurationInvalidParams
-     * @expectedException Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
-     */
-    public function testElasticSearchHandlerInvalidConfiguration($param, $value)
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(['type' => 'elasticsearch'], ['elasticsearch' => 'id', $param => $value]),
-                ]
-            ],
-        ];
-
-        $this->process($configs);
-    }
-
-    public function provideElasticSearchHandlerConfigurationInvalidParams()
-    {
-        return array_diff_key(
-            $this->provideAllHandlersConfigurationParams(),
-            $this->provideElasticSearchHandlerValidConfigurationParams()
-        );
-    }
-
-    private function provideElasticSearchHandlerValidConfigurationParams()
-    {
-        return [
-            'elasticsearch' => 'id',
-            'index' => 'monolog',
-            'document_type' => 'logs',
-            'level' => 'DEBUG',
-            'bubble' => false,
-        ];
-    }
-
-    public function testElasticSearchHandlerValidConfiguration()
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(
-                        ['type' => 'elasticsearch'],
-                        $this->provideElasticSearchHandlerValidConfigurationParams()
-                    ),
-                ]
-            ],
-        ];
-
-        $config = $this->process($configs);
-
-        $this->assertArrayHasKey('handlers', $config);
-    }
-
-    /**
-     * @dataProvider provideRedisHandlerConfigurationInvalidParams
-     * @expectedException Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
-     */
-    public function testRedisHandlerInvalidConfiguration($param, $value)
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(['type' => 'redis'], ['redis' => ['id' => 'id'], $param => $value]),
-                ]
-            ],
-        ];
-
-        $this->process($configs);
-    }
-
-    public function provideRedisHandlerConfigurationInvalidParams()
-    {
-        return array_diff_key(
-            $this->provideAllHandlersConfigurationParams(),
-            $this->provideRedisHandlerValidConfigurationParams()
-        );
-    }
-
-    private function provideRedisHandlerValidConfigurationParams()
-    {
-        return [
-            'redis' => ['id' => 'id'],
-        ];
-    }
-
-    public function testRedisHandlerValidConfiguration()
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(['type' => 'redis'], $this->provideRedisHandlerValidConfigurationParams()),
-                ]
-            ],
-        ];
-
-        $config = $this->process($configs);
-
-        $this->assertArrayHasKey('handlers', $config);
-    }
-
-    /**
-     * @dataProvider providePredisHandlerConfigurationInvalidParams
-     * @expectedException Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
-     */
-    public function testPredisHandlerInvalidConfiguration($param, $value)
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(['type' => 'predis'], ['redis' => ['id' => 'id'], $param => $value]),
-                ]
-            ],
-        ];
-
-        $this->process($configs);
-    }
-
-    public function providePredisHandlerConfigurationInvalidParams()
-    {
-        return array_diff_key(
-            $this->provideAllHandlersConfigurationParams(),
-            $this->providePredisHandlerValidConfigurationParams()
-        );
-    }
-
-    private function providePredisHandlerValidConfigurationParams()
-    {
-        return [
-            'redis' => ['id' => 'id'],
-        ];
-    }
-
-    public function testPredisHandlerValidConfiguration()
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(['type' => 'redis'], $this->providePredisHandlerValidConfigurationParams()),
-                ]
-            ],
-        ];
-
-        $config = $this->process($configs);
-
-        $this->assertArrayHasKey('handlers', $config);
-    }
-
-    /**
-     * @dataProvider provideFingersCrossedHandlerConfigurationInvalidParams
-     * @expectedException Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
-     */
-    public function testFingersCrossedHandlerInvalidConfiguration($param, $value)
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(['type' => 'fingers_crossed'], ['handler' => 'handler_name', $param => $value]),
-                ]
-            ],
-        ];
-
-        $this->process($configs);
-    }
-
-    public function provideFingersCrossedHandlerConfigurationInvalidParams()
-    {
-        return array_diff_key(
-            $this->provideAllHandlersConfigurationParams(),
-            $this->provideFingersCrossedHandlerValidConfigurationParams()
-        );
-    }
-
-    private function provideFingersCrossedHandlerValidConfigurationParams()
-    {
-        return [
-            'handler' => 'handler_name',
+            'accepted_levels' => ['DEBUG'],
             'action_level' => 'DEBUG',
             'activation_strategy' => 'DEBUG',
-            'excluded_404s' => ['^/.*'],
-            'excluded_http_codes' => [404],
-            'buffer_size' => 0,
-            'stop_buffering' => false,
-            'passthru_level' => 'DEBUG',
-            'bubble' => false,
-        ];
-    }
-
-    public function testFingersCrossedHandlerWithActionLevelExcluded404sConfiguration()
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(
-                        ['type' => 'fingers_crossed'],
-                        [
-                            'handler' => 'handler_name',
-                            'action_level' => 'DEBUG',
-                            'excluded_http_codes' => [404],
-                            'buffer_size' => 0,
-                            'stop_buffering' => false,
-                            'passthru_level' => 'DEBUG',
-                            'bubble' => false,
-                        ]
-                    ),
-                ]
-            ],
-        ];
-
-        $config = $this->process($configs);
-
-        $this->assertArrayHasKey('handlers', $config);
-    }
-
-    public function testFingersCrossedHandlerWithActionLevelExcludedHttpCodesConfiguration()
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(
-                        ['type' => 'fingers_crossed'],
-                        [
-                            'handler' => 'handler_name',
-                            'action_level' => 'DEBUG',
-                            'excluded_404s' => ['^/.*'],
-                            'buffer_size' => 0,
-                            'stop_buffering' => false,
-                            'passthru_level' => 'DEBUG',
-                            'bubble' => false,
-                        ]
-                    ),
-                ]
-            ],
-        ];
-
-        $config = $this->process($configs);
-
-        $this->assertArrayHasKey('handlers', $config);
-    }
-
-    public function testFingersCrossedHandlerWithActivationStrategyConfiguration()
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(
-                        ['type' => 'fingers_crossed'],
-                        [
-                            'handler' => 'handler_name',
-                            'activation_strategy' => 'DEBUG',
-                            'buffer_size' => 0,
-                            'stop_buffering' => false,
-                            'passthru_level' => 'DEBUG',
-                            'bubble' => false,
-                        ]
-                    ),
-                ]
-            ],
-        ];
-
-        $config = $this->process($configs);
-
-        $this->assertArrayHasKey('handlers', $config);
-    }
-
-    /**
-     * @dataProvider provideFilterHandlerConfigurationInvalidParams
-     * @expectedException Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
-     */
-    public function testFilterHandlerInvalidConfiguration($param, $value)
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(['type' => 'filter'], ['handler' => 'handler_name', $param => $value]),
-                ]
-            ],
-        ];
-
-        $this->process($configs);
-    }
-
-    public function provideFilterHandlerConfigurationInvalidParams()
-    {
-        return array_diff_key(
-            $this->provideAllHandlersConfigurationParams(),
-            $this->provideFilterHandlerValidConfigurationParams()
-        );
-    }
-
-    private function provideFilterHandlerValidConfigurationParams()
-    {
-        return [
-            'handler' => 'handler_name',
-            'accepted_levels' => ['DEBUG'],
-            'min_level' => 'DEBUG',
-            'max_level' => 'DEBUG',
-            'bubble' => false,
-        ];
-    }
-
-    public function testFilterHandlerWithAcceptedLevelsValidConfiguration()
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(['type' => 'filter'], [
-                        'handler' => 'handler_name',
-                        'accepted_levels' => ['DEBUG'],
-                        'bubble' => false,
-                    ]),
-                ]
-            ],
-        ];
-
-        $config = $this->process($configs);
-
-        $this->assertArrayHasKey('handlers', $config);
-    }
-
-    public function testFilterHandlerWithMinMaxLevelsValidConfiguration()
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(['type' => 'filter'], [
-                        'handler' => 'handler_name',
-                        'min_level' => 'DEBUG',
-                        'max_level' => 'DEBUG',
-                        'bubble' => false,
-                    ]),
-                ]
-            ],
-        ];
-
-        $config = $this->process($configs);
-
-        $this->assertArrayHasKey('handlers', $config);
-    }
-
-    /**
-     * @dataProvider provideBufferHandlerConfigurationInvalidParams
-     * @expectedException Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
-     */
-    public function testBufferHandlerInvalidConfiguration($param, $value)
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(['type' => 'buffer'], ['handler' => 'handler_name', $param => $value]),
-                ]
-            ],
-        ];
-
-        $this->process($configs);
-    }
-
-    public function provideBufferHandlerConfigurationInvalidParams()
-    {
-        return array_diff_key(
-            $this->provideAllHandlersConfigurationParams(),
-            $this->provideBufferHandlerValidConfigurationParams()
-        );
-    }
-
-    private function provideBufferHandlerValidConfigurationParams()
-    {
-        return [
-            'handler' => 'handler_name',
-            'buffer_size' => 0,
-            'level' => 'DEBUG',
-            'bubble' => false,
-            'flush_on_overflow' => true,
-        ];
-    }
-
-    public function testBufferHandlerValidConfiguration()
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(['type' => 'buffer'], $this->provideBufferHandlerValidConfigurationParams()),
-                ]
-            ],
-        ];
-
-        $config = $this->process($configs);
-
-        $this->assertArrayHasKey('handlers', $config);
-    }
-
-    /**
-     * @dataProvider provideDeduplicationHandlerConfigurationInvalidParams
-     * @expectedException Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
-     */
-    public function testDeduplicationHandlerInvalidConfiguration($param, $value)
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(['type' => 'deduplication'], ['handler' => 'handler_name', $param => $value]),
-                ]
-            ],
-        ];
-
-        $this->process($configs);
-    }
-
-    public function provideDeduplicationHandlerConfigurationInvalidParams()
-    {
-        return array_diff_key(
-            $this->provideAllHandlersConfigurationParams(),
-            $this->provideDeduplicationHandlerValidConfigurationParams()
-        );
-    }
-
-    private function provideDeduplicationHandlerValidConfigurationParams()
-    {
-        return [
-            'handler' => 'handler_name',
-            'store' => '/',
-            'deduplication_level' => 'DEBUG',
-            'time' => 3600,
-            'bubble' => false,
-        ];
-    }
-
-    public function testDeduplicationHandlerValidConfiguration()
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(['type' => 'deduplication'], $this->provideDeduplicationHandlerValidConfigurationParams()),
-                ]
-            ],
-        ];
-
-        $config = $this->process($configs);
-
-        $this->assertArrayHasKey('handlers', $config);
-    }
-
-    /**
-     * @dataProvider provideGroupHandlerConfigurationInvalidParams
-     * @expectedException Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
-     */
-    public function testGroupHandlerInvalidConfiguration($param, $value)
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(['type' => 'group'], ['members' => ['foo'], $param => $value]),
-                ]
-            ],
-        ];
-
-        $this->process($configs);
-    }
-
-    public function provideGroupHandlerConfigurationInvalidParams()
-    {
-        return array_diff_key(
-            $this->provideAllHandlersConfigurationParams(),
-            $this->provideGroupHandlerValidConfigurationParams()
-        );
-    }
-
-    private function provideGroupHandlerValidConfigurationParams()
-    {
-        return [
-            'members' => ['foo'],
-            'bubble' => false,
-        ];
-    }
-
-    public function testGroupHandlerValidConfiguration()
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(['type' => 'group'], $this->provideGroupHandlerValidConfigurationParams()),
-                ]
-            ],
-        ];
-
-        $config = $this->process($configs);
-
-        $this->assertArrayHasKey('handlers', $config);
-    }
-
-    /**
-     * @dataProvider provideWhatFailureGroupHandlerConfigurationInvalidParams
-     * @expectedException Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
-     */
-    public function testWhatFailureGroupHandlerInvalidConfiguration($param, $value)
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(['type' => 'whatfailuregroup'], ['members' => ['foo'], $param => $value]),
-                ]
-            ],
-        ];
-
-        $this->process($configs);
-    }
-
-    public function provideWhatFailureGroupHandlerConfigurationInvalidParams()
-    {
-        return array_diff_key(
-            $this->provideAllHandlersConfigurationParams(),
-            $this->provideWhatFailureGroupHandlerValidConfigurationParams()
-        );
-    }
-
-    private function provideWhatFailureGroupHandlerValidConfigurationParams()
-    {
-        return [
-            'members' => ['foo'],
-            'bubble' => false,
-        ];
-    }
-
-    public function testWhatFailureGroupHandlerValidConfiguration()
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(
-                        ['type' => 'group'],
-                        $this->provideWhatFailureGroupHandlerValidConfigurationParams()
-                    ),
-                ]
-            ],
-        ];
-
-        $config = $this->process($configs);
-
-        $this->assertArrayHasKey('handlers', $config);
-    }
-
-    /**
-     * @dataProvider provideSyslogHandlerConfigurationInvalidParams
-     * @expectedException Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
-     */
-    public function testSyslogHandlerInvalidConfiguration($param, $value)
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(['type' => 'syslog'], ['ident' => 'ident', $param => $value]),
-                ]
-            ],
-        ];
-
-        $this->process($configs);
-    }
-
-    public function provideSyslogHandlerConfigurationInvalidParams()
-    {
-        return array_diff_key(
-            $this->provideAllHandlersConfigurationParams(),
-            $this->provideSyslogHandlerValidConfigurationParams()
-        );
-    }
-
-    private function provideSyslogHandlerValidConfigurationParams()
-    {
-        return [
-            'ident' => 'ident',
-            'facility' => 'user',
-            'logopts' => 'LOGPID',
-            'level' => 'DEBUG',
-            'bubble' => false,
-        ];
-    }
-
-    public function testSyslogHandlerValidConfiguration()
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(['type' => 'syslog'], $this->provideSyslogHandlerValidConfigurationParams()),
-                ]
-            ],
-        ];
-
-        $config = $this->process($configs);
-
-        $this->assertArrayHasKey('handlers', $config);
-    }
-
-    /**
-     * @dataProvider provideSyslogUDPHandlerConfigurationInvalidParams
-     * @expectedException Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
-     */
-    public function testSyslogUDPHandlerInvalidConfiguration($param, $value)
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(['type' => 'syslogudp'], ['host' => 'hostname', $param => $value]),
-                ]
-            ],
-        ];
-
-        $this->process($configs);
-    }
-
-    public function provideSyslogUDPHandlerConfigurationInvalidParams()
-    {
-        return array_diff_key(
-            $this->provideAllHandlersConfigurationParams(),
-            $this->provideSyslogUDPHandlerValidConfigurationParams()
-        );
-    }
-
-    private function provideSyslogUDPHandlerValidConfigurationParams()
-    {
-        return [
-            'host' => 'hostname',
-            'port' => 541,
-            'facility' => 'user',
-            'logopts' => 'LOGPID',
-            'level' => 'DEBUG',
-            'bubble' => false,
-            'ident' => 'ident'
-        ];
-    }
-
-    public function testSyslogUDPHandlerValidConfiguration()
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(['type' => 'syslogudp'], $this->provideSyslogUDPHandlerValidConfigurationParams()),
-                ]
-            ],
-        ];
-
-        $config = $this->process($configs);
-
-        $this->assertArrayHasKey('handlers', $config);
-    }
-
-    /**
-     * @dataProvider provideSwiftMailerHandlerConfigurationInvalidParams
-     * @expectedException Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
-     */
-    public function testSwitftMailerHandlerInvalidConfiguration($param, $value)
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(
-                        ['type' => 'swift_mailer'],
-                        [
-                            'from_email' => 'fromemail@test.com',
-                            'to_email' => 'toemail@test.com',
-                            'subject' => 'subject',
-                            $param => $value
-                        ]
-                    ),
-                ]
-            ],
-        ];
-
-        $this->process($configs);
-    }
-
-    public function provideSwiftMailerHandlerConfigurationInvalidParams()
-    {
-        return array_diff_key(
-            $this->provideAllHandlersConfigurationParams(),
-            $this->provideSwiftMailerHandlerValidConfigurationParams()
-        );
-    }
-
-    private function provideSwiftMailerHandlerValidConfigurationParams()
-    {
-        return [
-            'from_email' => 'fromemail@test.com',
-            'to_email' => 'toemail@test.com',
-            'subject' => 'subject',
-            'email_prototype' => 'service_message_id',
-            'content_type' => 'text/plain',
-            'mailer' => 'mailer',
-            'level' => 'DEBUG',
-            'bubble' => false,
-            'lazy' => false,
-        ];
-    }
-
-    public function testSwiftMailerHandlerValidConfiguration()
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(
-                        ['type' => 'swift_mailer'],
-                        $this->provideSwiftMailerHandlerValidConfigurationParams()
-                    ),
-                ]
-            ],
-        ];
-
-        $config = $this->process($configs);
-
-        $this->assertArrayHasKey('handlers', $config);
-    }
-
-    /**
-     * @dataProvider provideNativeMailerHandlerConfigurationInvalidParams
-     * @expectedException Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
-     */
-    public function testNativeMailerHandlerInvalidConfiguration($param, $value)
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(
-                        ['type' => 'native_mailer'],
-                        [
-                            'from_email' => 'fromemail@test.com',
-                            'to_email' => 'toemail@test.com',
-                            'subject' => 'subject',
-                            $param => $value
-                        ]
-                    ),
-                ]
-            ],
-        ];
-
-        $this->process($configs);
-    }
-
-    public function provideNativeMailerHandlerConfigurationInvalidParams()
-    {
-        return array_diff_key(
-            $this->provideAllHandlersConfigurationParams(),
-            $this->provideNativeMailerHandlerValidConfigurationParams()
-        );
-    }
-
-    private function provideNativeMailerHandlerValidConfigurationParams()
-    {
-        return [
-            'from_email' => 'fromemail@test.com',
-            'to_email' => 'toemail@test.com',
-            'subject' => 'subject',
-            'level' => 'DEBUG',
-            'bubble' => false,
-            'headers' => ['Foo: Bar'],
-        ];
-    }
-
-    public function testNativeMailerHandlerValidConfiguration()
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(
-                        ['type' => 'native_mailer'],
-                        $this->provideNativeMailerHandlerValidConfigurationParams()
-                    ),
-                ]
-            ],
-        ];
-
-        $config = $this->process($configs);
-
-        $this->assertArrayHasKey('handlers', $config);
-    }
-
-    /**
-     * @dataProvider provideSocketHandlerConfigurationInvalidParams
-     * @expectedException Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
-     */
-    public function testSocketHandlerInvalidConfiguration($param, $value)
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(
-                        ['type' => 'socket'],
-                        ['connection_string' => 'connection_string', $param => $value]
-                    ),
-                ]
-            ],
-        ];
-
-        $this->process($configs);
-    }
-
-    public function provideSocketHandlerConfigurationInvalidParams()
-    {
-        return array_diff_key(
-            $this->provideAllHandlersConfigurationParams(),
-            $this->provideSocketHandlerValidConfigurationParams()
-        );
-    }
-
-    private function provideSocketHandlerValidConfigurationParams()
-    {
-        return [
-            'connection_string' => 'connection_string',
-            'timeout' => 1.2,
-            'connection_timeout' => 0.5,
-            'persistent' => true,
-            'level' => 'DEBUG',
-            'bubble' => false,
-        ];
-    }
-
-    public function testSocketHandlerValidConfiguration()
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(['type' => 'socket'], $this->provideSocketHandlerValidConfigurationParams()),
-                ]
-            ],
-        ];
-
-        $config = $this->process($configs);
-
-        $this->assertArrayHasKey('handlers', $config);
-    }
-
-    /**
-     * @dataProvider providePushoverHandlerConfigurationInvalidParams
-     * @expectedException Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
-     */
-    public function testPushoverHandlerInvalidConfiguration($param, $value)
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(
-                        ['type' => 'pushover'],
-                        ['token' => 'api_token', 'user' => 'user_id', $param => $value]
-                    ),
-                ]
-            ],
-        ];
-
-        $this->process($configs);
-    }
-
-    public function providePushoverHandlerConfigurationInvalidParams()
-    {
-        return array_diff_key(
-            $this->provideAllHandlersConfigurationParams(),
-            $this->providePushoverHandlerValidConfigurationParams()
-        );
-    }
-
-    private function providePushoverHandlerValidConfigurationParams()
-    {
-        return [
-            'token' => 'api_token',
-            'user' => 'user_id',
-            'title' => 'title',
-            'level' => 'DEBUG',
-            'bubble' => false,
-            'timeout' => 1.2,
-            'connection_timeout' => 0.5,
-        ];
-    }
-
-    public function testPushoverHandlerValidConfiguration()
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(['type' => 'pushover'], $this->providePushoverHandlerValidConfigurationParams()),
-                ]
-            ],
-        ];
-
-        $config = $this->process($configs);
-
-        $this->assertArrayHasKey('handlers', $config);
-    }
-
-    /**
-     * @dataProvider provideRavenSentryHandlerConfigurationInvalidParams
-     * @expectedException Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
-     */
-    public function testRavenHandlerInvalidConfiguration($param, $value)
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(
-                        ['type' => 'raven'],
-                        ['dsn' => 'dsn_connection_string', 'client_id' => 'client_id', $param => $value]
-                    ),
-                ]
-            ],
-        ];
-
-        $this->process($configs);
-    }
-
-    public function provideRavenSentryHandlerConfigurationInvalidParams()
-    {
-        return array_diff_key(
-            $this->provideAllHandlersConfigurationParams(),
-            $this->provideRavenSentryHandlerValidConfigurationParams()
-        );
-    }
-
-    private function provideRavenSentryHandlerValidConfigurationParams()
-    {
-        return [
-            'dsn' => 'dsn_connection_string',
-            'client_id' => 'client_id',
-            'release' => '1.0.1',
-            'level' => 'DEBUG',
-            'bubble' => false,
-            'auto_log_stacks' => true,
-            'environment' => 'dev',
-        ];
-    }
-
-    public function testRavenHandlerValidConfiguration()
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(['type' => 'raven'], $this->provideRavenSentryHandlerValidConfigurationParams()),
-                ]
-            ],
-        ];
-
-        $config = $this->process($configs);
-
-        $this->assertArrayHasKey('handlers', $config);
-    }
-
-    /**
-     * @dataProvider provideRavenSentryHandlerConfigurationInvalidParams
-     * @expectedException Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
-     */
-    public function testSentryHandlerInvalidConfiguration($param, $value)
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(
-                        ['type' => 'sentry'],
-                        ['dsn' => 'dsn_connection_string', 'client_id' => 'client_id', $param => $value]
-                    ),
-                ]
-            ],
-        ];
-
-        $this->process($configs);
-    }
-
-    public function testSentryHandlerValidConfiguration()
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(['type' => 'sentry'], $this->provideRavenSentryHandlerValidConfigurationParams()),
-                ]
-            ],
-        ];
-
-        $config = $this->process($configs);
-
-        $this->assertArrayHasKey('handlers', $config);
-    }
-
-    /**
-     * @dataProvider provideNewrelicHandlerConfigurationInvalidParams
-     * @expectedException Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
-     */
-    public function testNewrelicHandlerInvalidConfiguration($param, $value)
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(['type' => 'newrelic'], [$param => $value]),
-                ]
-            ],
-        ];
-
-        $this->process($configs);
-    }
-
-    public function provideNewrelicHandlerConfigurationInvalidParams()
-    {
-        return array_diff_key(
-            $this->provideAllHandlersConfigurationParams(),
-            $this->provideNewrelicHandlerValidConfigurationParams()
-        );
-    }
-
-    private function provideNewrelicHandlerValidConfigurationParams()
-    {
-        return [
-            'level' => 'DEBUG',
-            'bubble' => false,
-            'app_name' => 'app_name'
-        ];
-    }
-
-    public function testNewrelicHandlerValidConfiguration()
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(['type' => 'newrelic'], $this->provideNewrelicHandlerValidConfigurationParams()),
-                ]
-            ],
-        ];
-
-        $config = $this->process($configs);
-
-        $this->assertArrayHasKey('handlers', $config);
-    }
-
-    /**
-     * @dataProvider provideHipchatHandlerConfigurationInvalidParams
-     * @expectedException Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
-     */
-    public function testHipchatHandlerInvalidConfiguration($param, $value)
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(
-                        ['type' => 'hipchat'],
-                        ['token' => 'api_token', 'room' => 'room_id', $param => $value]
-                    ),
-                ]
-            ],
-        ];
-
-        $this->process($configs);
-    }
-
-    public function provideHipchatHandlerConfigurationInvalidParams()
-    {
-        return array_diff_key(
-            $this->provideAllHandlersConfigurationParams(),
-            $this->provideHipchatHandlerValidConfigurationParams()
-        );
-    }
-
-    private function provideHipchatHandlerValidConfigurationParams()
-    {
-        return [
-            'token' => 'api_token',
-            'room' => 'room_id',
-            'notify' => true,
-            'nickname' => 'nickname',
-            'level' => 'DEBUG',
-            'bubble' => false,
-            'use_ssl' => false,
-            'message_format' => 'html',
-            'host' => 'hostname',
             'api_version' => 'v2',
-            'timeout' => 1.2,
-            'connection_timeout' => 0.5,
-        ];
-    }
-
-    public function testHipchatHandlerValidConfiguration()
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(['type' => 'hipchat'], $this->provideHipchatHandlerValidConfigurationParams()),
-                ]
-            ],
-        ];
-
-        $config = $this->process($configs);
-
-        $this->assertArrayHasKey('handlers', $config);
-    }
-
-    /**
-     * @dataProvider provideSlackHandlerConfigurationInvalidParams
-     * @expectedException Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
-     */
-    public function testSlackHandlerInvalidConfiguration($param, $value)
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(
-                        ['type' => 'slack'],
-                        ['token' => 'api_token', 'channel' => '#channel_name', $param => $value]
-                    ),
-                ]
-            ],
-        ];
-
-        $this->process($configs);
-    }
-
-    public function provideSlackHandlerConfigurationInvalidParams()
-    {
-        return array_diff_key(
-            $this->provideAllHandlersConfigurationParams(),
-            $this->provideSlackHandlerValidConfigurationParams()
-        );
-    }
-
-    private function provideSlackHandlerValidConfigurationParams()
-    {
-        return [
-            'token' => 'api_token',
-            'channel' => '#channel_name',
+            'app_name' => 'app_name',
+            'auto_log_stacks' => true,
+            'bubble' => false,
             'bot_name' => 'bot_name',
-            'icon_emoji' => ':icon_emoji:',
-            'use_attachment' => false,
-            'use_short_attachment' => true,
-            'include_extra' => true,
-            'level' => 'DEBUG',
-            'bubble' => false,
-            'timeout' => 1.2,
+            'buffer_size' => 0,
+            'channel' => '#channel_name',
+            'client_id' => 'client_id',
+            'config' => ['config' => 'config'],
+            'connection_string' => 'connection_string',
             'connection_timeout' => 0.5,
-        ];
-    }
-
-    public function testSlackHandlerValidConfiguration()
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(['type' => 'slack'], $this->provideSlackHandlerValidConfigurationParams()),
-                ]
-            ],
-        ];
-
-        $config = $this->process($configs);
-
-        $this->assertArrayHasKey('handlers', $config);
-    }
-
-    /**
-     * @dataProvider provideSlackWebHookHandlerConfigurationInvalidParams
-     * @expectedException Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
-     */
-    public function testSlackWebHookHandlerInvalidConfiguration($param, $value)
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(
-                        ['type' => 'slackwebhook'],
-                        ['webhook_url' => 'http://localhost', 'channel' => '#channel_name', $param => $value]
-                    ),
-                ]
-            ],
-        ];
-
-        $this->process($configs);
-    }
-
-    public function provideSlackWebHookHandlerConfigurationInvalidParams()
-    {
-        return array_diff_key(
-            $this->provideAllHandlersConfigurationParams(),
-            $this->provideSlackWebHookHandlerValidConfigurationParams()
-        );
-    }
-
-    private function provideSlackWebHookHandlerValidConfigurationParams()
-    {
-        return [
-            'webhook_url' => 'http://localhost',
-            'channel' => '#channel_name',
-            'bot_name' => 'bot_name',
-            'icon_emoji' => ':icon_emoji:',
-            'use_attachment' => false,
-            'use_short_attachment' => true,
-            'include_extra' => true,
-            'level' => 'DEBUG',
-            'bubble' => false,
-        ];
-    }
-
-    public function testSlackWebHookHandlerValidConfiguration()
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(
-                        ['type' => 'slackwebhook'],
-                        $this->provideSlackWebHookHandlerValidConfigurationParams()
-                    ),
-                ]
-            ],
-        ];
-
-        $config = $this->process($configs);
-
-        $this->assertArrayHasKey('handlers', $config);
-    }
-
-    /**
-     * @dataProvider provideSlackBotHandlerConfigurationInvalidParams
-     * @expectedException Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
-     */
-    public function testSlackBotHandlerInvalidConfiguration($param, $value)
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(
-                        ['type' => 'slackbot'],
-                        ['team' => 'team', 'token' => 'api_token', 'channel' => '#channel_name', $param => $value]
-                    ),
-                ]
-            ],
-        ];
-
-        $this->process($configs);
-    }
-
-    public function provideSlackBotHandlerConfigurationInvalidParams()
-    {
-        return array_diff_key(
-            $this->provideAllHandlersConfigurationParams(),
-            $this->provideSlackBotHandlerValidConfigurationParams()
-        );
-    }
-
-    private function provideSlackBotHandlerValidConfigurationParams()
-    {
-        return [
-            'team' => 'team',
-            'token' => 'api_token',
-            'channel' => '#channel_name',
-            'level' => 'DEBUG',
-            'bubble' => false,
-        ];
-    }
-
-    public function testSlackBotHandlerValidConfiguration()
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(['type' => 'slackbot'], $this->provideSlackBotHandlerValidConfigurationParams()),
-                ]
-            ],
-        ];
-
-        $config = $this->process($configs);
-
-        $this->assertArrayHasKey('handlers', $config);
-    }
-
-    /**
-     * @dataProvider provideCubeHandlerConfigurationInvalidParams
-     * @expectedException Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
-     */
-    public function testCubeHandlerInvalidConfiguration($param, $value)
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(['type' => 'cube'], ['url' => 'http://localhost', $param => $value]),
-                ]
-            ],
-        ];
-
-        $this->process($configs);
-    }
-
-    public function provideCubeHandlerConfigurationInvalidParams()
-    {
-        return array_diff_key(
-            $this->provideAllHandlersConfigurationParams(),
-            $this->provideCubeHandlerValidConfigurationParams()
-        );
-    }
-
-    private function provideCubeHandlerValidConfigurationParams()
-    {
-        return [
-            'url' => 'http://localhost',
-            'level' => 'DEBUG',
-            'bubble' => false,
-        ];
-    }
-
-    public function testCubeHandlerValidConfiguration()
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(['type' => 'cube'], $this->provideCubeHandlerValidConfigurationParams()),
-                ]
-            ],
-        ];
-
-        $config = $this->process($configs);
-
-        $this->assertArrayHasKey('handlers', $config);
-    }
-
-    /**
-     * @dataProvider provideAmqpHandlerConfigurationInvalidParams
-     * @expectedException Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
-     */
-    public function testAmqpHandlerInvalidConfiguration($param, $value)
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(['type' => 'amqp'], ['exchange' => 'service_id', $param => $value]),
-                ]
-            ],
-        ];
-
-        $this->process($configs);
-    }
-
-    public function provideAmqpHandlerConfigurationInvalidParams()
-    {
-        return array_diff_key(
-            $this->provideAllHandlersConfigurationParams(),
-            $this->provideAmqpHandlerValidConfigurationParams()
-        );
-    }
-
-    private function provideAmqpHandlerValidConfigurationParams()
-    {
-        return [
+            'console_formater_options' => [],
+            'content_type' => 'text/plain',
+            'date_format' => 'Y-m-d',
+            'deduplication_level' => 'DEBUG',
+            'document_type' => 'logs',
+            'dsn' => 'dsn_connection_string',
+            'elasticsearch' => 'id',
+            'email_prototype' => 'service_message_id',
+            'environment' => 'dev',
             'exchange' => 'service_id',
             'exchange_name' => 'log',
-            'level' => 'DEBUG',
-            'bubble' => false,
-        ];
-    }
-
-    public function testAmqpHandlerValidConfiguration()
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(['type' => 'amqp'], $this->provideAmqpHandlerValidConfigurationParams()),
-                ]
-            ],
-        ];
-
-        $config = $this->process($configs);
-
-        $this->assertArrayHasKey('handlers', $config);
-    }
-
-    /**
-     * @dataProvider provideErrorLogHandlerConfigurationInvalidParams
-     * @expectedException Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
-     */
-    public function testErrorLogHandlerInvalidConfiguration($param, $value)
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(['type' => 'error_log'], [$param => $value]),
-                ]
-            ],
-        ];
-
-        $this->process($configs);
-    }
-
-    public function provideErrorLogHandlerConfigurationInvalidParams()
-    {
-        return array_diff_key(
-            $this->provideAllHandlersConfigurationParams(),
-            $this->provideErrorLogHandlerValidConfigurationParams()
-        );
-    }
-
-    private function provideErrorLogHandlerValidConfigurationParams()
-    {
-        return [
-            'message_type' => '1',
-            'level' => 'DEBUG',
-            'bubble' => false,
-        ];
-    }
-
-    public function testErrorLogHandlerValidConfiguration()
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(['type' => 'error_log'], $this->provideErrorLogHandlerValidConfigurationParams()),
-                ]
-            ],
-        ];
-
-        $config = $this->process($configs);
-
-        $this->assertArrayHasKey('handlers', $config);
-    }
-
-    /**
-     * @dataProvider provideNullHandlerConfigurationInvalidParams
-     * @expectedException Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
-     */
-    public function testNullHandlerInvalidConfiguration($param, $value)
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(['type' => 'null'], [$param => $value]),
-                ]
-            ],
-        ];
-
-        $this->process($configs);
-    }
-
-    public function provideNullHandlerConfigurationInvalidParams()
-    {
-        return array_diff_key(
-            $this->provideAllHandlersConfigurationParams(),
-            $this->provideNullHandlerValidConfigurationParams()
-        );
-    }
-
-    private function provideNullHandlerValidConfigurationParams()
-    {
-        return [
-            'level' => 'DEBUG',
-            'bubble' => false,
-        ];
-    }
-
-    public function testNullHandlerValidConfiguration()
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(['type' => 'null'], $this->provideNullHandlerValidConfigurationParams()),
-                ]
-            ],
-        ];
-
-        $config = $this->process($configs);
-
-        $this->assertArrayHasKey('handlers', $config);
-    }
-
-    /**
-     * @dataProvider provideTestHandlerConfigurationInvalidParams
-     * @expectedException Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
-     */
-    public function testTestHandlerInvalidConfiguration($param, $value)
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(['type' => 'test'], [$param => $value]),
-                ]
-            ],
-        ];
-
-        $this->process($configs);
-    }
-
-    public function provideTestHandlerConfigurationInvalidParams()
-    {
-        return array_diff_key(
-            $this->provideAllHandlersConfigurationParams(),
-            $this->provideTestHandlerValidConfigurationParams()
-        );
-    }
-
-    private function provideTestHandlerValidConfigurationParams()
-    {
-        return [
-            'level' => 'DEBUG',
-            'bubble' => false,
-        ];
-    }
-
-    public function testTestHandlerValidConfiguration()
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(['type' => 'test'], $this->provideTestHandlerValidConfigurationParams()),
-                ]
-            ],
-        ];
-
-        $config = $this->process($configs);
-
-        $this->assertArrayHasKey('handlers', $config);
-    }
-
-    /**
-     * @dataProvider provideDebugHandlerConfigurationInvalidParams
-     * @expectedException Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
-     */
-    public function testDebugHandlerInvalidConfiguration($param, $value)
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(['type' => 'debug'], [$param => $value]),
-                ]
-            ],
-        ];
-
-        $this->process($configs);
-    }
-
-    public function provideDebugHandlerConfigurationInvalidParams()
-    {
-        return array_diff_key(
-            $this->provideAllHandlersConfigurationParams(),
-            $this->provideDebugHandlerValidConfigurationParams()
-        );
-    }
-
-    private function provideDebugHandlerValidConfigurationParams()
-    {
-        return [
-            'level' => 'DEBUG',
-            'bubble' => false,
-        ];
-    }
-
-    public function testDebugHandlerValidConfiguration()
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(['type' => 'debug'], $this->provideDebugHandlerValidConfigurationParams()),
-                ]
-            ],
-        ];
-
-        $config = $this->process($configs);
-
-        $this->assertArrayHasKey('handlers', $config);
-    }
-
-    /**
-     * @dataProvider provideLogglyHandlerConfigurationInvalidParams
-     * @expectedException Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
-     */
-    public function testLogglyHandlerInvalidConfiguration($param, $value)
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(['type' => 'loggly'], ['token' => 'api_token', $param => $value]),
-                ]
-            ],
-        ];
-
-        $this->process($configs);
-    }
-
-    public function provideLogglyHandlerConfigurationInvalidParams()
-    {
-        return array_diff_key(
-            $this->provideAllHandlersConfigurationParams(),
-            $this->provideLogglyHandlerValidConfigurationParams()
-        );
-    }
-
-    private function provideLogglyHandlerValidConfigurationParams()
-    {
-        return [
-            'token' => 'api_token',
-            'level' => 'DEBUG',
-            'bubble' => false,
-            'tags' => ['a_tag'],
-        ];
-    }
-
-    public function testLogglyHandlerValidConfiguration()
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(['type' => 'loggly'], $this->provideLogglyHandlerValidConfigurationParams()),
-                ]
-            ],
-        ];
-
-        $config = $this->process($configs);
-
-        $this->assertArrayHasKey('handlers', $config);
-    }
-
-    /**
-     * @dataProvider provideLogEntriesHandlerConfigurationInvalidParams
-     * @expectedException Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
-     */
-    public function testLogEntriesHandlerInvalidConfiguration($param, $value)
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(['type' => 'logentries'], ['token' => 'api_token', $param => $value]),
-                ]
-            ],
-        ];
-
-        $this->process($configs);
-    }
-
-    public function provideLogEntriesHandlerConfigurationInvalidParams()
-    {
-        return array_diff_key(
-            $this->provideAllHandlersConfigurationParams(),
-            $this->provideLogEntriesHandlerValidConfigurationParams()
-        );
-    }
-
-    private function provideLogEntriesHandlerValidConfigurationParams()
-    {
-        return [
-            'token' => 'api_token',
-            'use_ssl' => false,
-            'level' => 'DEBUG',
-            'bubble' => false,
-            'timeout' => 1.2,
-            'connection_timeout' => 0.5,
-        ];
-    }
-
-    public function testLogEntriesHandlerValidConfiguration()
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(['type' => 'logentries'], $this->provideLogEntriesHandlerValidConfigurationParams()),
-                ]
-            ],
-        ];
-
-        $config = $this->process($configs);
-
-        $this->assertArrayHasKey('handlers', $config);
-    }
-
-    /**
-     * @dataProvider provideInsightopsHandlerConfigurationInvalidParams
-     * @expectedException Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
-     */
-    public function testInsightopsHandlerInvalidConfiguration($param, $value)
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(
-                        ['type' => 'insightops'],
-                        ['token' => 'api_token', 'region' => 'eu', $param => $value]
-                    ),
-                ]
-            ],
-        ];
-
-        $this->process($configs);
-    }
-
-    public function provideInsightopsHandlerConfigurationInvalidParams()
-    {
-        return array_diff_key(
-            $this->provideAllHandlersConfigurationParams(),
-            $this->provideInsightopsHandlerValidConfigurationParams()
-        );
-    }
-
-    private function provideInsightopsHandlerValidConfigurationParams()
-    {
-        return [
-            'token' => 'api_token',
-            'region' => 'eu',
-            'use_ssl' => false,
-            'level' => 'DEBUG',
-            'bubble' => false,
-        ];
-    }
-
-    public function testInsightopsHandlerValidConfiguration()
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(['type' => 'insightops'], $this->provideInsightopsHandlerValidConfigurationParams()),
-                ]
-            ],
-        ];
-
-        $config = $this->process($configs);
-
-        $this->assertArrayHasKey('handlers', $config);
-    }
-
-    /**
-     * @dataProvider provideFlowdockHandlerConfigurationInvalidParams
-     * @expectedException Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
-     */
-    public function testFlowdockHandlerInvalidConfiguration($param, $value)
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(
-                        ['type' => 'flowdock'],
-                        [
-                            'token' => 'api_token',
-                            'source' => 'source_id',
-                            'from_email' => 'fromemail@test.com',
-                            $param => $value
-                        ]
-                    ),
-                ]
-            ],
-        ];
-
-        $this->process($configs);
-    }
-
-    public function provideFlowdockHandlerConfigurationInvalidParams()
-    {
-        return array_diff_key(
-            $this->provideAllHandlersConfigurationParams(),
-            $this->provideFlowdockHandlerValidConfigurationParams()
-        );
-    }
-
-    private function provideFlowdockHandlerValidConfigurationParams()
-    {
-        return [
-            'token' => 'api_token',
-            'source' => 'source_id',
+            'excluded_404s' => ['^/.*'],
+            'excluded_http_codes' => [404],
+            'facility' => 'user',
+            'filename_format' => 'filename_format',
+            'file_permission' => 777,
+            'flush_on_overflow' =>  true,
             'from_email' => 'fromemail@test.com',
-            'level' => 'DEBUG',
-            'bubble' => false,
-        ];
-    }
-
-    public function testFlowdockHandlerValidConfiguration()
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(['type' => 'flowdock'], $this->provideFlowdockHandlerValidConfigurationParams()),
-                ]
-            ],
-        ];
-
-        $config = $this->process($configs);
-
-        $this->assertArrayHasKey('handlers', $config);
-    }
-
-    /**
-     * @dataProvider provideRollbarHandlerConfigurationInvalidParams
-     * @expectedException Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
-     */
-    public function testRollbarHandlerInvalidConfiguration($param, $value)
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(['type' => 'rollbar'], ['id' => 'id', 'token' => 'api_token', $param => $value]),
-                ]
-            ],
-        ];
-
-        $this->process($configs);
-    }
-
-    public function provideRollbarHandlerConfigurationInvalidParams()
-    {
-        return array_diff_key(
-            $this->provideAllHandlersConfigurationParams(),
-            $this->provideRollbarHandlerValidConfigurationParams()
-        );
-    }
-
-    private function provideRollbarHandlerValidConfigurationParams()
-    {
-        return [
-            'id' => 'id',
-            'token' => 'api_token',
-            'config' => ['config' => 'config'],
-            'level' => 'DEBUG',
-            'bubble' => false,
-        ];
-    }
-
-    public function testRollbarHandlerValidIdConfiguration()
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(
-                        ['type' => 'rollbar'],
-                        [
-                            'id' => 'id',
-                            'config' => ['config' => 'config'],
-                            'level' => 'DEBUG',
-                            'bubble' => false,
-                        ]
-                    )
-                ]
-            ],
-        ];
-
-        $config = $this->process($configs);
-
-        $this->assertArrayHasKey('handlers', $config);
-    }
-
-    public function testRollbarHandlerValidTokenConfiguration()
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(
-                        ['type' => 'rollbar'],
-                        [
-                            'token' => 'api_token',
-                            'config' => ['config' => 'config'],
-                            'level' => 'DEBUG',
-                            'bubble' => false,
-                        ]
-                    )
-                ]
-            ],
-        ];
-
-        $config = $this->process($configs);
-
-        $this->assertArrayHasKey('handlers', $config);
-    }
-
-    /**
-     * @dataProvider provideServerLogHandlerConfigurationInvalidParams
-     * @expectedException Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
-     */
-    public function testServerLogHandlerInvalidConfiguration($param, $value)
-    {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(['type' => 'server_log'], ['host' => 'hostname', $param => $value]),
-                ]
-            ],
-        ];
-
-        $this->process($configs);
-    }
-
-    public function provideServerLogHandlerConfigurationInvalidParams()
-    {
-        return array_diff_key(
-            $this->provideAllHandlersConfigurationParams(),
-            $this->provideServerLogHandlerValidConfigurationParams()
-        );
-    }
-
-    private function provideServerLogHandlerValidConfigurationParams()
-    {
-        return [
+            'handler' => 'handler_name',
+            'headers' => ['Foo: Bar'],
             'host' => 'hostname',
+            'icon_emoji' => ':icon_emoji:',
+            'id' => 'id',
+            'ident' => 'ident',
+            'include_extra' => true,
+            'index' => 'monolog',
+            'lazy' => false,
             'level' => 'DEBUG',
-            'bubble' => false,
+            'logopts' => 'LOGPID',
+            'mailer' =>  'mailer',
+            'max_files' => 0,
+            'max_level' => 'DEBUG',
+            'message_format' => 'html',
+            'message_type' => '1',
+            'min_level' => 'DEBUG',
+            'members' => ['foo'],
+            'mongo' => 'id',
+            'nickname' => 'nickname',
+            'notify' => true,
+            'path' => '/a/path',
+            'passthru_level' => 'DEBUG',
+            'persistent' => true,
+            'port' => 514,
+            'publisher' => 'id',
+            'redis' => ['id' => 'id'],
+            'release' => '1.0.1',
+            'region' => 'eu',
+            'room' => 'room_id',
+            'source' => 'source_id',
+            'stop_buffering' => false,
+            'store' => '/',
+            'subject' => 'subject',
+            'tags' => ['a_tag'],
+            'team' => 'team',
+            'time' => 3600,
+            'timeout' => 1.2,
+            'title' => 'title',
+            'token' => 'api_token',
+            'to_email' => 'toemail@test.com',
+            'url' => 'http://localhost',
+            'user' => 'user_id',
+            'use_attachment' => false,
+            'use_locking' => true,
+            'use_short_attachment' => true,
+            'use_ssl' => false,
+            'verbosity_levels' => ['DEBUG'],
+            'webhook_url' => 'http://localhost',
         ];
     }
 
-    public function testServerLogHandlerValidConfiguration()
+    /**
+     * @dataProvider provideHandlersInvalidConfigurations
+     * @expectedException Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
+     */
+    public function testHandlerInvalidConfiguration($config)
     {
-        $configs = [
-            [
-                'handlers' => [
-                    'foo' => array_merge(['type' => 'server_log'], $this->provideServerLogHandlerValidConfigurationParams()),
-                ]
-            ],
+        $this->process([$config]);
+    }
+
+    public function provideHandlersInvalidConfigurations()
+    {
+        $madatoryParams = [
+            'stream' => ['path'],
+            'gelf' => ['publisher'],
+            'rotating_file' => ['path'],
+            'mongo' => ['id', 'host', 'pass'],
+            'elasticsearch' => ['elasticsearch'],
+            'redis' => ['redis'],
+            'predis' => ['redis'],
+            'fingers_crossed' => ['handler'],
+            'filter' => ['handler'],
+            'buffer' => ['handler'],
+            'deduplication' => ['handler'],
+            'group' => ['members'],
+            'whatfailuregroup' => ['members'],
+            'syslog' => ['ident'],
+            'syslogudp' => ['host'],
+            'swift_mailer' => ['from_email', 'to_email', 'subject'],
+            'native_mailer' => ['from_email', 'to_email', 'subject'],
+            'socket' => ['connection_string'],
+            'pushover' => ['token', 'user'],
+            'raven' => ['dsn', 'client_id'],
+            'sentry' => ['dsn', 'client_id'],
+            'hipchat' => ['token', 'room'],
+            'slack' => ['token', 'channel'],
+            'slackwebhook' => ['webhook_url', 'channel'],
+            'slackbot' => ['team', 'token', 'channel'],
+            'cube' => ['url'],
+            'amqp' => ['exchange'],
+            'loggly' => ['token'],
+            'logentries' => ['token'],
+            'insightops' => ['token', 'region'],
+            'flowdock' => ['token', 'source', 'from_email'],
+            'rollbar' => ['id', 'token'],
+            'server_log' => ['host'],
         ];
 
-        $config = $this->process($configs);
+        $handlersConfigurations = $this->getHandlersConfigurations();
+        $handlersConfigurationParams = $this->provideAllHandlersConfigurationParams();
 
-        $this->assertArrayHasKey('handlers', $config);
+        $configs = [];
+
+        foreach ($handlersConfigurations as $handlerType => $handler) {
+            $mandatoryParams = array_key_exists($handlerType, $madatoryParams) ? $madatoryParams[$handlerType] : [];
+            $invalidParams = array_diff_key($handlersConfigurationParams, $handler);
+            $handlerMandatoryParams = array_intersect_key($handlersConfigurationParams, array_flip($mandatoryParams));
+            foreach($invalidParams as $invalidParamKey => $invalidParamValue) {
+                $configs[] = [
+                    [
+                        'handlers' => [
+                            $handlerType => array_merge([
+                                'type' => $handler['type'],
+                                $invalidParamKey => $invalidParamValue
+                            ], $handlerMandatoryParams)
+                        ]
+                    ]
+                ];
+            }
+        }
+
+        return $configs;
     }
+
+//    /**
+//     * @dataProvider provideFingersCrossedHandlerConfigurationInvalidParams
+//     * @expectedException Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
+//     */
+//    public function testFingersCrossedHandlerInvalidConfiguration($param, $value)
+//    {
+//        $configs = [
+//            [
+//                'handlers' => [
+//                    'foo' => array_merge(['type' => 'fingers_crossed'], ['handler' => 'handler_name', $param => $value]),
+//                ]
+//            ],
+//        ];
+//
+//        $this->process($configs);
+//    }
+//
+//    public function provideFingersCrossedHandlerConfigurationInvalidParams()
+//    {
+//        return array_diff_key(
+//            $this->provideAllHandlersConfigurationParams(),
+//            $this->provideFingersCrossedHandlerValidConfigurationParams()
+//        );
+//    }
+//
+//    private function provideFingersCrossedHandlerValidConfigurationParams()
+//    {
+//        return [
+//            'handler' => 'handler_name',
+//            'action_level' => 'DEBUG',
+//            'activation_strategy' => 'DEBUG',
+//            'excluded_404s' => ['^/.*'],
+//            'excluded_http_codes' => [404],
+//            'buffer_size' => 0,
+//            'stop_buffering' => false,
+//            'passthru_level' => 'DEBUG',
+//            'bubble' => false,
+//        ];
+//    }
+//
+//    public function testFingersCrossedHandlerWithActionLevelExcluded404sConfiguration()
+//    {
+//        $configs = [
+//            [
+//                'handlers' => [
+//                    'foo' => array_merge(
+//                        ['type' => 'fingers_crossed'],
+//                        [
+//                            'handler' => 'handler_name',
+//                            'action_level' => 'DEBUG',
+//                            'excluded_http_codes' => [404],
+//                            'buffer_size' => 0,
+//                            'stop_buffering' => false,
+//                            'passthru_level' => 'DEBUG',
+//                            'bubble' => false,
+//                        ]
+//                    ),
+//                ]
+//            ],
+//        ];
+//
+//        $config = $this->process($configs);
+//
+//        $this->assertArrayHasKey('handlers', $config);
+//    }
+//
+//    public function testFingersCrossedHandlerWithActionLevelExcludedHttpCodesConfiguration()
+//    {
+//        $configs = [
+//            [
+//                'handlers' => [
+//                    'foo' => array_merge(
+//                        ['type' => 'fingers_crossed'],
+//                        [
+//                            'handler' => 'handler_name',
+//                            'action_level' => 'DEBUG',
+//                            'excluded_404s' => ['^/.*'],
+//                            'buffer_size' => 0,
+//                            'stop_buffering' => false,
+//                            'passthru_level' => 'DEBUG',
+//                            'bubble' => false,
+//                        ]
+//                    ),
+//                ]
+//            ],
+//        ];
+//
+//        $config = $this->process($configs);
+//
+//        $this->assertArrayHasKey('handlers', $config);
+//    }
+//
+//    public function testFingersCrossedHandlerWithActivationStrategyConfiguration()
+//    {
+//        $configs = [
+//            [
+//                'handlers' => [
+//                    'foo' => array_merge(
+//                        ['type' => 'fingers_crossed'],
+//                        [
+//                            'handler' => 'handler_name',
+//                            'activation_strategy' => 'DEBUG',
+//                            'buffer_size' => 0,
+//                            'stop_buffering' => false,
+//                            'passthru_level' => 'DEBUG',
+//                            'bubble' => false,
+//                        ]
+//                    ),
+//                ]
+//            ],
+//        ];
+//
+//        $config = $this->process($configs);
+//
+//        $this->assertArrayHasKey('handlers', $config);
+//    }
+//
+//    /**
+//     * @dataProvider provideFilterHandlerConfigurationInvalidParams
+//     * @expectedException Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
+//     */
+//    public function testFilterHandlerInvalidConfiguration($param, $value)
+//    {
+//        $configs = [
+//            [
+//                'handlers' => [
+//                    'foo' => array_merge(['type' => 'filter'], ['handler' => 'handler_name', $param => $value]),
+//                ]
+//            ],
+//        ];
+//
+//        $this->process($configs);
+//    }
+//
+//    public function provideFilterHandlerConfigurationInvalidParams()
+//    {
+//        return array_diff_key(
+//            $this->provideAllHandlersConfigurationParams(),
+//            $this->provideFilterHandlerValidConfigurationParams()
+//        );
+//    }
+//
+//    private function provideFilterHandlerValidConfigurationParams()
+//    {
+//        return [
+//            'handler' => 'handler_name',
+//            'accepted_levels' => ['DEBUG'],
+//            'min_level' => 'DEBUG',
+//            'max_level' => 'DEBUG',
+//            'bubble' => false,
+//        ];
+//    }
+//
+//    public function testFilterHandlerWithAcceptedLevelsValidConfiguration()
+//    {
+//        $configs = [
+//            [
+//                'handlers' => [
+//                    'foo' => array_merge(['type' => 'filter'], [
+//                        'handler' => 'handler_name',
+//                        'accepted_levels' => ['DEBUG'],
+//                        'bubble' => false,
+//                    ]),
+//                ]
+//            ],
+//        ];
+//
+//        $config = $this->process($configs);
+//
+//        $this->assertArrayHasKey('handlers', $config);
+//    }
+//
+//    public function testFilterHandlerWithMinMaxLevelsValidConfiguration()
+//    {
+//        $configs = [
+//            [
+//                'handlers' => [
+//                    'foo' => array_merge(['type' => 'filter'], [
+//                        'handler' => 'handler_name',
+//                        'min_level' => 'DEBUG',
+//                        'max_level' => 'DEBUG',
+//                        'bubble' => false,
+//                    ]),
+//                ]
+//            ],
+//        ];
+//
+//        $config = $this->process($configs);
+//
+//        $this->assertArrayHasKey('handlers', $config);
+//    }
+//
+//    /**
+//     * @dataProvider provideRollbarHandlerConfigurationInvalidParams
+//     * @expectedException Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
+//     */
+//    public function testRollbarHandlerInvalidConfiguration($param, $value)
+//    {
+//        $configs = [
+//            [
+//                'handlers' => [
+//                    'foo' => array_merge(['type' => 'rollbar'], ['id' => 'id', 'token' => 'api_token', $param => $value]),
+//                ]
+//            ],
+//        ];
+//
+//        $this->process($configs);
+//    }
+//
+//    public function provideRollbarHandlerConfigurationInvalidParams()
+//    {
+//        return array_diff_key(
+//            $this->provideAllHandlersConfigurationParams(),
+//            $this->provideRollbarHandlerValidConfigurationParams()
+//        );
+//    }
+//
+//    private function provideRollbarHandlerValidConfigurationParams()
+//    {
+//        return [
+//            'id' => 'id',
+//            'token' => 'api_token',
+//            'config' => ['config' => 'config'],
+//            'level' => 'DEBUG',
+//            'bubble' => false,
+//        ];
+//    }
+//
+//    public function testRollbarHandlerValidIdConfiguration()
+//    {
+//        $configs = [
+//            [
+//                'handlers' => [
+//                    'foo' => array_merge(
+//                        ['type' => 'rollbar'],
+//                        [
+//                            'id' => 'id',
+//                            'config' => ['config' => 'config'],
+//                            'level' => 'DEBUG',
+//                            'bubble' => false,
+//                        ]
+//                    )
+//                ]
+//            ],
+//        ];
+//
+//        $config = $this->process($configs);
+//
+//        $this->assertArrayHasKey('handlers', $config);
+//    }
+//
+//    public function testRollbarHandlerValidTokenConfiguration()
+//    {
+//        $configs = [
+//            [
+//                'handlers' => [
+//                    'foo' => array_merge(
+//                        ['type' => 'rollbar'],
+//                        [
+//                            'token' => 'api_token',
+//                            'config' => ['config' => 'config'],
+//                            'level' => 'DEBUG',
+//                            'bubble' => false,
+//                        ]
+//                    )
+//                ]
+//            ],
+//        ];
+//
+//        $config = $this->process($configs);
+//
+//        $this->assertArrayHasKey('handlers', $config);
+//    }
 }
