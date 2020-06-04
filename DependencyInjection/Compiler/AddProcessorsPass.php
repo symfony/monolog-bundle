@@ -28,32 +28,57 @@ class AddProcessorsPass implements CompilerPassInterface
             return;
         }
 
+        $processors = [];
+
         foreach ($container->findTaggedServiceIds('monolog.processor') as $id => $tags) {
             foreach ($tags as $tag) {
-                if (!empty($tag['channel']) && !empty($tag['handler'])) {
-                    throw new \InvalidArgumentException(sprintf('you cannot specify both the "handler" and "channel" attributes for the "monolog.processor" tag on service "%s"', $id));
+                if (!isset($tag['priority'])) {
+                    $tag['priority'] = 0;
                 }
 
-                if (!empty($tag['handler'])) {
-                    $definition = $container->findDefinition(sprintf('monolog.handler.%s', $tag['handler']));
-                } elseif (!empty($tag['channel'])) {
-                    if ('app' === $tag['channel']) {
-                        $definition = $container->getDefinition('monolog.logger');
-                    } else {
-                        $definition = $container->getDefinition(sprintf('monolog.logger.%s', $tag['channel']));
-                    }
-                } else {
-                    $definition = $container->getDefinition('monolog.logger_prototype');
-                }
-
-                if (!empty($tag['method'])) {
-                    $processor = [new Reference($id), $tag['method']];
-                } else {
-                    // If no method is defined, fallback to use __invoke
-                    $processor = new Reference($id);
-                }
-                $definition->addMethodCall('pushProcessor', [$processor]);
+                $processors[] = [
+                    'id' => $id,
+                    'tag' => $tag,
+                ];
             }
+        }
+
+        // Sort ascending by priority so that higher-priority processors are added last.
+        // The effect is that monolog will call the higher-priority processors first
+        usort(
+            $processors,
+            function (array $left, array $right) {
+               return $left['tag']['priority'] - $right['tag']['priority'];
+            }
+        );
+
+        foreach ($processors as $processor) {
+            $tag = $processor['tag'];
+            $id = $processor['id'];
+
+            if (!empty($tag['channel']) && !empty($tag['handler'])) {
+                throw new \InvalidArgumentException(sprintf('you cannot specify both the "handler" and "channel" attributes for the "monolog.processor" tag on service "%s"', $id));
+            }
+
+            if (!empty($tag['handler'])) {
+                $definition = $container->findDefinition(sprintf('monolog.handler.%s', $tag['handler']));
+            } elseif (!empty($tag['channel'])) {
+                if ('app' === $tag['channel']) {
+                    $definition = $container->getDefinition('monolog.logger');
+                } else {
+                    $definition = $container->getDefinition(sprintf('monolog.logger.%s', $tag['channel']));
+                }
+            } else {
+                $definition = $container->getDefinition('monolog.logger_prototype');
+            }
+
+            if (!empty($tag['method'])) {
+                $processor = [new Reference($id), $tag['method']];
+            } else {
+                // If no method is defined, fallback to use __invoke
+                $processor = new Reference($id);
+            }
+            $definition->addMethodCall('pushProcessor', [$processor]);
         }
     }
 }
