@@ -177,6 +177,15 @@ use Monolog\Logger;
  *   - [bubble]: bool, defaults to true
  *   - [headers]: optional array containing additional headers: ['Foo: Bar', '...']
  *
+ * - symfony_mailer:
+ *   - from_email: optional if email_prototype is given
+ *   - to_email: optional if email_prototype is given
+ *   - subject: optional if email_prototype is given
+ *   - [email_prototype]: service id of a message, defaults to a default message with the three fields above
+ *   - [mailer]: mailer service id, defaults to mailer.mailer
+ *   - [level]: level name or int value, defaults to DEBUG
+ *   - [bubble]: bool, defaults to true
+ *
  * - socket:
  *   - connection_string: string
  *   - [timeout]: float
@@ -595,22 +604,22 @@ class Configuration implements ConfigurationInterface
                                 ->performNoDeepMerging()
                                 ->prototype('scalar')->end()
                             ->end()
-                            ->scalarNode('from_email')->end() // swift_mailer, native_mailer and flowdock
-                            ->arrayNode('to_email') // swift_mailer and native_mailer
+                            ->scalarNode('from_email')->end() // swift_mailer, native_mailer, symfony_mailer and flowdock
+                            ->arrayNode('to_email') // swift_mailer, native_mailer and symfony_mailer
                                 ->prototype('scalar')->end()
                                 ->beforeNormalization()
                                     ->ifString()
                                     ->then(function ($v) { return [$v]; })
                                 ->end()
                             ->end()
-                            ->scalarNode('subject')->end() // swift_mailer and native_mailer
-                            ->scalarNode('content_type')->defaultNull()->end() // swift_mailer
+                            ->scalarNode('subject')->end() // swift_mailer, native_mailer and symfony_mailer
+                            ->scalarNode('content_type')->defaultNull()->end() // swift_mailer and symfony_mailer
                             ->arrayNode('headers') // native_mailer
                                 ->canBeUnset()
                                 ->scalarPrototype()->end()
                             ->end()
-                            ->scalarNode('mailer')->defaultValue('mailer')->end() // swift_mailer
-                            ->arrayNode('email_prototype') // swift_mailer
+                            ->scalarNode('mailer')->defaultNull()->end() // swift_mailer and symfony_mailer
+                            ->arrayNode('email_prototype') // swift_mailer and symfony_mailer
                                 ->canBeUnset()
                                 ->beforeNormalization()
                                     ->ifString()
@@ -821,6 +830,10 @@ class Configuration implements ConfigurationInterface
                         ->validate()
                             ->ifTrue(function ($v) { return 'native_mailer' === $v['type'] && (empty($v['from_email']) || empty($v['to_email']) || empty($v['subject'])); })
                             ->thenInvalid('The sender, recipient and subject have to be specified to use a NativeMailerHandler')
+                        ->end()
+                        ->validate()
+                            ->ifTrue(function ($v) { return 'symfony_mailer' === $v['type'] && empty($v['email_prototype']) && (empty($v['from_email']) || empty($v['to_email']) || empty($v['subject'])); })
+                            ->thenInvalid('The sender, recipient and subject or an email prototype have to be specified to use the Symfony MailerHandler')
                         ->end()
                         ->validate()
                             ->ifTrue(function ($v) { return 'service' === $v['type'] && !isset($v['id']); })
