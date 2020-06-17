@@ -738,7 +738,8 @@ class MonologExtension extends Extension
                     $handler['dsn'],
                     [
                         'auto_log_stacks' => $handler['auto_log_stacks'],
-                        'environment' => $handler['environment']
+                        'environment' => $handler['environment'],
+                        'name' => $handler['name'],
                     ]
                 ]);
                 $client->setPublic(false);

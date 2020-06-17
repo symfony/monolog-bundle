@@ -202,6 +202,7 @@ use Monolog\Logger;
  *   - [bubble]: bool, defaults to true
  *   - [auto_log_stacks]: bool, defaults to false
  *   - [environment]: string, default to null (no env specified)
+ *   - [name]: string, hostname, default to null (detect hostname)
  *
  * - newrelic:
  *   - [level]: level name or int value, defaults to DEBUG
@@ -634,6 +635,7 @@ class Configuration implements ConfigurationInterface
                             ->scalarNode('auto_log_stacks')->defaultFalse()->end() // raven_handler
                             ->scalarNode('release')->defaultNull()->end() // raven_handler, sentry_handler
                             ->scalarNode('environment')->defaultNull()->end() // raven_handler, sentry_handler
+                            ->scalarNode('name')->defaultNull()->end() // raven_handler, sentry_handler
                             ->scalarNode('message_type')->defaultValue(0)->end() // error_log
                             ->arrayNode('tags') // loggly
                                 ->beforeNormalization()
