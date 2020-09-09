@@ -1,6 +1,7 @@
 ## 3.6.0 (xxxx-xx-xx)
 
-* Add support for Symfony Mailer
+* Added support for Symfony Mailer
+* Added support for setting log levels from parameters or environment variables
 
 ## 3.5.0 (2019-11-13)
 
