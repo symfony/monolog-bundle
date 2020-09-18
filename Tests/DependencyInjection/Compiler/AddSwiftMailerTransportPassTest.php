@@ -13,6 +13,7 @@ namespace Symfony\Bundle\MonologBundle\Tests\DependencyInjection\Compiler;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\AddSwiftMailerTransportPass;
+use Symfony\Bundle\MonologBundle\Tests\ForwardCompatTestTrait;
 use Symfony\Component\DependencyInjection\Reference;
 
 /**
@@ -20,13 +21,15 @@ use Symfony\Component\DependencyInjection\Reference;
  */
 class AddSwiftMailerTransportPassTest extends TestCase
 {
+    use ForwardCompatTestTrait;
+
     private $compilerPass;
 
     private $container;
 
     private $definition;
 
-    protected function setUp()
+    protected function doSetUp()
     {
         $this->compilerPass = new AddSwiftMailerTransportPass();
         $this->definition = $this->getMockBuilder('\Symfony\Component\DependencyInjection\Definition')->getMock();
