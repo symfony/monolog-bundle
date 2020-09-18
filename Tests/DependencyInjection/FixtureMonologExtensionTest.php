@@ -202,7 +202,7 @@ abstract class FixtureMonologExtensionTest extends DependencyInjectionTest
 
         $methodCalls = $logger->getMethodCalls();
 
-        $this->assertContains(['pushProcessor', [new Reference('monolog.processor.psr_log_message')]], $methodCalls, 'The PSR-3 processor should be enabled', false, false);
+        $this->assertContainsEquals(['pushProcessor', [new Reference('monolog.processor.psr_log_message')]], $methodCalls, 'The PSR-3 processor should be enabled');
     }
 
     public function testPsr3MessageProcessingDisabled()
@@ -213,7 +213,7 @@ abstract class FixtureMonologExtensionTest extends DependencyInjectionTest
 
         $methodCalls = $logger->getMethodCalls();
 
-        $this->assertNotContains(['pushProcessor', [new Reference('monolog.processor.psr_log_message')]], $methodCalls, 'The PSR-3 processor should not be enabled', false, false);
+        $this->assertNotContainsEquals(['pushProcessor', [new Reference('monolog.processor.psr_log_message')]], $methodCalls, 'The PSR-3 processor should not be enabled');
     }
 
     public function testNativeMailer()
