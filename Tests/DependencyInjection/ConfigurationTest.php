@@ -14,6 +14,7 @@ namespace Symfony\Bundle\MonologBundle\Tests\DependencyInjection;
 use Monolog\Logger;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MonologBundle\DependencyInjection\Configuration;
+use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -143,9 +144,6 @@ class ConfigurationTest extends TestCase
         $this->assertEquals('D', $config['handlers']['bar']['channels']['elements'][1]);
     }
 
-    /**
-     * @expectedException Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
-     */
     public function testInvalidArrays()
     {
         $configs = [
@@ -160,12 +158,11 @@ class ConfigurationTest extends TestCase
             ]
         ];
 
+        $this->expectException(InvalidConfigurationException::class);
+
         $config = $this->process($configs);
     }
 
-    /**
-     * @expectedException Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
-     */
     public function testMergingInvalidChannels()
     {
         $configs = [
@@ -186,6 +183,8 @@ class ConfigurationTest extends TestCase
                 ]
             ]
         ];
+
+        $this->expectException(InvalidConfigurationException::class);
 
         $config = $this->process($configs);
     }

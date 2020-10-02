@@ -24,17 +24,32 @@ matrix:
     - php: 7.1
       # There is a bug in PHPUnit 5.7
       env: SYMFONY_PHPUNIT_VERSION=6.5
+    # Test against seldaek/monolog 1.x
     - php: 7.2
+      env: MONOLOG_VERSION=1.*
     - php: 7.3
+      env: MONOLOG_VERSION=1.*
+    - php: 7.4
+      env: MONOLOG_VERSION=1.*
+    # Test against seldaek/monolog 2.x
+    - php: 7.2
+      env: MONOLOG_VERSION=2.*
+    - php: 7.3
+      env: MONOLOG_VERSION=2.*
+    - php: 7.4
+      env: MONOLOG_VERSION=2.*
     # Test against dev versions
     - php: nightly
-      env: DEPENDENCIES=dev
+      env: DEPENDENCIES=dev MONOLOG_VERSION=1.*
+    - php: nightly
+      env: DEPENDENCIES=dev MONOLOG_VERSION=2.*
   allow_failures:
-    - env: DEPENDENCIES=dev
+    - php: nightly
 
 before_install:
     - composer self-update
     - if [ "$DEPENDENCIES" = "dev" ]; then perl -pi -e 's/^}$/,"minimum-stability":"dev"}/' composer.json; fi;
+    - if [ "$MONOLOG_VERSION" != "" ]; then composer require --dev --no-update monolog/monolog:"$MONOLOG_VERSION"; fi;
     - if [ "$SYMFONY_VERSION" != "" ]; then composer require --dev --no-update symfony/symfony:"$SYMFONY_VERSION"; fi
 
 install:

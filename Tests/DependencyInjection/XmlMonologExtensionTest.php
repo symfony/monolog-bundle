@@ -13,12 +13,15 @@ namespace Symfony\Bundle\MonologBundle\Tests\DependencyInjection;
 
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 
 class XmlMonologExtensionTest extends FixtureMonologExtensionTest
 {
     protected function loadFixture(ContainerBuilder $container, $fixture)
     {
+        $container->setDefinition('mailer', new Definition('Swiftmailer'));
+
         $loader = new XmlFileLoader($container, new FileLocator(__DIR__.'/Fixtures/xml'));
         $loader->load($fixture.'.xml');
     }
