@@ -1,3 +1,7 @@
+## 3.6.0 (xxxx-xx-xx)
+
+* Add support for Symfony Mailer
+
 ## 3.5.0 (2019-11-13)
 
 * Added support for Monolog 2.0
