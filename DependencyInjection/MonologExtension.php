@@ -514,6 +514,7 @@ class MonologExtension extends Extension
             break;
 
         case 'swift_mailer':
+            $mailer = $handler['mailer'] ?: 'mailer';
             if (isset($handler['email_prototype'])) {
                 if (!empty($handler['email_prototype']['method'])) {
                     $prototype = [new Reference($handler['email_prototype']['id']), $handler['email_prototype']['method']];
@@ -525,7 +526,7 @@ class MonologExtension extends Extension
                 $messageFactory->setLazy(true);
                 $messageFactory->setPublic(false);
                 $messageFactory->setArguments([
-                    new Reference($handler['mailer']),
+                    new Reference($mailer),
                     $handler['from_email'],
                     $handler['to_email'],
                     $handler['subject'],
@@ -538,7 +539,7 @@ class MonologExtension extends Extension
                 $prototype = [new Reference($messageFactoryId), 'createMessage'];
             }
             $definition->setArguments([
-                new Reference($handler['mailer']),
+                new Reference($mailer),
                 $prototype,
                 $handler['level'],
                 $handler['bubble'],
@@ -560,6 +561,29 @@ class MonologExtension extends Extension
             if (!empty($handler['headers'])) {
                 $definition->addMethodCall('addHeader', [$handler['headers']]);
             }
+            break;
+
+        case 'symfony_mailer':
+            $mailer = $handler['mailer'] ?: 'mailer.mailer';
+            if (isset($handler['email_prototype'])) {
+                if (!empty($handler['email_prototype']['method'])) {
+                    $prototype = [new Reference($handler['email_prototype']['id']), $handler['email_prototype']['method']];
+                } else {
+                    $prototype = new Reference($handler['email_prototype']['id']);
+                }
+            } else {
+                $prototype = (new Definition('Symfony\Component\Mime\Email'))
+                    ->setPublic(false)
+                    ->addMethodCall('from', [$handler['from_email']])
+                    ->addMethodCall('to', $handler['to_email'])
+                    ->addMethodCall('subject', [$handler['subject']]);
+            }
+            $definition->setArguments([
+                new Reference($mailer),
+                $prototype,
+                $handler['level'],
+                $handler['bubble'],
+            ]);
             break;
 
         case 'socket':
@@ -923,6 +947,7 @@ class MonologExtension extends Extension
             'debug' => 'Symfony\Bridge\Monolog\Handler\DebugHandler',
             'swift_mailer' => 'Symfony\Bridge\Monolog\Handler\SwiftMailerHandler',
             'native_mailer' => 'Monolog\Handler\NativeMailerHandler',
+            'symfony_mailer' => 'Symfony\Bridge\Monolog\Handler\MailerHandler',
             'socket' => 'Monolog\Handler\SocketHandler',
             'pushover' => 'Monolog\Handler\PushoverHandler',
             'raven' => 'Monolog\Handler\RavenHandler',
