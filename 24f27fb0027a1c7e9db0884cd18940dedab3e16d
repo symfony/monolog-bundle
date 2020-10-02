@@ -1,0 +1,104 @@
+---------------------------------------------------------------------------
+
+by noniagriconomie at 2020-07-02T14:03:54Z
+
+@acasademont thank you for working on this, i can help test/try it on a project if needed :)
+
+---------------------------------------------------------------------------
+
+by mmarton at 2020-07-14T17:54:42Z
+
+Can I help somehow to make this PR accepted and included in the next release?
+I really want to replace swiftmailer and migrate to symfony's one, and this is a must have feature for me.
+
+---------------------------------------------------------------------------
+
+by devcut at 2020-07-23T15:35:48Z
+
+Same @mmarton ...
+
+---------------------------------------------------------------------------
+
+by noniagriconomie at 2020-09-07T09:37:27Z
+
+@lyrixx friendly ping :) (cf slack discussion)
+
+```json
+// composer.json
+// inside a symfony 5.1 app
+- symfony/mailer v5.1.5
+- symfony/monolog-bundle  v3.5.0 + manual edit files from PR changes
+```
+
+```yaml
+# config/packages/dev/monolog.yaml
+# from https://symfony.com/doc/current/logging/monolog_email.html but adapted for "symfony_mailer"
+monolog:
+    handlers:
+        main:
+            type:         fingers_crossed
+            action_level: critical
+            handler:      deduplicated
+        deduplicated:
+            type:    deduplication
+            handler: symfony_mailer
+        symfony_mailer:
+            type:       symfony_mailer
+            from_email: 'error@example.com'
+            to_email:   'error@example.com'
+            subject:    'An Error Occurred! %%message%%'
+            level:      debug
+            formatter:  monolog.formatter.html
+            content_type: text/html
+```
+
+```php
+    // a controller
+    /**
+     * @Route("/mailer-logger", name="mailer_logger")
+     */
+    public function log(LoggerInterface $logger)
+    {
+    	$logger->debug('A "debug"', ['foo' => 'bar']);
+    	$logger->notice('A "notice"', ['1' => 1]);
+    	$logger->error('A "error"');
+    	$logger->critical('A "critical"');
+        // ...
+}
+```
+
+## results
+
+<img width="975" alt="profiler_log" src="https://user-images.githubusercontent.com/13205768/92368098-8e1bdb00-f0f7-11ea-90be-6985e04edb22.png">
+<img width="1280" alt="mailer_log" src="https://user-images.githubusercontent.com/13205768/92368109-9116cb80-f0f7-11ea-9889-d57d719f0175.png">
+
+👍
+
+---------------------------------------------------------------------------
+
+by lyrixx at 2020-09-07T09:53:37Z
+
+@noniagriconomie Thanks a lot for testing 👍🏼
+
+---------------------------------------------------------------------------
+
+by acasademont at 2020-09-08T16:04:39Z
+
+@noniagriconomie sorry for the late reply! quite busy on other fronts, something you tink needs to be changed?
+
+---------------------------------------------------------------------------
+
+by noniagriconomie at 2020-09-08T16:11:11Z
+
+@acasademont
+
+> something you tink needs to be changed?
+
+no, i was checking this PR (as i want also to remove swiftmailer but still use logger mail feature)
+that is why i asked @lyrixx to review (core member) where he asked me to proof test it locally ;)
+
+---------------------------------------------------------------------------
+
+by lyrixx at 2020-10-02T09:48:00Z
+
+Note: I rebased your PR to ensure it's green, once it's green, we'll merge it 👍🏼
