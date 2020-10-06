@@ -18,6 +18,7 @@ use Symfony\Bundle\MonologBundle\DependencyInjection\MonologExtension;
 use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\LoggerChannelPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
+use Symfony\Component\DependencyInjection\ParameterBag\EnvPlaceholderParameterBag;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -611,10 +612,94 @@ class MonologExtensionTest extends DependencyInjectionTest
         ];
     }
 
+    public function testLogLevelfromInvalidparameterThrowsException()
+    {
+        $container = new ContainerBuilder();
+        $loader = new MonologExtension();
+        $config = [['handlers' => ['main' => ['type' => 'stream', 'level' => '%some_param%']]]];
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Could not match "%some_param%" to a log level.');
+
+        $loader->load($config, $container);
+    }
+
+    /**
+     * @dataProvider provideLoglevelParameterConfig
+     */
+    public function testLogLevelfromParameter(array $parameters, array $config, $expectedClass, array $expectedArgs)
+    {
+        $container = new ContainerBuilder();
+        foreach ($parameters as $name => $value) {
+            $container->setParameter($name, $value);
+        }
+        $loader = new MonologExtension();
+        $config = [['handlers' => ['main' => $config]]];
+        $loader->load($config, $container);
+
+        $definition = $container->getDefinition('monolog.handler.main');
+        $this->assertDICDefinitionClass($definition, $expectedClass);
+        $this->assertDICConstructorArguments($definition, $expectedArgs);
+    }
+
+    public function provideLoglevelParameterConfig()
+    {
+        return [
+            'browser console with parameter level' => [
+                ['%log_level%' => 'info'],
+                ['type' => 'browser_console', 'level' => '%log_level%'],
+                'Monolog\Handler\BrowserConsoleHandler',
+                [200, true]
+            ],
+            'browser console with envvar level' => [
+                ['%env(LOG_LEVEL)%' => 'info'],
+                ['type' => 'browser_console', 'level' => '%env(LOG_LEVEL)%'],
+                'Monolog\Handler\BrowserConsoleHandler',
+                [200, true]
+            ],
+            'stream with envvar level null or "~" (in yaml config)' => [
+                ['%env(LOG_LEVEL)%' => null],
+                ['type' => 'stream', 'level' => '%env(LOG_LEVEL)%'],
+                'Monolog\Handler\StreamHandler',
+                [
+                    '%kernel.logs_dir%/%kernel.environment%.log',
+                    null,
+                    true,
+                    null,
+                    false,
+                ]
+            ],
+            'stream with envvar level' => [
+                ['%env(LOG_LEVEL)%' => '400'],
+                ['type' => 'stream', 'level' => '%env(LOG_LEVEL)%'],
+                'Monolog\Handler\StreamHandler',
+                [
+                    '%kernel.logs_dir%/%kernel.environment%.log',
+                    400,
+                    true,
+                    null,
+                    false,
+                ]
+            ],
+            'stream with envvar and fallback parameter' => [
+                ['%env(LOG_LEVEL)%' => '500', '%log_level%' => '%env(LOG_LEVEL)%'],
+                ['type' => 'stream', 'level' => '%log_level%'],
+                'Monolog\Handler\StreamHandler',
+                [
+                    '%kernel.logs_dir%/%kernel.environment%.log',
+                    500,
+                    true,
+                    null,
+                    false,
+                ]
+            ],
+        ];
+    }
+
 
     protected function getContainer(array $config = [], array $thirdPartyDefinitions = [])
     {
-        $container = new ContainerBuilder();
+        $container = new ContainerBuilder(new EnvPlaceholderParameterBag());
         foreach ($thirdPartyDefinitions as $id => $definition) {
             $container->setDefinition($id, $definition);
         }
