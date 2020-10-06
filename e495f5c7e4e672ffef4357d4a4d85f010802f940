@@ -1,0 +1,47 @@
+---------------------------------------------------------------------------
+
+by SerkanYildiz at 2020-09-18T12:26:23Z
+
+Hi @dbrumann, we're in the phase of extending the Extension class of Monolog to have this functionality.
+However we would like to have this in the bundle, so that we don't manage it ourselves.
+
+Can we help you to get this functionality merged in the bundle itself?
+
+Thanks in advance!
+
+---------------------------------------------------------------------------
+
+by dbrumann at 2020-09-18T12:47:34Z
+
+Thanks @SerkanYildiz. The failing tests should be addressed by #360. I hope after merging that we can also merge this. I guess other than reviewing if this is the appropriate way to solve this, there is not much else to do here, right now.
+
+---------------------------------------------------------------------------
+
+by lyrixx at 2020-10-02T13:52:40Z
+
+Could you add a note in the CHANGELOG? after that I'm 👍🏼
+
+---------------------------------------------------------------------------
+
+by dbrumann at 2020-10-04T07:33:30Z
+
+I just tried this out in a project and noticed an issue. The following config (when no env var is set) will not work:
+
+```yaml
+# config/packages/monolog/dev.yaml
+parameters:
+    env(LOG_LEVEL): ~
+monolog:
+    handlers:
+        main:
+            type: stream
+            path: "%kernel.logs_dir%/%kernel.environment%.log"
+            level: '%env(LOG_LEVEL)%'
+```
+
+~I am working on a fix for this:~
+
+~Option 1: when null is encountered we do not set `$level` which will then use the fallback provided in the handlers constructor (usually "debug").~
+Option 2: null is not a valid value --> we fail with an error message 👇
+
+<img width="1039" alt="Screen Shot 2020-10-04 at 09 38 49" src="https://user-images.githubusercontent.com/2952726/95010269-2e4a1e80-0628-11eb-8151-2afb44098e1d.png">
