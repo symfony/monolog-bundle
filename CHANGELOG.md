@@ -1,4 +1,4 @@
-## 3.6.0 (xxxx-xx-xx)
+## 3.6.0 (2020-10-06)
 
 * Added support for Symfony Mailer
 * Added support for setting log levels from parameters or environment variables
