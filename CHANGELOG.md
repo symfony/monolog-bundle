@@ -1,5 +1,6 @@
 ## 3.7.0 (xxxx-xx-xx)
 
+* Add support for `datadog` handler
 * Use `ActivationStrategy` instead of `actionLevel` when available 
 * Register resettable processors (`ResettableInterface`) for autoconfiguration (tag: `kernel.reset`)
 * Drop support for Symfony 3.4
