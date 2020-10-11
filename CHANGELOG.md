@@ -1,3 +1,7 @@
+## 3.6.1 (xxxx-xx-xx)
+
+* Register resettable processors (`ResettableInterface`) for autoconfiguration (tag: `kernel.reset`)
+
 ## 3.6.0 (2020-10-06)
 
 * Added support for Symfony Mailer
