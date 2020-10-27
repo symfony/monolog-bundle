@@ -1,4 +1,4 @@
-## 3.6.1 (xxxx-xx-xx)
+## 3.7.0 (xxxx-xx-xx)
 
 * Register resettable processors (`ResettableInterface`) for autoconfiguration (tag: `kernel.reset`)
 
