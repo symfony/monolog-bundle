@@ -150,6 +150,10 @@ class MonologExtension extends Extension
                 $container->registerForAutoconfiguration(WebProcessor::class)
                     ->addTag('monolog.processor');
             }
+            if (interface_exists(ResettableInterface::class)) {
+                $container->registerForAutoconfiguration(ResettableInterface::class)
+                    ->addTag('kernel.reset', ['method' => 'reset']);
+            }
             $container->registerForAutoconfiguration(TokenProcessor::class)
                 ->addTag('monolog.processor');
             if (interface_exists(HttpClientInterface::class)) {

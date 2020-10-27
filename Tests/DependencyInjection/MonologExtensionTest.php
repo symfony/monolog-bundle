@@ -14,6 +14,7 @@ namespace Symfony\Bundle\MonologBundle\Tests\DependencyInjection;
 use InvalidArgumentException;
 use Monolog\Handler\RollbarHandler;
 use Monolog\Logger;
+use Monolog\Processor\UidProcessor;
 use Symfony\Bundle\MonologBundle\DependencyInjection\MonologExtension;
 use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\LoggerChannelPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -696,6 +697,24 @@ class MonologExtensionTest extends DependencyInjectionTest
         ];
     }
 
+    public function testProcessorAutoConfiguration()
+    {
+        if (!interface_exists('Monolog\ResettableInterface')) {
+            $this->markTestSkipped('The ResettableInterface is not available.');
+        }
+        $service = new Definition(UidProcessor::class);
+        $service->setAutoconfigured(true);
+        $container = $this->getContainer([], ['processor.uid' => $service]);
+        $this->assertTrue($container->hasDefinition('processor.uid'));
+        $processor = $container->getDefinition('processor.uid');
+        $tags = $processor->getTags();
+        $this->assertArrayHasKey('kernel.reset', $tags);
+        $this->assertIsArray($tags['kernel.reset']);
+        $this->assertCount(1, $tags['kernel.reset']);
+        $this->assertIsArray($tags['kernel.reset'][0]);
+        $this->assertArrayHasKey('method', $tags['kernel.reset'][0]);
+        $this->assertEquals('reset', $tags['kernel.reset'][0]['method']);
+    }
 
     protected function getContainer(array $config = [], array $thirdPartyDefinitions = [])
     {
