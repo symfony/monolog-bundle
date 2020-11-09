@@ -60,6 +60,15 @@ class MonologExtensionTest extends DependencyInjectionTest
         $this->assertDICConstructorArguments($handler, ['/tmp/symfony.log', \Monolog\Logger::ERROR, false, 0666, true]);
     }
 
+    public function testLoadWithUnknownLevel()
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Could not match "warn" to a log level.');
+        $container = $this->getContainer([['handlers' => [
+            'custom' => ['type' => 'stream', 'path' => '/tmp/symfony.log', 'bubble' => false, 'level' => 'warn', 'file_permission' => '0666', 'use_locking' => true]
+        ]]]);
+    }
+
     public function testLoadWithNestedHandler()
     {
         $container = $this->getContainer([['handlers' => [
