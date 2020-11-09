@@ -62,7 +62,7 @@ class MonologExtension extends Extension
             throw new \InvalidArgumentException(sprintf('Could not match "%s" to a log level.', $level));
         }
 
-        if ($logLevel !== '') {
+        if ($logLevel !== '' && $logLevel !== $level) {
             return $this->levelToMonologConst($logLevel, $container);
         }
 
