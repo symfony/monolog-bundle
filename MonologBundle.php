@@ -52,4 +52,15 @@ class MonologBundle extends Bundle
             $formatter->includeStacktraces();
         }
     }
+
+    public function shutdown()
+    {
+        parent::shutdown();
+
+        $handlerManager = $this->container->get('monolog.handler_manager');
+
+        $handlerManager->close();
+    }
+
+
 }
