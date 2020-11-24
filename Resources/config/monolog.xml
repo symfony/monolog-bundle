@@ -41,8 +41,8 @@
             <factory class="Symfony\Component\HttpClient\HttpClient" method="create" />
         </service>
 
-        <service id="monolog.handler_manager" class="Symfony\Bundle\MonologBundle\Services\HandlerManager" public="false">
-            <argument type="tagged" tag="monolog.handler" />
+        <service id="monolog.handler_manager" class="Symfony\Bundle\MonologBundle\HandlerLifecycleManager" public="false">
+            <argument type="tagged_iterator" tag="monolog.handler" />
         </service>
     </services>
 </container>

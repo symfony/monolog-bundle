@@ -62,5 +62,4 @@ class MonologBundle extends Bundle
         $handlerManager->close();
     }
 
-
 }

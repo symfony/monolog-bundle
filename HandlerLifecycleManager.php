@@ -1,20 +1,19 @@
 <?php
 
 
-namespace Symfony\Bundle\MonologBundle\Services;
+namespace Symfony\Bundle\MonologBundle;
 
 
 use Monolog\Handler\HandlerInterface;
 
-class HandlerManager
+class HandlerLifecycleManager
 {
-
     /**
      * @var HandlerInterface[]
      */
     private $handlers;
 
-    public function __construct(array $handlers)
+    public function __construct(iterable $handlers)
     {
         $this->handlers = $handlers;
     }
