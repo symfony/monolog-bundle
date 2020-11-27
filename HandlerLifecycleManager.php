@@ -13,7 +13,7 @@ class HandlerLifecycleManager
      */
     private $handlers;
 
-    public function __construct(iterable $handlers)
+    public function __construct(\IteratorAggregate $handlers)
     {
         $this->handlers = $handlers;
     }
