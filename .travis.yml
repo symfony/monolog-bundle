@@ -11,6 +11,7 @@ cache:
 env:
     global:
         - SYMFONY_PHPUNIT_DIR=.phpunit
+        - XDEBUG_MODE=coverage
 
 matrix:
   fast_finish: true
