@@ -234,6 +234,7 @@ class MonologExtension extends Extension
             $definition->addTag('kernel.event_subscriber');
             break;
 
+        case 'chromephp':
         case 'firephp':
             $definition->setArguments([
                 $handler['level'],
@@ -315,7 +316,7 @@ class MonologExtension extends Extension
                     'transport' => $handler['elasticsearch']['transport'],
                 ];
 
-                if (isset($handler['elasticsearch']['user']) && isset($handler['elasticsearch']['password'])) {
+                if (isset($handler['elasticsearch']['user'], $handler['elasticsearch']['password'])) {
                     $elasticaClientArguments = array_merge(
                         $elasticaClientArguments,
                         [
@@ -381,14 +382,6 @@ class MonologExtension extends Extension
                 $handler['level'],
                 $handler['bubble'],
             ]);
-            break;
-
-        case 'chromephp':
-            $definition->setArguments([
-                $handler['level'],
-                $handler['bubble'],
-            ]);
-            $definition->addTag('kernel.event_listener', ['event' => 'kernel.response', 'method' => 'onKernelResponse']);
             break;
 
         case 'rotating_file':
