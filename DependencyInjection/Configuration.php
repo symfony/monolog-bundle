@@ -16,6 +16,7 @@ use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Monolog\Logger;
+use Monolog\Handler\SyslogUdpHandler;
 
 /**
  * This class contains the configuration information for the bundle
@@ -162,7 +163,7 @@ use Monolog\Logger;
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
  *   - [ident]: string, defaults to
- *   - [rfc]: int 0 (RFC3164) or 1 (RFC5424), defaults to 1
+ *   - [rfc]: RFC3164 or RFC5424, defaults to RFC5424
  *
  * - swift_mailer:
  *   - from_email: optional if email_prototype is given
@@ -495,7 +496,10 @@ class Configuration implements ConfigurationInterface
                             ->scalarNode('title')->defaultNull()->end() // pushover
                             ->scalarNode('host')->defaultNull()->end() // syslogudp & hipchat
                             ->scalarNode('port')->defaultValue(514)->end() // syslogudp
-                            ->integerNode('rfc')->defaultValue(1)->end() // syslogudp
+                            ->enumNode('rfc')
+                                ->values([SyslogUdpHandler::RFC5424, SyslogUdpHandler::RFC3164])
+                                ->defaultValue(SyslogUdpHandler::RFC5424)
+                                ->end() // syslogudp
                             ->arrayNode('publisher')
                                 ->canBeUnset()
                                 ->beforeNormalization()
