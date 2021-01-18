@@ -1,6 +1,7 @@
 ## 3.7.0 (xxxx-xx-xx)
 
 * Register resettable processors (`ResettableInterface`) for autoconfiguration (tag: `kernel.reset`)
+* Drop support for Symfony 3.4
 
 ## 3.6.0 (2020-10-06)
 

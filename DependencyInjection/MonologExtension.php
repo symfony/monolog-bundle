@@ -120,24 +120,6 @@ class MonologExtension extends Extension
                 }
             }
             $container->setParameter('monolog.handlers_to_channels', $handlersToChannels);
-
-            if (PHP_VERSION_ID < 70000) {
-                $this->addClassesToCompile([
-                    'Monolog\\Formatter\\FormatterInterface',
-                    'Monolog\\Formatter\\LineFormatter',
-                    'Monolog\\Handler\\HandlerInterface',
-                    'Monolog\\Handler\\AbstractHandler',
-                    'Monolog\\Handler\\AbstractProcessingHandler',
-                    'Monolog\\Handler\\StreamHandler',
-                    'Monolog\\Handler\\FingersCrossedHandler',
-                    'Monolog\\Handler\\FilterHandler',
-                    'Monolog\\Handler\\TestHandler',
-                    'Monolog\\Logger',
-                    'Symfony\\Bridge\\Monolog\\Logger',
-                    'Monolog\\Handler\\FingersCrossed\\ActivationStrategyInterface',
-                    'Monolog\\Handler\\FingersCrossed\\ErrorLevelActivationStrategy',
-                ]);
-            }
         }
 
         $container->setParameter('monolog.additional_channels', isset($config['channels']) ? $config['channels'] : []);
