@@ -1,0 +1,23 @@
+---------------------------------------------------------------------------
+
+by lyrixx at 2020-11-02T17:47:18Z
+
+It should be OK now 💚
+
+---------------------------------------------------------------------------
+
+by lyrixx at 2020-11-09T15:31:36Z
+
+IIRC, I did this pr to fix https://github.com/symfony/monolog-bundle/issues/365#issuecomment-705417779
+
+---------------------------------------------------------------------------
+
+by derrabus at 2020-11-09T16:07:06Z
+
+At the moment, php 5 support is dropped from other repos as well (`symfony/symfony`, `symfony/polyfill`) and I don't think we're doing ourselves a favor by maintaining php 5 support for future releases. That being said, old php 5 compatible releases of this package won't disappear after merging this PR.
+
+php 5 is EOL for almost two years now. Let's move on.
+
+> Do we expect to use php 7.1 features here?
+
+We should start to. 😃
