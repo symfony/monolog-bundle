@@ -361,6 +361,7 @@ class ConfigurationTest extends TestCase
 
         $this->assertTrue($config['handlers']['foobar']['nested']);
     }
+
     public function testWithRedisHandler()
     {
         $configs = [
@@ -404,6 +405,88 @@ class ConfigurationTest extends TestCase
 
         $this->assertEquals('127.0.1.1', $config['handlers']['redis']['redis']['host']);
         $this->assertEquals('monolog_redis_test', $config['handlers']['redis']['redis']['key_name']);
+    }
+
+    /**
+     * @group legacy
+     */
+    public function testConsoleFormatterOptionsRename()
+    {
+        $configs = [
+            [
+                'handlers' => [
+                    'old' => [
+                        'type' => 'console',
+                        'console_formater_options' => ['foo' => 'foo'],
+                    ],
+                    'old2' => [
+                        'type' => 'console',
+                        'console_formater_options' => ['foo' => 'foo'],
+                    ],
+                    'new' => [
+                        'type' => 'console',
+                        'console_formatter_options' => ['bar' => 'bar'],
+                    ],
+                    'new2' => [
+                        'type' => 'console',
+                        'console_formatter_options' => ['bar' => 'bar'],
+                    ],
+                    'both' => [
+                        'type' => 'console',
+                        'console_formater_options' => ['foo' => 'foo'],
+                        'console_formatter_options' => ['bar' => 'bar'],
+                    ],
+                    'both2' => [
+                        'type' => 'console',
+                        'console_formater_options' => ['foo' => 'foo'],
+                        'console_formatter_options' => ['bar' => 'bar'],
+                    ],
+                ],
+            ],
+            [
+                'handlers' => [
+                    'old2' => [
+                        'type' => 'console',
+                        'console_formater_options' => ['baz' => 'baz'],
+                    ],
+                    'new2' => [
+                        'type' => 'console',
+                        'console_formatter_options' => ['qux' => 'qux'],
+                    ],
+                    'both2' => [
+                        'type' => 'console',
+                        'console_formater_options' => ['baz' => 'baz'],
+                        'console_formatter_options' => ['qux' => 'qux'],
+                    ],
+                ],
+            ],
+        ];
+
+        $config = $this->process($configs);
+
+        $this->assertArrayHasKey('console_formatter_options', $config['handlers']['old']);
+        $this->assertSame(['foo' => 'foo'], $config['handlers']['old']['console_formatter_options']);
+        $this->assertArrayNotHasKey('console_formater_options', $config['handlers']['old']);
+
+        $this->assertArrayHasKey('console_formatter_options', $config['handlers']['new']);
+        $this->assertSame(['bar' => 'bar'], $config['handlers']['new']['console_formatter_options']);
+        $this->assertArrayNotHasKey('console_formater_options', $config['handlers']['new']);
+
+        $this->assertArrayHasKey('console_formatter_options', $config['handlers']['both']);
+        $this->assertSame(['bar' => 'bar'], $config['handlers']['both']['console_formatter_options']);
+        $this->assertArrayNotHasKey('console_formater_options', $config['handlers']['both']);
+
+        $this->assertArrayHasKey('console_formatter_options', $config['handlers']['old2']);
+        $this->assertSame(['baz' => 'baz'], $config['handlers']['old2']['console_formatter_options']);
+        $this->assertArrayNotHasKey('console_formater_options', $config['handlers']['old2']);
+
+        $this->assertArrayHasKey('console_formatter_options', $config['handlers']['new2']);
+        $this->assertSame(['qux' => 'qux'], $config['handlers']['new2']['console_formatter_options']);
+        $this->assertArrayNotHasKey('console_formater_options', $config['handlers']['new2']);
+
+        $this->assertArrayHasKey('console_formatter_options', $config['handlers']['both2']);
+        $this->assertSame(['qux' => 'qux'], $config['handlers']['both2']['console_formatter_options']);
+        $this->assertArrayNotHasKey('console_formater_options', $config['handlers']['both2']);
     }
 
     /**
