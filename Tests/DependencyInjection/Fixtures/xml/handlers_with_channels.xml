@@ -30,7 +30,7 @@
                 <monolog:channel>foo</monolog:channel>
             </monolog:channels>
         </monolog:handler>
-        <monolog:handler name="main" type="group" handler="nested">
+        <monolog:handler name="main" type="group">
             <monolog:member>nested</monolog:member>
             <monolog:channels>
                 <monolog:channel>!foo</monolog:channel>
