@@ -14,6 +14,7 @@ namespace Symfony\Bundle\MonologBundle\DependencyInjection;
 use Monolog\Logger;
 use Monolog\Processor\ProcessorInterface;
 use Monolog\Handler\HandlerInterface;
+use Monolog\Handler\ProcessableHandlerInterface;
 use Monolog\ResettableInterface;
 use Symfony\Bridge\Monolog\Handler\FingersCrossed\HttpCodeActivationStrategy;
 use Symfony\Bridge\Monolog\Processor\TokenProcessor;
@@ -188,7 +189,7 @@ class MonologExtension extends Extension
             $handler['process_psr_3_messages'] = !isset($handler['handler']) && !$handler['members'];
         }
 
-        if ($handler['process_psr_3_messages']) {
+        if ($handler['process_psr_3_messages'] && is_a($handlerClass, ProcessableHandlerInterface::class, true)) {
             $processorId = 'monolog.processor.psr_log_message';
             if (!$container->hasDefinition($processorId)) {
                 $processor = new Definition('Monolog\\Processor\\PsrLogMessageProcessor');

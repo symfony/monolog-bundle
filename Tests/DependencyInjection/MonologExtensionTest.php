@@ -210,6 +210,18 @@ class MonologExtensionTest extends DependencyInjectionTest
         $loader->load([['handlers' => ['debug' => ['type' => 'stream']]]], $container);
     }
 
+    public function testNullHandler()
+    {
+        $container = $this->getContainer([['handlers' => ['dummy' => ['type' => 'null']]]]);
+
+        $this->assertTrue($container->hasDefinition('monolog.logger'));
+        $this->assertTrue($container->hasDefinition('monolog.handler.dummy'));
+
+        $handler = $container->getDefinition('monolog.handler.dummy');
+        $this->assertDICDefinitionClass($handler, 'Monolog\Handler\NullHandler');
+        $this->assertCount(0, $handler->getMethodCalls());
+    }
+
     public function testSyslogHandlerWithLogopts()
     {
         $container = $this->getContainer([['handlers' => ['main' => ['type' => 'syslog', 'logopts' => LOG_CONS]]]]);
