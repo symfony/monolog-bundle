@@ -27,13 +27,11 @@ class AddProcessorsPassTest extends TestCase
 
         $service = $container->getDefinition('monolog.handler.test');
         $calls = $service->getMethodCalls();
-        $this->assertCount(1, $calls);
-        $this->assertEquals(['pushProcessor', [new Reference('test')]], $calls[0]);
+        $this->assertCount(0, $calls);
 
         $service = $container->getDefinition('handler_test');
         $calls = $service->getMethodCalls();
-        $this->assertCount(1, $calls);
-        $this->assertEquals(['pushProcessor', [new Reference('test2')]], $calls[0]);
+        $this->assertCount(0, $calls);
     }
 
     protected function getContainer()

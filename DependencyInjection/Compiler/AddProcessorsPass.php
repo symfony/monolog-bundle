@@ -11,8 +11,9 @@
 
 namespace Symfony\Bundle\MonologBundle\DependencyInjection\Compiler;
 
-use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Monolog\Handler\ProcessableHandlerInterface;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
 
 /**
@@ -46,13 +47,15 @@ class AddProcessorsPass implements CompilerPassInterface
                     $definition = $container->getDefinition('monolog.logger_prototype');
                 }
 
-                if (!empty($tag['method'])) {
-                    $processor = [new Reference($id), $tag['method']];
-                } else {
-                    // If no method is defined, fallback to use __invoke
-                    $processor = new Reference($id);
+                if (is_a($definition->getClass(), ProcessableHandlerInterface::class, true)) {
+                    if (!empty($tag['method'])) {
+                        $processor = [new Reference($id), $tag['method']];
+                    } else {
+                        // If no method is defined, fallback to use __invoke
+                        $processor = new Reference($id);
+                    }
+                    $definition->addMethodCall('pushProcessor', [$processor]);
                 }
-                $definition->addMethodCall('pushProcessor', [$processor]);
             }
         }
     }
