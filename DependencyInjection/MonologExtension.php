@@ -189,7 +189,12 @@ class MonologExtension extends Extension
             $handler['process_psr_3_messages'] = !isset($handler['handler']) && !$handler['members'];
         }
 
-        if ($handler['process_psr_3_messages'] && is_a($handlerClass, ProcessableHandlerInterface::class, true)) {
+        if ($handler['process_psr_3_messages'] 
+            && (
+                1 === Logger::API
+                || is_a($handlerClass, ProcessableHandlerInterface::class, true)
+            )
+        ) {
             $processorId = 'monolog.processor.psr_log_message';
             if (!$container->hasDefinition($processorId)) {
                 $processor = new Definition('Monolog\\Processor\\PsrLogMessageProcessor');

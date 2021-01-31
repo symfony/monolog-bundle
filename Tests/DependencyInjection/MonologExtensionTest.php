@@ -219,7 +219,16 @@ class MonologExtensionTest extends DependencyInjectionTest
 
         $handler = $container->getDefinition('monolog.handler.dummy');
         $this->assertDICDefinitionClass($handler, 'Monolog\Handler\NullHandler');
-        $this->assertCount(0, $handler->getMethodCalls());
+        $calls = $handler->getMethodCalls();
+        switch (Logger::API) {
+            case 1:
+                $this->assertCount(1, $calls);
+                $this->assertEquals(['pushProcessor', [new Reference('monolog.processor.psr_log_message')]], $calls[0]);
+                break;
+            case 2:
+                $this->assertCount(0, $calls);
+                break;
+        }
     }
 
     public function testSyslogHandlerWithLogopts()

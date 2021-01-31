@@ -11,13 +11,15 @@
 
 namespace Symfony\Bundle\MonologBundle\Tests\DependencyInjection\Compiler;
 
+use Monolog\Handler\ProcessableHandlerInterface;
+use Monolog\Logger;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\AddProcessorsPass;
-use Symfony\Component\DependencyInjection\Reference;
-use Symfony\Component\DependencyInjection\Definition;
-use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Config\FileLocator;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
+use Symfony\Component\DependencyInjection\Reference;
 
 class AddProcessorsPassTest extends TestCase
 {
@@ -27,11 +29,27 @@ class AddProcessorsPassTest extends TestCase
 
         $service = $container->getDefinition('monolog.handler.test');
         $calls = $service->getMethodCalls();
-        $this->assertCount(0, $calls);
+        switch (Logger::API) {
+            case 1:
+                $this->assertCount(1, $calls);
+                $this->assertEquals(['pushProcessor', [new Reference('test')]], $calls[0]);
+                break;
+            case 2:
+                $this->assertCount(0, $calls);
+                break;
+        }
 
         $service = $container->getDefinition('handler_test');
         $calls = $service->getMethodCalls();
-        $this->assertCount(0, $calls);
+        switch (Logger::API) {
+            case 1:
+                $this->assertCount(1, $calls);
+                $this->assertEquals(['pushProcessor', [new Reference('test2')]], $calls[0]);
+                break;
+            case 2:
+                $this->assertCount(0, $calls);
+                break;
+        }
     }
 
     protected function getContainer()
