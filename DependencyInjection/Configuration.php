@@ -163,7 +163,7 @@ use Monolog\Handler\SyslogUdpHandler;
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
  *   - [ident]: string, defaults to
- *   - [rfc]: RFC3164 or RFC5424, defaults to RFC5424
+ *   - [rfc]: SyslogUdpHandler::RFC3164 (0) or SyslogUdpHandler::RFC5424 (1), defaults to SyslogUdpHandler::RFC5424
  *
  * - swift_mailer:
  *   - from_email: optional if email_prototype is given
