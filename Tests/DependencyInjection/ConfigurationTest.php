@@ -439,8 +439,28 @@ class ConfigurationTest extends TestCase
                         'host' => '127.0.0.1',
                         'port' => 514,
                         'facility' => 'USER',
+                        'level' => 'ERROR'
+                    ]
+                ]
+            ]
+        ];
+        $config = $this->process($configs);
+
+        $this->assertEquals('syslogudp', $config['handlers']['syslogudp']['type']);
+        $this->assertEquals('127.0.0.1', $config['handlers']['syslogudp']['host']);
+        $this->assertEquals(514, $config['handlers']['syslogudp']['port']);
+        $this->assertEquals(1, $config['handlers']['syslogudp']['rfc']);
+
+        $configs = [
+            [
+                'handlers' => [
+                    'syslogudp' => [
+                        'type' => 'syslogudp',
+                        'host' => '127.0.0.1',
+                        'port' => 514,
+                        'facility' => 'USER',
                         'level' => 'ERROR',
-                        'rfc' => SyslogUdpHandler::RFC5424e
+                        'rfc' => 2
                     ]
                 ]
             ]
