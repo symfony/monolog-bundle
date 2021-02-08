@@ -63,6 +63,7 @@ use Monolog\Logger;
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
  *   - [file_permission]: string|null, defaults to null
+ *   - [use_locking]: bool, defaults to false
  *   - [filename_format]: string, defaults to '{filename}-{date}'
  *   - [date_format]: string, defaults to 'Y-m-d'
  *
@@ -397,7 +398,7 @@ class Configuration implements ConfigurationInterface
                                     })
                                 ->end()
                             ->end()
-                            ->booleanNode('use_locking')->defaultFalse()->end() // stream
+                            ->booleanNode('use_locking')->defaultFalse()->end() // stream and rotating
                             ->scalarNode('filename_format')->defaultValue('{filename}-{date}')->end() //rotating
                             ->scalarNode('date_format')->defaultValue('Y-m-d')->end() //rotating
                             ->scalarNode('ident')->defaultFalse()->end() // syslog and syslogudp

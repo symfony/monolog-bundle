@@ -334,7 +334,7 @@ class ConfigurationTest extends TestCase
                         'use_locking' => false,
                     ],
                     'bar' => [
-                        'type' => 'stream',
+                        'type' => 'rotating_file',
                         'path' => '/bar',
                         'use_locking' => true,
                     ]

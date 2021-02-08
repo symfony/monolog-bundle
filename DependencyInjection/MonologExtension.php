@@ -384,6 +384,7 @@ class MonologExtension extends Extension
                 $handler['level'],
                 $handler['bubble'],
                 $handler['file_permission'],
+                $handler['use_locking'],
             ]);
             $definition->addMethodCall('setFilenameFormat', [
                 $handler['filename_format'],
