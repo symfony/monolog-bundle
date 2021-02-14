@@ -11,15 +11,36 @@
 
 namespace Symfony\Bundle\MonologBundle\Tests\DependencyInjection;
 
-use Symfony\Bundle\MonologBundle\DependencyInjection\MonologExtension;
+use Monolog\Handler\FingersCrossed\ErrorLevelActivationStrategy;
+use Symfony\Bridge\Monolog\Processor\SwitchUserTokenProcessor;
 use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\LoggerChannelPass;
+use Symfony\Bundle\MonologBundle\DependencyInjection\MonologExtension;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
 
 abstract class FixtureMonologExtensionTest extends DependencyInjectionTest
 {
+    /** @group legacy */
+    public function testLegacyLoadWithSeveralHandlers()
+    {
+        if (class_exists(SwitchUserTokenProcessor::class)) {
+            $this->markTestSkipped('Symfony MonologBridge < 5.2 is needed.');
+        }
+
+        $this->doTestLoadWithSeveralHandlers(\Monolog\Logger::ERROR);
+    }
+
     public function testLoadWithSeveralHandlers()
+    {
+        if (!class_exists(SwitchUserTokenProcessor::class)) {
+            $this->markTestSkipped('Symfony MonologBridge >= 5.2 is needed.');
+        }
+
+        $this->doTestLoadWithSeveralHandlers(new Definition(ErrorLevelActivationStrategy::class, [\Monolog\Logger::ERROR]));
+    }
+
+    private function doTestLoadWithSeveralHandlers($activation)
     {
         $container = $this->getContainer('multiple_handlers');
 
@@ -41,14 +62,33 @@ abstract class FixtureMonologExtensionTest extends DependencyInjectionTest
 
         $handler = $container->getDefinition('monolog.handler.main');
         $this->assertDICDefinitionClass($handler, 'Monolog\Handler\FingersCrossedHandler');
-        $this->assertDICConstructorArguments($handler, [new Reference('monolog.handler.nested'), \Monolog\Logger::ERROR, 0, true, true, \Monolog\Logger::NOTICE]);
+        $this->assertDICConstructorArguments($handler, [new Reference('monolog.handler.nested'), $activation, 0, true, true, \Monolog\Logger::NOTICE]);
 
         $handler = $container->getDefinition('monolog.handler.filtered');
         $this->assertDICDefinitionClass($handler, 'Monolog\Handler\FilterHandler');
         $this->assertDICConstructorArguments($handler, [new Reference('monolog.handler.nested2'), [\Monolog\Logger::WARNING, \Monolog\Logger::ERROR], \Monolog\Logger::EMERGENCY, true]);
     }
 
+    /** @group legacy */
+    public function testLegacyLoadWithOverwriting()
+    {
+        if (class_exists(SwitchUserTokenProcessor::class)) {
+            $this->markTestSkipped('Symfony MonologBridge < 5.2 is needed.');
+        }
+
+        $this->doTestLoadWithOverwriting(\Monolog\Logger::ERROR);
+    }
+
     public function testLoadWithOverwriting()
+    {
+        if (!class_exists(SwitchUserTokenProcessor::class)) {
+            $this->markTestSkipped('Symfony MonologBridge >= 5.2 is needed.');
+        }
+
+        $this->doTestLoadWithOverwriting(new Definition(ErrorLevelActivationStrategy::class, [\Monolog\Logger::ERROR]));
+    }
+
+    private function doTestLoadWithOverwriting($activation)
     {
         $container = $this->getContainer('overwriting');
 
@@ -69,7 +109,7 @@ abstract class FixtureMonologExtensionTest extends DependencyInjectionTest
 
         $handler = $container->getDefinition('monolog.handler.main');
         $this->assertDICDefinitionClass($handler, 'Monolog\Handler\FingersCrossedHandler');
-        $this->assertDICConstructorArguments($handler, [new Reference('monolog.handler.nested'), \Monolog\Logger::ERROR, 0, true, true, null]);
+        $this->assertDICConstructorArguments($handler, [new Reference('monolog.handler.nested'), $activation, 0, true, true, null]);
     }
 
     public function testLoadWithNewAtEnd()
