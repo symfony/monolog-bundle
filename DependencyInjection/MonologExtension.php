@@ -11,11 +11,13 @@
 
 namespace Symfony\Bundle\MonologBundle\DependencyInjection;
 
+use Monolog\Handler\FingersCrossed\ErrorLevelActivationStrategy;
 use Monolog\Logger;
 use Monolog\Processor\ProcessorInterface;
 use Monolog\Handler\HandlerInterface;
 use Monolog\ResettableInterface;
 use Symfony\Bridge\Monolog\Handler\FingersCrossed\HttpCodeActivationStrategy;
+use Symfony\Bridge\Monolog\Processor\SwitchUserTokenProcessor;
 use Symfony\Bridge\Monolog\Processor\TokenProcessor;
 use Symfony\Bridge\Monolog\Processor\WebProcessor;
 use Symfony\Bundle\FullStack;
@@ -399,6 +401,11 @@ class MonologExtension extends Extension
             $nestedHandlerId = $this->getHandlerId($handler['handler']);
             $this->markNestedHandler($nestedHandlerId);
 
+            $activation = $handler['action_level'];
+            if (class_exists(SwitchUserTokenProcessor::class)) {
+                $activation = new Definition(ErrorLevelActivationStrategy::class, [$activation]);
+            }
+
             if (isset($handler['activation_strategy'])) {
                 $activation = new Reference($handler['activation_strategy']);
             } elseif (!empty($handler['excluded_404s'])) {
@@ -408,7 +415,7 @@ class MonologExtension extends Extension
                 $activationDef = new Definition('Symfony\Bridge\Monolog\Handler\FingersCrossed\NotFoundActivationStrategy', [
                     new Reference('request_stack'),
                     $handler['excluded_404s'],
-                    $handler['action_level']
+                    $activation
                 ]);
                 $container->setDefinition($handlerId.'.not_found_strategy', $activationDef);
                 $activation = new Reference($handlerId.'.not_found_strategy');
@@ -419,12 +426,10 @@ class MonologExtension extends Extension
                 $activationDef = new Definition('Symfony\Bridge\Monolog\Handler\FingersCrossed\HttpCodeActivationStrategy', [
                     new Reference('request_stack'),
                     $handler['excluded_http_codes'],
-                    $handler['action_level']
+                    $activation
                 ]);
                 $container->setDefinition($handlerId.'.http_code_strategy', $activationDef);
                 $activation = new Reference($handlerId.'.http_code_strategy');
-            } else {
-                $activation = $handler['action_level'];
             }
 
             $definition->setArguments([

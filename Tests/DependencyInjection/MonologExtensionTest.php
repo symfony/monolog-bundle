@@ -12,9 +12,11 @@
 namespace Symfony\Bundle\MonologBundle\Tests\DependencyInjection;
 
 use InvalidArgumentException;
+use Monolog\Handler\FingersCrossed\ErrorLevelActivationStrategy;
 use Monolog\Handler\RollbarHandler;
 use Monolog\Logger;
 use Monolog\Processor\UidProcessor;
+use Symfony\Bridge\Monolog\Processor\SwitchUserTokenProcessor;
 use Symfony\Bundle\MonologBundle\DependencyInjection\MonologExtension;
 use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\LoggerChannelPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -496,7 +498,26 @@ class MonologExtensionTest extends DependencyInjectionTest
     }
 
     /** @group legacy */
+    public function testLegacyFingersCrossedHandlerWhenExcluded404sAreSpecified()
+    {
+        if (class_exists(SwitchUserTokenProcessor::class)) {
+            $this->markTestSkipped('Symfony MonologBridge < 5.2 is needed.');
+        }
+
+        $this->doTestFingersCrossedHandlerWhenExcluded404sAreSpecified(\Monolog\Logger::WARNING);
+    }
+
+    /** @group legacy */
     public function testFingersCrossedHandlerWhenExcluded404sAreSpecified()
+    {
+        if (!class_exists(SwitchUserTokenProcessor::class)) {
+            $this->markTestSkipped('Symfony MonologBridge >= 5.2 is needed.');
+        }
+
+        $this->doTestFingersCrossedHandlerWhenExcluded404sAreSpecified(new Definition(ErrorLevelActivationStrategy::class, [\Monolog\Logger::WARNING]));
+    }
+
+    private function doTestFingersCrossedHandlerWhenExcluded404sAreSpecified($activation)
     {
         $container = $this->getContainer([['handlers' => [
             'main' => ['type' => 'fingers_crossed', 'handler' => 'nested', 'excluded_404s' => ['^/foo', '^/bar']],
@@ -514,14 +535,33 @@ class MonologExtensionTest extends DependencyInjectionTest
 
         $strategy = $container->getDefinition('monolog.handler.main.not_found_strategy');
         $this->assertDICDefinitionClass($strategy, 'Symfony\Bridge\Monolog\Handler\FingersCrossed\NotFoundActivationStrategy');
-        $this->assertDICConstructorArguments($strategy, [new Reference('request_stack'), ['^/foo', '^/bar'], \Monolog\Logger::WARNING]);
+        $this->assertDICConstructorArguments($strategy, [new Reference('request_stack'), ['^/foo', '^/bar'], $activation]);
 
         $handler = $container->getDefinition('monolog.handler.main');
         $this->assertDICDefinitionClass($handler, 'Monolog\Handler\FingersCrossedHandler');
         $this->assertDICConstructorArguments($handler, [new Reference('monolog.handler.nested'), new Reference('monolog.handler.main.not_found_strategy'), 0, true, true, null]);
     }
 
+    /** @group legacy */
+    public function testLegacyFingersCrossedHandlerWhenExcludedHttpCodesAreSpecified()
+    {
+        if (class_exists(SwitchUserTokenProcessor::class)) {
+            $this->markTestSkipped('Symfony MonologBridge < 5.2 is needed.');
+        }
+
+        $this->doTestFingersCrossedHandlerWhenExcludedHttpCodesAreSpecified(\Monolog\Logger::WARNING);
+    }
+
     public function testFingersCrossedHandlerWhenExcludedHttpCodesAreSpecified()
+    {
+        if (!class_exists(SwitchUserTokenProcessor::class)) {
+            $this->markTestSkipped('Symfony MonologBridge >= 5.2 is needed.');
+        }
+
+        $this->doTestFingersCrossedHandlerWhenExcludedHttpCodesAreSpecified(new Definition(ErrorLevelActivationStrategy::class, [\Monolog\Logger::WARNING]));
+    }
+
+    private function doTestFingersCrossedHandlerWhenExcludedHttpCodesAreSpecified($activation)
     {
         if (!class_exists('Symfony\Bridge\Monolog\Handler\FingersCrossed\HttpCodeActivationStrategy')) {
             $this->markTestSkipped('Symfony Monolog 4.1+ is needed.');
@@ -554,7 +594,7 @@ class MonologExtensionTest extends DependencyInjectionTest
                 ['code' => 404, 'urls' => []],
                 ['code' => 405, 'urls' => ['^/foo', '^/bar']]
             ],
-            \Monolog\Logger::WARNING
+            $activation,
         ]);
 
         $handler = $container->getDefinition('monolog.handler.main');
