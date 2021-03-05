@@ -393,6 +393,7 @@ class MonologExtensionTest extends DependencyInjectionTest
         ]]]]);
         $this->assertTrue($container->hasDefinition('monolog.logger'));
         $this->assertTrue($container->hasDefinition('monolog.handler.sentry'));
+        $this->assertTrue($container->hasDefinition('monolog.handler.sentry.hub'));
 
         $logger = $container->getDefinition('monolog.logger');
         $this->assertDICDefinitionMethodCallAt(0, $logger, 'useMicrosecondTimestamps', ['%monolog.use_microseconds%']);
@@ -400,6 +401,10 @@ class MonologExtensionTest extends DependencyInjectionTest
 
         $handler = $container->getDefinition('monolog.handler.sentry');
         $this->assertDICDefinitionClass($handler, 'Sentry\Monolog\Handler');
+
+        $hub = $container->getDefinition('monolog.handler.sentry.hub');
+        $this->assertDICDefinitionClass($hub, 'Sentry\State\Hub');
+        $this->assertDICConstructorArguments($hub, [new Reference('monolog.sentry.client.'.sha1($dsn))]);
     }
 
     public function testSentryHandlerWhenADSNAndAClientAreSpecified()
