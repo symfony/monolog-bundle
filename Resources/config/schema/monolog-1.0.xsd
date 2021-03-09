@@ -29,6 +29,7 @@
             <xsd:element name="accepted-level" type="level" minOccurs="0" maxOccurs="unbounded" />
             <xsd:element name="to-email" type="xsd:string" minOccurs="0" maxOccurs="unbounded" />
             <xsd:element name="header" type="xsd:string" minOccurs="0" maxOccurs="unbounded" />
+            <xsd:element name="process-psr-3-messages" type="process-psr-3-messages" minOccurs="0" maxOccurs="1" />
         </xsd:sequence>
         <xsd:attribute name="type" type="xsd:string" />
         <xsd:attribute name="priority" type="xsd:integer" />
@@ -192,7 +193,13 @@
 
     <xsd:complexType name="headers">
         <xsd:sequence>
-            <xsd:any minOccurs="0" processContents="lax"/>
+            <xsd:any minOccurs="0" processContents="lax" />
         </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="process-psr-3-messages">
+        <xsd:attribute name="enabled" type="xsd:boolean" />
+        <xsd:attribute name="date-format" type="xsd:string" />
+        <xsd:attribute name="remove-used-context-fields" type="xsd:boolean" />
     </xsd:complexType>
 </xsd:schema>
