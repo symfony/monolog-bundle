@@ -212,6 +212,9 @@ use Monolog\Logger;
  *   - [auto_log_stacks]: bool, defaults to false
  *   - [environment]: string, default to null (no env specified)
  *
+ * - sentry:
+ *   - hub_id: Sentry hub custom service id (optional)
+ *
  * - newrelic:
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
@@ -639,6 +642,7 @@ class Configuration implements ConfigurationInterface
                             ->scalarNode('connection_timeout')->end() // socket_handler, logentries, pushover, hipchat & slack
                             ->booleanNode('persistent')->end() // socket_handler
                             ->scalarNode('dsn')->end() // raven_handler, sentry_handler
+                            ->scalarNode('hub_id')->defaultNull()->end() // sentry_handler
                             ->scalarNode('client_id')->defaultNull()->end() // raven_handler, sentry_handler
                             ->scalarNode('auto_log_stacks')->defaultFalse()->end() // raven_handler
                             ->scalarNode('release')->defaultNull()->end() // raven_handler, sentry_handler
@@ -860,8 +864,12 @@ class Configuration implements ConfigurationInterface
                             ->thenInvalid('The DSN has to be specified to use a RavenHandler')
                         ->end()
                         ->validate()
-                            ->ifTrue(function ($v) { return 'sentry' === $v['type'] && !array_key_exists('dsn', $v) && null === $v['client_id']; })
+                            ->ifTrue(function ($v) { return 'sentry' === $v['type'] && !array_key_exists('dsn', $v) && null === $v['hub_id'] && null === $v['client_id']; })
                             ->thenInvalid('The DSN has to be specified to use Sentry\'s handler')
+                        ->end()
+                        ->validate()
+                            ->ifTrue(function ($v) { return 'sentry' === $v['type'] && null !== $v['hub_id'] && null !== $v['client_id']; })
+                            ->thenInvalid('You can not use both a hub_id and a client_id in a Sentry handler')
                         ->end()
                         ->validate()
                             ->ifTrue(function ($v) { return 'hipchat' === $v['type'] && (empty($v['token']) || empty($v['room'])); })

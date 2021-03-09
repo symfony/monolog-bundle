@@ -456,6 +456,52 @@ class MonologExtensionTest extends DependencyInjectionTest
         $this->assertDICConstructorArguments($handler->getArguments()[0], [new Reference('sentry.client')]);
     }
 
+    public function testSentryHandlerWhenAHubIsSpecified()
+    {
+        $container = $this->getContainer(
+            [
+                [
+                    'handlers' => [
+                        'sentry' => [
+                            'type' => 'sentry',
+                            'hub_id' => 'sentry.hub',
+                        ],
+                    ],
+                ],
+            ],
+            [
+                'sentry.hub' => new Definition(\Sentry\State\HubInterface::class),
+            ]
+        );
+
+        $logger = $container->getDefinition('monolog.logger');
+        $this->assertDICDefinitionMethodCallAt(0, $logger, 'useMicrosecondTimestamps', ['%monolog.use_microseconds%']);
+        $this->assertDICDefinitionMethodCallAt(1, $logger, 'pushHandler', [new Reference('monolog.handler.sentry')]);
+
+        $handler = $container->getDefinition('monolog.handler.sentry');
+        $this->assertDICConstructorArguments($handler, [new Reference('sentry.hub'), \Monolog\Logger::DEBUG, true]);
+    }
+
+    public function testSentryHandlerWhenAHubAndAClientAreSpecified()
+    {
+        $this->expectException(InvalidConfigurationException::class);
+        $this->expectExceptionMessage('You can not use both a hub_id and a client_id in a Sentry handler');
+
+        $this->getContainer(
+            [
+                [
+                    'handlers' => [
+                        'sentry' => [
+                            'type' => 'sentry',
+                            'hub_id' => 'sentry.hub',
+                            'client_id' => 'sentry.client',
+                        ],
+                    ],
+                ],
+            ]
+        );
+    }
+
     public function testLogglyHandler()
     {
         $token = '026308d8-2b63-4225-8fe9-e01294b6e472';
