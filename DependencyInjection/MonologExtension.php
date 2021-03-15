@@ -23,6 +23,7 @@ use Symfony\Bridge\Monolog\Processor\WebProcessor;
 use Symfony\Bundle\FullStack;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\Argument\BoundArgument;
+use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Exception\ParameterNotFoundException;
@@ -191,14 +192,16 @@ class MonologExtension extends Extension
         }
 
         if ($handler['process_psr_3_messages']) {
-            $processorId = 'monolog.processor.psr_log_message';
-            if (!$container->hasDefinition($processorId)) {
-                $processor = new Definition('Monolog\\Processor\\PsrLogMessageProcessor');
-                $processor->setPublic(false);
-                $container->setDefinition($processorId, $processor);
-            }
+            if (method_exists($handlerClass, 'pushProcessor')) {
+                $processorId = 'monolog.processor.psr_log_message';
+                if (!$container->hasDefinition($processorId)) {
+                    $processor = new Definition('Monolog\\Processor\\PsrLogMessageProcessor');
+                    $processor->setPublic(false);
+                    $container->setDefinition($processorId, $processor);
+                }
 
-            $definition->addMethodCall('pushProcessor', [new Reference($processorId)]);
+                $definition->addMethodCall('pushProcessor', [new Reference($processorId)]);
+            }
         }
 
         switch ($handler['type']) {
@@ -892,6 +895,7 @@ class MonologExtension extends Extension
         case 'browser_console':
         case 'test':
         case 'null':
+        case 'noop':
         case 'debug':
             $definition->setArguments([
                 $handler['level'],

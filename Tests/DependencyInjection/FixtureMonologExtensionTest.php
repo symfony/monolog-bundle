@@ -245,6 +245,20 @@ abstract class FixtureMonologExtensionTest extends DependencyInjectionTest
         $this->assertContainsEquals(['pushProcessor', [new Reference('monolog.processor.psr_log_message')]], $methodCalls, 'The PSR-3 processor should be enabled');
     }
 
+    public function testPsr3MessageProcessingDisabledOnNullHandler()
+    {
+        if (\Monolog\Logger::API < 2) {
+            $this->markTestSkipped('This test requires Monolog v2');
+        }
+        $container = $this->getContainer('process_psr_3_messages_null');
+
+        $logger = $container->getDefinition('monolog.handler.custom');
+
+        $methodCalls = $logger->getMethodCalls();
+
+        $this->assertNotContainsEquals(['pushProcessor', [new Reference('monolog.processor.psr_log_message')]], $methodCalls, 'The PSR-3 processor should not be enabled');
+    }
+
     public function testPsr3MessageProcessingDisabled()
     {
         $container = $this->getContainer('process_psr_3_messages_disabled');
