@@ -884,30 +884,6 @@ class MonologExtension extends Extension
                 $handler['bubble'],
             ]);
             break;
-        case 'datadog':
-            $definition->setArguments([
-                $handler['token'],
-                $handler['region'] ? $handler['region'] : 'us',
-                $handler['use_ssl'],
-                $handler['level'],
-                $handler['bubble'],
-            ]);
-
-            if (empty($handler['formatter'])) {
-                $formatter = new Definition('Monolog\Formatter\DatadogFormatter', [
-                    $handler['app_name'],
-                    $handler['system_name'],
-                    $handler['environment'],
-                    isset($handler['source']) ? $handler['source'] : 'php',
-                    $handler['logger_name'],
-                ]);
-                $formatterId = 'monolog.datadog.formatter';
-                $formatter->setPublic(false);
-                $container->setDefinition($formatterId, $formatter);
-
-                $definition->addMethodCall('setFormatter', [new Reference($formatterId)]);
-            }
-            break;
 
         // Handlers using the constructor of AbstractHandler without adding their own arguments
         case 'browser_console':
@@ -1007,7 +983,6 @@ class MonologExtension extends Extension
             'redis' => 'Monolog\Handler\RedisHandler',
             'predis' => 'Monolog\Handler\RedisHandler',
             'insightops' => 'Monolog\Handler\InsightOpsHandler',
-            'datadog' => 'Monolog\Handler\DatadogHandler',
         ];
 
         $v2HandlerTypesAdded = [

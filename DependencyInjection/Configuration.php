@@ -326,18 +326,6 @@ use Monolog\Logger;
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
  *
- * - datadog:
- *   - token: Api Key supplied by Datadog
- *   - region: Region where Datadog data are hosted. Could be 'us' or 'eu'. Defaults to 'us'
- *   - [app_name]: Application name used as the "source" Datadog attribute inside the DatadogFormatter. Defaults to null
- *   - [system_name]: The system/machine name, used as the "host" Datadog attribute inside the DatadogFormatter. Defaults to null
- *   - [environment]: The environment, used as the "env" Datadog attribute. Defaults to null
- *   - [source]: This corresponds to the integration name: the technology from which the log originated. Must be one of the following list: https://app.datadoghq.eu/logs/pipelines/pipeline/library. If not set, the formatter uses 'php'.
- *   - [logger_name]: Name of the logger, used as the "logger.name" Datadog attribute inside the DatadogFormatter. Defaults to 'monolog'
- *   - [use_ssl]: whether or not SSL encryption should be used, defaults to true
- *   - [level]: level name or int value, defaults to DEBUG
- *   - [bubble]: bool, defaults to true
- *
  * - server_log:
  *   - host: server log host. ex: 127.0.0.1:9911
  *   - [level]: level name or int value, defaults to DEBUG
@@ -393,7 +381,7 @@ class Configuration implements ConfigurationInterface
                             ->scalarNode('priority')->defaultValue(0)->end()
                             ->scalarNode('level')->defaultValue('DEBUG')->end()
                             ->booleanNode('bubble')->defaultTrue()->end()
-                            ->scalarNode('app_name')->defaultNull()->end() // newrelic & datadog
+                            ->scalarNode('app_name')->defaultNull()->end()
                             ->booleanNode('include_stacktraces')->defaultFalse()->end()
                             ->booleanNode('process_psr_3_messages')->defaultNull()->end()
                             ->scalarNode('path')->defaultValue('%kernel.logs_dir%/%kernel.environment%.log')->end() // stream and rotating
@@ -484,12 +472,10 @@ class Configuration implements ConfigurationInterface
                             ->scalarNode('team')->end() // slackbot
                             ->scalarNode('notify')->defaultFalse()->end() // hipchat
                             ->scalarNode('nickname')->defaultValue('Monolog')->end() // hipchat
-                            ->scalarNode('token')->end() // pushover & hipchat & loggly & logentries & flowdock & rollbar & slack & slackbot & insightops & datadog
-                            ->scalarNode('region')->end() // insightops & datadog
-                            ->scalarNode('source')->end() // flowdock & datadog
-                            ->scalarNode('system_name')->defaultNull()->end() // datadog
-                            ->scalarNode('logger_name')->defaultValue('monolog')->end() // datadog
-                            ->booleanNode('use_ssl')->defaultTrue()->end() // logentries & hipchat & insightops & datadog
+                            ->scalarNode('token')->end() // pushover & hipchat & loggly & logentries & flowdock & rollbar & slack & slackbot & insightops
+                            ->scalarNode('region')->end() // insightops
+                            ->scalarNode('source')->end() // flowdock
+                            ->booleanNode('use_ssl')->defaultTrue()->end() // logentries & hipchat & insightops
                             ->variableNode('user') // pushover
                                 ->validate()
                                     ->ifTrue(function ($v) {
@@ -657,7 +643,7 @@ class Configuration implements ConfigurationInterface
                             ->scalarNode('client_id')->defaultNull()->end() // raven_handler, sentry_handler
                             ->scalarNode('auto_log_stacks')->defaultFalse()->end() // raven_handler
                             ->scalarNode('release')->defaultNull()->end() // raven_handler, sentry_handler
-                            ->scalarNode('environment')->defaultNull()->end() // raven_handler, sentry_handler, datadog
+                            ->scalarNode('environment')->defaultNull()->end() // raven_handler, sentry_handler
                             ->scalarNode('message_type')->defaultValue(0)->end() // error_log
                             ->arrayNode('tags') // loggly
                                 ->beforeNormalization()
@@ -936,10 +922,6 @@ class Configuration implements ConfigurationInterface
                         ->validate()
                             ->ifTrue(function ($v) { return 'insightops' === $v['type'] && empty($v['token']); })
                             ->thenInvalid('The token has to be specified to use a InsightOpsHandler')
-                        ->end()
-                        ->validate()
-                            ->ifTrue(function ($v) { return 'datadog' === $v['type'] && empty($v['token']); })
-                            ->thenInvalid('The token (Api Key) has to be specified to use a DatadogHandler')
                         ->end()
                         ->validate()
                             ->ifTrue(function ($v) { return 'flowdock' === $v['type'] && empty($v['token']); })
