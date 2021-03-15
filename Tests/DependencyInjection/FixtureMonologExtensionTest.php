@@ -159,7 +159,7 @@ abstract class FixtureMonologExtensionTest extends DependencyInjectionTest
 
         $handler = $container->getDefinition('monolog.handler.first');
         $this->assertDICDefinitionClass($handler, 'Monolog\Handler\RotatingFileHandler');
-        $this->assertDICConstructorArguments($handler, ['/tmp/monolog.log', 0, \Monolog\Logger::ERROR, true, null]);
+        $this->assertDICConstructorArguments($handler, ['/tmp/monolog.log', 0, \Monolog\Logger::ERROR, true, null, false]);
 
         $handler = $container->getDefinition('monolog.handler.last');
         $this->assertDICDefinitionClass($handler, 'Monolog\Handler\StreamHandler');
