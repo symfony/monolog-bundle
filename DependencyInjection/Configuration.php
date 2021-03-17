@@ -38,7 +38,7 @@ use Monolog\Logger;
  *   - [verbosity_levels]: level => verbosity configuration
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
- *   - [console_formater_options]: array
+ *   - [console_formatter_options]: array
  *
  * - firephp:
  *   - [level]: level name or int value, defaults to DEBUG
@@ -658,12 +658,19 @@ class Configuration implements ConfigurationInterface
                             ->end()
                              // console
                             ->variableNode('console_formater_options')
-                                ->defaultValue([])
+                                ->setDeprecated('"%path%.%node%" is deprecated, use "%path%.console_formatter_options" instead.')
                                 ->validate()
                                     ->ifTrue(function ($v) {
                                         return !is_array($v);
                                     })
-                                    ->thenInvalid('console_formater_options must an array.')
+                                    ->thenInvalid('The console_formater_options must be an array.')
+                                ->end()
+                            ->end()
+                            ->variableNode('console_formatter_options')
+                                ->defaultValue([])
+                                ->validate()
+                                    ->ifTrue(static function ($v) { return !is_array($v); })
+                                    ->thenInvalid('The console_formatter_options must be an array.')
                                 ->end()
                             ->end()
                             ->arrayNode('verbosity_levels') // console
@@ -783,6 +790,18 @@ class Configuration implements ConfigurationInterface
                             ->end()
                             ->scalarNode('formatter')->end()
                             ->booleanNode('nested')->defaultFalse()->end()
+                        ->end()
+                        ->beforeNormalization()
+                            ->always(static function ($v) {
+                                if (empty($v['console_formatter_options']) && !empty($v['console_formater_options'])) {
+                                    $v['console_formatter_options'] = $v['console_formater_options'];
+                                }
+
+                                return $v;
+                            })
+                        ->end()
+                        ->validate()
+                            ->always(static function ($v) { unset($v['console_formater_options']); return $v; })
                         ->end()
                         ->validate()
                             ->ifTrue(function ($v) { return 'service' === $v['type'] && !empty($v['formatter']); })
