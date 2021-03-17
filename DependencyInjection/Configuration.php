@@ -11,6 +11,7 @@
 
 namespace Symfony\Bundle\MonologBundle\DependencyInjection;
 
+use Symfony\Component\Config\Definition\BaseNode;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
@@ -658,7 +659,7 @@ class Configuration implements ConfigurationInterface
                             ->end()
                              // console
                             ->variableNode('console_formater_options')
-                                ->setDeprecated('"%path%.%node%" is deprecated, use "%path%.console_formatter_options" instead.')
+                                ->setDeprecated(...$this->getDeprecationMsg('"%path%.%node%" is deprecated, use "%path%.console_formatter_options" instead.', 3.7))
                                 ->validate()
                                     ->ifTrue(function ($v) {
                                         return !is_array($v);
@@ -995,5 +996,28 @@ class Configuration implements ConfigurationInterface
         ;
 
         return $treeBuilder;
+    }
+
+    /**
+     * Returns the correct deprecation param's as an array for setDeprecated.
+     *
+     * Symfony/Config v5.1 introduces a deprecation notice when calling
+     * setDeprecation() with less than 3 args and the getDeprecation method was
+     * introduced at the same time. By checking if getDeprecation() exists,
+     * we can determine the correct param count to use when calling setDeprecated.
+     *
+     * @return array{0:string}|array{0:string, 1: numeric-string, string}
+     */
+    private function getDeprecationMsg(string $message, string $version): array
+    {
+        if (method_exists(BaseNode::class, 'getDeprecation')) {
+            return [
+                'symfony/monolog-bundle',
+                $version,
+                $message,
+            ];
+        }
+
+        return [$message];
     }
 }
