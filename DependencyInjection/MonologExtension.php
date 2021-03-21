@@ -757,6 +757,7 @@ class MonologExtension extends Extension
                     'Sentry\\State\\Hub',
                     [new Reference($clientId)]
                 );
+                $container->setDefinition(sprintf('monolog.handler.%s.hub', $name), $hub);
 
                 // can't set the hub to the current hub, getting into a recursion otherwise...
                 //$hub->addMethodCall('setCurrent', array($hub));
