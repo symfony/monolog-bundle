@@ -1,0 +1,25 @@
+---------------------------------------------------------------------------
+
+by dedpikhto at 2021-03-10T17:10:18Z
+
+@stof @jderusse could you review, please?
+
+---------------------------------------------------------------------------
+
+by jderusse at 2021-03-15T07:51:12Z
+
+I think the PR #393 would cover the same issue, but is more flexible.
+
+---------------------------------------------------------------------------
+
+by dedpikhto at 2021-03-15T09:09:57Z
+
+> I think the PR #393 would cover the same issue, but is more flexible.
+
+It has the same flexibility (i think it's rare case, when you need overriden hub, but you can do it) and it's simplier for common use case because you don't need to describe your own hub (i'm not using getsentry/sentry-symfony).
+
+---------------------------------------------------------------------------
+
+by jderusse at 2021-03-21T15:02:31Z
+
+@dedpikhto could you please rebase your PR?
