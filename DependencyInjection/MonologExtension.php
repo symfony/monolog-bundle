@@ -721,42 +721,46 @@ class MonologExtension extends Extension
             break;
 
         case 'sentry':
-            if (null !== $handler['client_id']) {
-                $clientId = $handler['client_id'];
+            if (null !== $handler['hub_id']) {
+                $hub = new Reference($handler['hub_id']);
             } else {
-                $options = new Definition(
-                    'Sentry\\Options',
-                    [['dsn' => $handler['dsn']]]
+                if (null !== $handler['client_id']) {
+                    $clientId = $handler['client_id'];
+                } else {
+                    $options = new Definition(
+                        'Sentry\\Options',
+                        [['dsn' => $handler['dsn']]]
+                    );
+
+                    if (!empty($handler['environment'])) {
+                        $options->addMethodCall('setEnvironment', [$handler['environment']]);
+                    }
+
+                    if (!empty($handler['release'])) {
+                        $options->addMethodCall('setRelease', [$handler['release']]);
+                    }
+
+                    $builder = new Definition('Sentry\\ClientBuilder', [$options]);
+
+                    $client = new Definition('Sentry\\Client');
+                    $client->setFactory([$builder, 'getClient']);
+
+                    $clientId = 'monolog.sentry.client.'.sha1($handler['dsn']);
+                    $container->setDefinition($clientId, $client);
+
+                    if (!$container->hasAlias('Sentry\\ClientInterface')) {
+                        $container->setAlias('Sentry\\ClientInterface', $clientId);
+                    }
+                }
+
+                $hub = new Definition(
+                    'Sentry\\State\\Hub',
+                    [new Reference($clientId)]
                 );
 
-                if (!empty($handler['environment'])) {
-                    $options->addMethodCall('setEnvironment', [$handler['environment']]);
-                }
-
-                if (!empty($handler['release'])) {
-                    $options->addMethodCall('setRelease', [$handler['release']]);
-                }
-
-                $builder = new Definition('Sentry\\ClientBuilder', [$options]);
-
-                $client = new Definition('Sentry\\Client');
-                $client->setFactory([$builder, 'getClient']);
-
-                $clientId = 'monolog.sentry.client.'.sha1($handler['dsn']);
-                $container->setDefinition($clientId, $client);
-
-                if (!$container->hasAlias('Sentry\\ClientInterface')) {
-                    $container->setAlias('Sentry\\ClientInterface', $clientId);
-                }
+                // can't set the hub to the current hub, getting into a recursion otherwise...
+                //$hub->addMethodCall('setCurrent', array($hub));
             }
-
-            $hub = new Definition(
-                'Sentry\\State\\Hub',
-                [new Reference($clientId)]
-            );
-
-            // can't set the hub to the current hub, getting into a recursion otherwise...
-            //$hub->addMethodCall('setCurrent', array($hub));
 
             $definition->setArguments([
                 $hub,
