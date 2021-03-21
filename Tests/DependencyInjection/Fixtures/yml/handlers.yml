@@ -1,0 +1,4 @@
+monolog:
+    handlers:
+        noop:
+            type: noop

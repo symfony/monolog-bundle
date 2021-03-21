@@ -992,13 +992,7 @@ class MonologExtension extends Extension
         $v2HandlerTypesAdded = [
             'elasticsearch' => 'Monolog\Handler\ElasticaHandler',
             'fallbackgroup' => 'Monolog\Handler\FallbackGroupHandler',
-            'logmatic' => 'Monolog\Handler\LogmaticHandler',
             'noop' => 'Monolog\Handler\NoopHandler',
-            'overflow' => 'Monolog\Handler\OverflowHandler',
-            'process' => 'Monolog\Handler\ProcessHandler',
-            'sendgrid' => 'Monolog\Handler\SendGridHandler',
-            'sqs' => 'Monolog\Handler\SqsHandler',
-            'telegram' => 'Monolog\Handler\TelegramBotHandler',
         ];
 
         $v2HandlerTypesRemoved = [
