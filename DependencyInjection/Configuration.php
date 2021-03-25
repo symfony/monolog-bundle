@@ -499,7 +499,7 @@ class Configuration implements ConfigurationInterface
                             ->enumNode('rfc')
                                 ->values([SyslogUdpHandler::RFC5424, SyslogUdpHandler::RFC3164])
                                 ->defaultValue(SyslogUdpHandler::RFC5424)
-                                ->end() // syslogudp
+                            ->end() // syslogudp
                             ->arrayNode('publisher')
                                 ->canBeUnset()
                                 ->beforeNormalization()
