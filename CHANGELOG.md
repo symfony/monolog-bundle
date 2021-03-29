@@ -3,6 +3,7 @@
 * Use `ActivationStrategy` instead of `actionLevel` when available 
 * Register resettable processors (`ResettableInterface`) for autoconfiguration (tag: `kernel.reset`)
 * Drop support for Symfony 3.4
+* Support 'null_handler' as alias for 'null', to ease problems with yaml and xml configuration
 
 ## 3.6.0 (2020-10-06)
 

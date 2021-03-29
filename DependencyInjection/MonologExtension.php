@@ -188,7 +188,7 @@ class MonologExtension extends Extension
         }
 
         if (null === $handler['process_psr_3_messages']) {
-            $handler['process_psr_3_messages'] = !isset($handler['handler']) && !$handler['members'];
+            $handler['process_psr_3_messages'] = !isset($handler['handler']) && !$handler['members'] && $handlerClass != 'Monolog\Handler\NullHandler';
         }
 
         if ($handler['process_psr_3_messages']) {
@@ -893,12 +893,18 @@ class MonologExtension extends Extension
         // Handlers using the constructor of AbstractHandler without adding their own arguments
         case 'browser_console':
         case 'test':
-        case 'null':
         case 'noop':
         case 'debug':
             $definition->setArguments([
                 $handler['level'],
                 $handler['bubble'],
+            ]);
+            break;
+
+        case 'null':
+        case 'null_handler':
+            $definition->setArguments([
+                $handler['level'],
             ]);
             break;
 
@@ -954,6 +960,7 @@ class MonologExtension extends Extension
             'syslog' => 'Monolog\Handler\SyslogHandler',
             'syslogudp' => 'Monolog\Handler\SyslogUdpHandler',
             'null' => 'Monolog\Handler\NullHandler',
+            'null_handler' => 'Monolog\Handler\NullHandler',
             'test' => 'Monolog\Handler\TestHandler',
             'gelf' => 'Monolog\Handler\GelfHandler',
             'rollbar' => 'Monolog\Handler\RollbarHandler',
