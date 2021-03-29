@@ -188,7 +188,7 @@ class MonologExtension extends Extension
         }
 
         if (null === $handler['process_psr_3_messages']) {
-            $handler['process_psr_3_messages'] = !isset($handler['handler']) && !$handler['members'];
+            $handler['process_psr_3_messages'] = !isset($handler['handler']) && !$handler['members'] && $handlerClass != 'Monolog\Handler\NullHandler';
         }
 
         if ($handler['process_psr_3_messages']) {
