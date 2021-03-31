@@ -520,10 +520,10 @@ class MonologExtension extends Extension
                 $handler['bubble'],
             ]);
 
-            if (false === $handler['ident'] || null === $handler['ident']) {
-                $handler['ident'] = 'php';
+            if ($handler['ident']) {
                 $definition->addArgument($handler['ident']);
-            } elseif ($handler['ident']) {
+            } else {
+                $handler['ident'] = 'php';
                 $definition->addArgument($handler['ident']);
             }
 
