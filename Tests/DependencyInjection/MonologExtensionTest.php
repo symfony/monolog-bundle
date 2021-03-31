@@ -14,6 +14,7 @@ namespace Symfony\Bundle\MonologBundle\Tests\DependencyInjection;
 use InvalidArgumentException;
 use Monolog\Handler\FingersCrossed\ErrorLevelActivationStrategy;
 use Monolog\Handler\RollbarHandler;
+use Monolog\Handler\SyslogUdpHandler;
 use Monolog\Logger;
 use Monolog\Processor\UidProcessor;
 use Symfony\Bridge\Monolog\Processor\SwitchUserTokenProcessor;
@@ -226,6 +227,31 @@ class MonologExtensionTest extends DependencyInjectionTest
         $handler = $container->getDefinition('monolog.handler.main');
         $this->assertDICDefinitionClass($handler, 'Monolog\Handler\SyslogHandler');
         $this->assertDICConstructorArguments($handler, [false, 'user', \Monolog\Logger::DEBUG, true, LOG_CONS]);
+    }
+
+    public function testSyslogHandlerForEmptyIdent()
+    {
+        $container = $this->getContainer(
+            [
+                [
+                    'handlers' => [
+                        'syslogudp' => [
+                            'type' => 'syslogudp',
+                            'host' => '127.0.0.1',
+                            'port' => 514,
+                            'facility' => 'USER',
+                            'level' => 'ERROR',
+                            'ident' => null,
+                            'rfc' => SyslogUdpHandler::RFC5424,
+                        ]
+                    ]
+                ]
+            ]
+        );
+
+        $expectedArguments = ['127.0.0.1', 514, 'USER', true, 400, 'php', 1];
+        $definition = $container->getDefinition('monolog.handler.syslogudp');
+        $this->assertDICConstructorArguments($definition, $expectedArguments);
     }
 
     public function testRollbarHandlerCreatesNotifier()
