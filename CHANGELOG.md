@@ -1,3 +1,7 @@
+## 3.7.1 (2021-03-31)
+
+* Add ability to specify RFC for SyslogUdpHandler
+
 ## 3.7.0 (xxxx-xx-xx)
 
 * Use `ActivationStrategy` instead of `actionLevel` when available 
