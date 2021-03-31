@@ -454,24 +454,6 @@ class ConfigurationTest extends TestCase
         $this->assertEquals('127.0.0.1', $config['handlers']['syslogudp']['host']);
         $this->assertEquals(514, $config['handlers']['syslogudp']['port']);
         $this->assertEquals(1, $config['handlers']['syslogudp']['rfc']);
-
-        $configs = [
-            [
-                'handlers' => [
-                    'syslogudp' => [
-                        'type' => 'syslogudp',
-                        'host' => '127.0.0.1',
-                        'port' => 514,
-                        'facility' => 'USER',
-                        'level' => 'ERROR',
-                        'rfc' => 2
-                    ]
-                ]
-            ]
-        ];
-
-        $this->expectException(InvalidConfigurationException::class);
-        $config = $this->process($configs);
     }
 
     /**

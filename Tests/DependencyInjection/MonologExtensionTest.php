@@ -226,7 +226,7 @@ class MonologExtensionTest extends DependencyInjectionTest
 
         $handler = $container->getDefinition('monolog.handler.main');
         $this->assertDICDefinitionClass($handler, 'Monolog\Handler\SyslogHandler');
-        $this->assertDICConstructorArguments($handler, [false, 'user', \Monolog\Logger::DEBUG, true, LOG_CONS]);
+        $this->assertDICConstructorArguments($handler, ['php', 'user', \Monolog\Logger::DEBUG, true, LOG_CONS]);
     }
 
     public function testSyslogHandlerForEmptyIdent()
