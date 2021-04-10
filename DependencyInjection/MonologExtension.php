@@ -17,6 +17,7 @@ use Monolog\Processor\ProcessorInterface;
 use Monolog\Handler\HandlerInterface;
 use Monolog\ResettableInterface;
 use Symfony\Bridge\Monolog\Handler\FingersCrossed\HttpCodeActivationStrategy;
+use Symfony\Bridge\Monolog\Messenger\ResetLoggersWorkerSubscriber;
 use Symfony\Bridge\Monolog\Processor\SwitchUserTokenProcessor;
 use Symfony\Bridge\Monolog\Processor\TokenProcessor;
 use Symfony\Bridge\Monolog\Processor\WebProcessor;
@@ -31,6 +32,7 @@ use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use Symfony\Component\HttpKernel\Kernel;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 /**
@@ -123,6 +125,10 @@ class MonologExtension extends Extension
                 }
             }
             $container->setParameter('monolog.handlers_to_channels', $handlersToChannels);
+
+            if (class_exists(MessageBusInterface::class) && class_exists(ResetLoggersWorkerSubscriber::class)) {
+                $loader->load('messenger.xml');
+            }
         }
 
         $container->setParameter('monolog.additional_channels', isset($config['channels']) ? $config['channels'] : []);
@@ -1004,7 +1010,7 @@ class MonologExtension extends Extension
 
         if (Logger::API === 2) {
             $typeToClassMapping = array_merge($typeToClassMapping, $v2HandlerTypesAdded);
-            foreach($v2HandlerTypesRemoved as $v2HandlerTypeRemoved) {
+            foreach ($v2HandlerTypesRemoved as $v2HandlerTypeRemoved) {
                 unset($typeToClassMapping[$v2HandlerTypeRemoved]);
             }
         }

@@ -14,13 +14,16 @@ namespace Symfony\Bundle\MonologBundle;
 use Monolog\Formatter\JsonFormatter;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\HandlerInterface;
+use Symfony\Bridge\Monolog\Messenger\ResetLoggersWorkerSubscriber;
 use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\AddSwiftMailerTransportPass;
+use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\ChannelsToMessengerPass;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\LoggerChannelPass;
 use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\DebugHandlerPass;
 use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\AddProcessorsPass;
 use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\FixEmptyLoggerPass;
+use Symfony\Component\Messenger\MessageBusInterface;
 
 /**
  * @author Jordi Boggiano <j.boggiano@seld.be>
@@ -38,6 +41,10 @@ class MonologBundle extends Bundle
         $container->addCompilerPass(new FixEmptyLoggerPass($channelPass));
         $container->addCompilerPass(new AddProcessorsPass());
         $container->addCompilerPass(new AddSwiftMailerTransportPass());
+
+        if (class_exists(MessageBusInterface::class) && class_exists(ResetLoggersWorkerSubscriber::class)) {
+            $container->addCompilerPass(new ChannelsToMessengerPass($channelPass));
+        }
     }
 
     /**
