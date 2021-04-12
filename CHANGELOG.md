@@ -1,4 +1,4 @@
-## 3.7.0 (xxxx-xx-xx)
+## 3.7.0 (2021-03-31)
 
 * Use `ActivationStrategy` instead of `actionLevel` when available 
 * Register resettable processors (`ResettableInterface`) for autoconfiguration (tag: `kernel.reset`)
