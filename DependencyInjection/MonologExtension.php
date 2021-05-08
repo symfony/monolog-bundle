@@ -337,6 +337,27 @@ class MonologExtension extends Extension
                 $handler['bubble'],
             ]);
             break;
+
+        case 'telegram':
+            if (isset($handler['id'])) {
+                $definition = new Reference($handler['id']);
+            } else {
+                if (!class_exists('Monolog\Handler\TelegramBotHandler')) {
+                    throw new \RuntimeException('The TelegramBotHandler is not available. Please update "monolog/monolog" to 2.2.0');
+                }
+
+                $definition->setArguments([
+                    $handler['token'],
+                    $handler['channel'],
+                    $handler['level'],
+                    $handler['bubble'],
+                    $handler['parse_mode'],
+                    $handler['disable_webpage_preview'],
+                    $handler['disable_notification'],
+                ]);
+            }
+            break;
+
         case 'redis':
         case 'predis':
             if (isset($handler['redis']['id'])) {
@@ -984,6 +1005,7 @@ class MonologExtension extends Extension
             'filter' => 'Monolog\Handler\FilterHandler',
             'mongo' => 'Monolog\Handler\MongoDBHandler',
             'elasticsearch' => 'Monolog\Handler\ElasticSearchHandler',
+            'telegram' => 'Monolog\Handler\TelegramBotHandler',
             'server_log' => 'Symfony\Bridge\Monolog\Handler\ServerLogHandler',
             'redis' => 'Monolog\Handler\RedisHandler',
             'predis' => 'Monolog\Handler\RedisHandler',

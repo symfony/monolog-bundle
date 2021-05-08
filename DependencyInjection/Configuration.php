@@ -338,6 +338,15 @@ use Monolog\Logger;
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
  *
+ * - telegram:
+ *   - token: Telegram bot access token provided by BotFather
+ *   - channel: Telegram channel name
+ *   - [level]: level name or int value, defaults to DEBUG
+ *   - [bubble]: bool, defaults to true
+ *   - [parse_mode]: optional the kind of formatting that is used for the message
+ *   - [disable_webpage_preview]: optional disables link previews for links in the message
+ *   - [disable_notification]: optional Sends the message silently. Users will receive a notification with no sound
+ *
  * All handlers can also be marked with `nested: true` to make sure they are never added explicitly to the stack
  *
  * @author Jordi Boggiano <j.boggiano@seld.be>
@@ -565,6 +574,27 @@ class Configuration implements ConfigurationInterface
                             ->scalarNode('index')->defaultValue('monolog')->end() // elasticsearch
                             ->scalarNode('document_type')->defaultValue('logs')->end() // elasticsearch
                             ->scalarNode('ignore_error')->defaultValue(false)->end() // elasticsearch
+                            ->arrayNode('telegram')
+                                ->canBeUnset()
+                                ->beforeNormalization()
+                                    ->ifString()
+                                    ->then(function ($v) { return ['id' => $v]; })
+                                ->end()
+                                ->children()
+                                    ->scalarNode('id')->end()
+                                    ->scalarNode('token')->end()
+                                    ->scalarNode('channel')->end()
+                                ->end()
+                                ->validate()
+                                    ->ifTrue(function ($v) {
+                                        return !isset($v['id']) && !isset($v['token']);
+                                    })
+                                    ->thenInvalid('What must be set is either the token with channel or the id.')
+                                ->end()
+                            ->end() // telegram
+                            ->scalarNode('parse_mode')->defaultNull()->end() // telegram
+                            ->booleanNode('disable_webpage_preview')->defaultNull()->end() // telegram
+                            ->booleanNode('disable_notification')->defaultNull()->end() // telegram
                             ->arrayNode('redis')
                                 ->canBeUnset()
                                 ->beforeNormalization()
@@ -977,6 +1007,10 @@ class Configuration implements ConfigurationInterface
                         ->validate()
                             ->ifTrue(function ($v) { return 'predis' === $v['type'] && empty($v['redis']); })
                             ->thenInvalid('The host has to be specified to use a RedisLogHandler')
+                        ->end()
+                        ->validate()
+                            ->ifTrue(function ($v) { return 'telegram' === $v['type'] && empty($v['id']) &&(empty($v['token']) || empty($v['channel'])); })
+                            ->thenInvalid('The token and channel have to be specified to use a TelegramBotHandler')
                         ->end()
                     ->end()
                     ->validate()
