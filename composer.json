@@ -17,16 +17,16 @@
     ],
     "require": {
         "php": ">=7.1.3",
-        "symfony/monolog-bridge": "~4.4 || ^5.0",
-        "symfony/dependency-injection": "^4.4 || ^5.0",
-        "symfony/config": "~4.4 || ^5.0",
-        "symfony/http-kernel": "~4.4 || ^5.0",
+        "symfony/monolog-bridge": "~4.4 || ^5.0 || ^6.0",
+        "symfony/dependency-injection": "^4.4 || ^5.0 || ^6.0",
+        "symfony/config": "~4.4 || ^5.0 || ^6.0",
+        "symfony/http-kernel": "~4.4 || ^5.0 || ^6.0",
         "monolog/monolog": "~1.22 || ~2.0"
     },
     "require-dev": {
-        "symfony/yaml": "~4.4 || ^5.0",
-        "symfony/console": "~4.4 || ^5.0",
-        "symfony/phpunit-bridge": "^5.1"
+        "symfony/yaml": "~4.4 || ^5.0 || ^6.0",
+        "symfony/console": "~4.4 || ^5.0 || ^6.0",
+        "symfony/phpunit-bridge": "^5.2 || ^6.0"
     },
     "autoload": {
         "psr-4": { "Symfony\\Bundle\\MonologBundle\\": "" },
