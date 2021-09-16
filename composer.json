@@ -26,7 +26,8 @@
     "require-dev": {
         "symfony/yaml": "~4.4 || ^5.0 || ^6.0",
         "symfony/console": "~4.4 || ^5.0 || ^6.0",
-        "symfony/phpunit-bridge": "^5.2 || ^6.0"
+        "symfony/phpunit-bridge": "^5.2 || ^6.0",
+        "phpunit/phpunit": "^9.5"
     },
     "autoload": {
         "psr-4": { "Symfony\\Bundle\\MonologBundle\\": "" },

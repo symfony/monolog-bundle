@@ -892,6 +892,7 @@ class MonologExtension extends Extension
 
         // Handlers using the constructor of AbstractHandler without adding their own arguments
         case 'browser_console':
+            $definition->addTag('kernel.event_subscriber');
         case 'test':
         case 'null':
         case 'noop':
@@ -958,7 +959,7 @@ class MonologExtension extends Extension
             'gelf' => 'Monolog\Handler\GelfHandler',
             'rollbar' => 'Monolog\Handler\RollbarHandler',
             'flowdock' => 'Monolog\Handler\FlowdockHandler',
-            'browser_console' => 'Monolog\Handler\BrowserConsoleHandler',
+            'browser_console' => 'Symfony\Bridge\Monolog\Handler\BrowserConsoleHandler',
             'firephp' => 'Symfony\Bridge\Monolog\Handler\FirePHPHandler',
             'chromephp' => 'Symfony\Bridge\Monolog\Handler\ChromePhpHandler',
             'debug' => 'Symfony\Bridge\Monolog\Handler\DebugHandler',

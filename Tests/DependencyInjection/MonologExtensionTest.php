@@ -17,13 +17,13 @@ use Monolog\Handler\RollbarHandler;
 use Monolog\Logger;
 use Monolog\Processor\UidProcessor;
 use Symfony\Bridge\Monolog\Processor\SwitchUserTokenProcessor;
-use Symfony\Bundle\MonologBundle\DependencyInjection\MonologExtension;
 use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\LoggerChannelPass;
+use Symfony\Bundle\MonologBundle\DependencyInjection\MonologExtension;
+use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\ParameterBag\EnvPlaceholderParameterBag;
 use Symfony\Component\DependencyInjection\Reference;
-use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 class MonologExtensionTest extends DependencyInjectionTest
@@ -728,7 +728,7 @@ class MonologExtensionTest extends DependencyInjectionTest
     /**
      * @dataProvider provideLoglevelParameterConfig
      */
-    public function testLogLevelfromParameter(array $parameters, array $config, $expectedClass, array $expectedArgs)
+    public function testLogLevelfromParameter(array $parameters, array $config, $expectedClass, array $expectedArgs, ?array $expectedTags = null)
     {
         $container = new ContainerBuilder();
         foreach ($parameters as $name => $value) {
@@ -741,6 +741,9 @@ class MonologExtensionTest extends DependencyInjectionTest
         $definition = $container->getDefinition('monolog.handler.main');
         $this->assertDICDefinitionClass($definition, $expectedClass);
         $this->assertDICConstructorArguments($definition, $expectedArgs);
+        if (null !== $expectedTags) {
+            self::assertEquals($definition->getTags(), $expectedTags);
+        }
     }
 
     public function provideLoglevelParameterConfig()
@@ -749,14 +752,16 @@ class MonologExtensionTest extends DependencyInjectionTest
             'browser console with parameter level' => [
                 ['%log_level%' => 'info'],
                 ['type' => 'browser_console', 'level' => '%log_level%'],
-                'Monolog\Handler\BrowserConsoleHandler',
-                [200, true]
+                'Symfony\Bridge\Monolog\Handler\BrowserConsoleHandler',
+                [200, true],
+                ['kernel.event_subscriber' => [0 => []]],
             ],
             'browser console with envvar level' => [
                 ['%env(LOG_LEVEL)%' => 'info'],
                 ['type' => 'browser_console', 'level' => '%env(LOG_LEVEL)%'],
-                'Monolog\Handler\BrowserConsoleHandler',
-                [200, true]
+                'Symfony\Bridge\Monolog\Handler\BrowserConsoleHandler',
+                [200, true],
+                ['kernel.event_subscriber' => [0 => []]],
             ],
             'stream with envvar level null or "~" (in yaml config)' => [
                 ['%env(LOG_LEVEL)%' => null],
