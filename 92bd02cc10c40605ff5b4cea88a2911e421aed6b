@@ -1,0 +1,19 @@
+---------------------------------------------------------------------------
+
+by stof at 2021-09-27T13:55:58Z
+
+Running tests on PHP 8.1 requires using PHPUnit 9.5 rather than 9.4 to avoid the deprecations
+
+---------------------------------------------------------------------------
+
+by derrabus at 2021-09-27T14:20:59Z
+
+> Running tests on PHP 8.1 requires using PHPUnit 9.5 rather than 9.4 to avoid the deprecations
+
+symfony/symfony#43200
+
+---------------------------------------------------------------------------
+
+by HypeMC at 2021-09-27T21:12:39Z
+
+@stof @derrabus The deprecation is still present on PHPUnit 9.5 https://github.com/HypeMC/monolog-bundle/actions/runs/1280019019 . Perhaps the [baseline feature](https://symfony.com/doc/current/components/phpunit_bridge.html#baseline-deprecations) could be used?
