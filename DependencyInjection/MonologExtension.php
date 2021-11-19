@@ -279,7 +279,7 @@ class MonologExtension extends Extension
 
                 $server .= $handler['mongo']['host'].':'.$handler['mongo']['port'];
 
-                $client = new Definition('MongoClient', [
+                $client = new Definition('MongoDB\Client', [
                     $server,
                 ]);
 
