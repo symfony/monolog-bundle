@@ -356,7 +356,7 @@ class Configuration implements ConfigurationInterface
         $treeBuilder = new TreeBuilder('monolog');
         $rootNode = method_exists(TreeBuilder::class, 'getRootNode') ? $treeBuilder->getRootNode() : $treeBuilder->root('monolog');
 
-        $handlerNode = $rootNode
+        $handlers = $rootNode
             ->fixXmlConfig('channel')
             ->fixXmlConfig('handler')
             ->children()
@@ -365,17 +365,44 @@ class Configuration implements ConfigurationInterface
                     ->canBeUnset()
                     ->prototype('scalar')->end()
                 ->end()
-                ->arrayNode('handlers')
-                    ->canBeUnset()
-                    ->useAttributeAsKey('name')
-                    ->prototype('array')
-                        ->fixXmlConfig('member')
-                        ->fixXmlConfig('excluded_404')
-                        ->fixXmlConfig('excluded_http_code')
-                        ->fixXmlConfig('tag')
-                        ->fixXmlConfig('accepted_level')
-                        ->fixXmlConfig('header')
-                        ->canBeUnset();
+                ->arrayNode('handlers');
+
+        $handlers
+            ->canBeUnset()
+            ->useAttributeAsKey('name')
+            ->validate()
+                ->ifTrue(function ($v) { return isset($v['debug']); })
+                ->thenInvalid('The "debug" name cannot be used as it is reserved for the handler of the profiler')
+            ->end()
+            ->example([
+                'syslog' => [
+                    'type' => 'stream',
+                    'path' => '/var/log/symfony.log',
+                    'level' => 'ERROR',
+                    'bubble' => 'false',
+                    'formatter' => 'my_formatter',
+                ],
+                'main' => [
+                    'type' => 'fingers_crossed',
+                    'action_level' => 'WARNING',
+                    'buffer_size' => 30,
+                    'handler' => 'custom',
+                ],
+                'custom' => [
+                    'type' => 'service',
+                    'id' => 'my_handler',
+                ]
+            ]);
+
+        $handlerNode = $handlers
+            ->prototype('array')
+                ->fixXmlConfig('member')
+                ->fixXmlConfig('excluded_404')
+                ->fixXmlConfig('excluded_http_code')
+                ->fixXmlConfig('tag')
+                ->fixXmlConfig('accepted_level')
+                ->fixXmlConfig('header')
+                ->canBeUnset();
 
         $handlerNode
             ->children()
@@ -712,32 +739,7 @@ class Configuration implements ConfigurationInterface
             ->validate()
                 ->ifTrue(function ($v) { return 'server_log' === $v['type'] && empty($v['host']); })
                 ->thenInvalid('The host has to be specified to use a ServerLogHandler')
-            ->end();
-
-        $rootNode
-            ->validate()
-                ->ifTrue(function ($v) { return isset($v['debug']); })
-                ->thenInvalid('The "debug" name cannot be used as it is reserved for the handler of the profiler')
             ->end()
-            ->example([
-                'syslog' => [
-                    'type' => 'stream',
-                    'path' => '/var/log/symfony.log',
-                    'level' => 'ERROR',
-                    'bubble' => 'false',
-                    'formatter' => 'my_formatter',
-                ],
-                'main' => [
-                    'type' => 'fingers_crossed',
-                    'action_level' => 'WARNING',
-                    'buffer_size' => 30,
-                    'handler' => 'custom',
-                ],
-                'custom' => [
-                    'type' => 'service',
-                    'id' => 'my_handler',
-                ]
-            ])
         ;
 
         return $treeBuilder;
