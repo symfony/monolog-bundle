@@ -781,7 +781,7 @@ class Configuration implements ConfigurationInterface
                                             return null;
                                         }
 
-                                        return ['type' => $isExclusive ? 'exclusive' : 'inclusive', 'elements' => $elements];
+                                        return ['type' => $isExclusive ? 'exclusive' : 'inclusive', 'elements' => array_unique($elements)];
                                     })
                                 ->end()
                                 ->children()
