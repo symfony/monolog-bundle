@@ -16,6 +16,7 @@ use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Monolog\Logger;
+use Monolog\Handler\SyslogUdpHandler;
 
 /**
  * This class contains the configuration information for the bundle
@@ -162,6 +163,7 @@ use Monolog\Logger;
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
  *   - [ident]: string, defaults to
+ *   - [rfc]: SyslogUdpHandler::RFC3164 (0), SyslogUdpHandler::RFC5424 (1) or 2 (for SyslogUdpHandler::RFC5424e, monolog 1 does not support it) defaults to SyslogUdpHandler::RFC5424
  *
  * - swift_mailer:
  *   - from_email: optional if email_prototype is given
@@ -408,7 +410,7 @@ class Configuration implements ConfigurationInterface
                             ->booleanNode('use_locking')->defaultFalse()->end() // stream and rotating
                             ->scalarNode('filename_format')->defaultValue('{filename}-{date}')->end() //rotating
                             ->scalarNode('date_format')->defaultValue('Y-m-d')->end() //rotating
-                            ->scalarNode('ident')->defaultFalse()->end() // syslog and syslogudp
+                            ->scalarNode('ident')->defaultValue('php')->end() // syslog and syslogudp
                             ->scalarNode('logopts')->defaultValue(LOG_PID)->end() // syslog
                             ->scalarNode('facility')->defaultValue('user')->end() // syslog
                             ->scalarNode('max_files')->defaultValue(0)->end() // rotating
@@ -494,6 +496,7 @@ class Configuration implements ConfigurationInterface
                             ->scalarNode('title')->defaultNull()->end() // pushover
                             ->scalarNode('host')->defaultNull()->end() // syslogudp & hipchat
                             ->scalarNode('port')->defaultValue(514)->end() // syslogudp
+                            ->scalarNode('rfc')->defaultValue(SyslogUdpHandler::RFC5424)->end() // syslogudp
                             ->arrayNode('publisher')
                                 ->canBeUnset()
                                 ->beforeNormalization()

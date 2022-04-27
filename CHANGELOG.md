@@ -11,6 +11,7 @@
 * Fix call to undefined method pushProcessor on handler that does not implement ProcessableHandlerInterface
 * Use "use_locking" option with rotating file handler
 * Add ability to specify custom Sentry hub service
+* Add ability to specify RFC for SyslogUdpHandler
 
 ## 3.6.0 (2020-10-06)
 

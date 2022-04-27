@@ -519,9 +519,18 @@ class MonologExtension extends Extension
                 $handler['level'],
                 $handler['bubble'],
             ]);
+
             if ($handler['ident']) {
                 $definition->addArgument($handler['ident']);
+            } else {
+                $handler['ident'] = 'php';
+                $definition->addArgument($handler['ident']);
             }
+
+            if (isset($handler['rfc'])) {
+                $definition->addArgument($handler['rfc']);
+            }
+
             break;
 
         case 'swift_mailer':
