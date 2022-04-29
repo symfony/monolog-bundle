@@ -147,6 +147,10 @@ use Monolog\Logger;
  *   - members: the wrapped handlers by name
  *   - [bubble]: bool, defaults to true
  *
+ * - fallbackgroup
+ *   - members: the wrapped handlers by name
+ *   - [bubble]: bool, defaults to true
+ *
  * - syslog:
  *   - ident: string
  *   - [facility]: defaults to 'user', use any of the LOG_* facility constant but without LOG_ prefix, e.g. user for LOG_USER
@@ -607,7 +611,7 @@ class Configuration implements ConfigurationInterface
                                 ->canBeUnset()
                                 ->prototype('scalar')->end()
                             ->end() // rollbar
-                            ->arrayNode('members') // group, whatfailuregroup
+                            ->arrayNode('members') // group, whatfailuregroup, fallbackgroup
                                 ->canBeUnset()
                                 ->performNoDeepMerging()
                                 ->prototype('scalar')->end()
