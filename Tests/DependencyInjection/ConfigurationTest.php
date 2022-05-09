@@ -191,6 +191,10 @@ class ConfigurationTest extends TestCase
 
     public function testWithSwiftMailerHandler()
     {
+        if (\Monolog\Logger::API >= 3) {
+            $this->markTestSkipped('This test requires Monolog v1 or v2');
+        }
+
         $configs = [
             [
                 'handlers' => [

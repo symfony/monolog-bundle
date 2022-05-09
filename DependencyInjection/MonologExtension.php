@@ -1002,10 +1002,20 @@ class MonologExtension extends Extension
             'slackbot',
         ];
 
-        if (Logger::API === 2) {
+        $v3HandlerTypesRemoved = [
+            'swift_mailer',
+        ];
+
+        if (Logger::API >= 2) {
             $typeToClassMapping = array_merge($typeToClassMapping, $v2HandlerTypesAdded);
             foreach($v2HandlerTypesRemoved as $v2HandlerTypeRemoved) {
                 unset($typeToClassMapping[$v2HandlerTypeRemoved]);
+            }
+        }
+
+        if (Logger::API >= 3) {
+            foreach($v3HandlerTypesRemoved as $v3HandlerTypeRemoved) {
+                unset($typeToClassMapping[$v3HandlerTypeRemoved]);
             }
         }
 
@@ -1014,8 +1024,12 @@ class MonologExtension extends Extension
                 throw new \InvalidArgumentException(sprintf('"%s" was added in Monolog v2, please upgrade if you wish to use it.', $handlerType));
             }
 
-            if (Logger::API === 2 && array_key_exists($handlerType, $v2HandlerTypesRemoved)) {
+            if (Logger::API >= 2 && array_key_exists($handlerType, $v2HandlerTypesRemoved)) {
                 throw new \InvalidArgumentException(sprintf('"%s" was removed in Monolog v2.', $handlerType));
+            }
+
+            if (Logger::API >= 3 && array_key_exists($handlerType, $v3HandlerTypesRemoved)) {
+                throw new \InvalidArgumentException(sprintf('"%s" was removed in Monolog v3.', $handlerType));
             }
 
             throw new \InvalidArgumentException(sprintf('There is no handler class defined for handler "%s".', $handlerType));
