@@ -257,7 +257,7 @@ class ConfigurationTest extends TestCase
                         'verbosity_levels' => [
                             'VERBOSITY_NORMAL' => 'NOTICE',
                             'verbosity_verbose' => 'info',
-                            'VERBOSITY_very_VERBOSE' => 150
+                            'VERBOSITY_very_VERBOSE' => '200'
                         ]
                     ]
                 ]
@@ -270,7 +270,7 @@ class ConfigurationTest extends TestCase
         $this->assertSame([
             OutputInterface::VERBOSITY_NORMAL => Logger::NOTICE,
             OutputInterface::VERBOSITY_VERBOSE => Logger::INFO,
-            OutputInterface::VERBOSITY_VERY_VERBOSE => 150,
+            OutputInterface::VERBOSITY_VERY_VERBOSE => 200,
             OutputInterface::VERBOSITY_QUIET => Logger::ERROR,
             OutputInterface::VERBOSITY_DEBUG => Logger::DEBUG
             ], $config['handlers']['console']['verbosity_levels']);

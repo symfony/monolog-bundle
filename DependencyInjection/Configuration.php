@@ -998,17 +998,18 @@ class Configuration implements ConfigurationInterface
                                          $verbosity
                                     ));
                                 }
-                                if (!is_numeric($level)) {
-                                    $levelConstant = 'Monolog\Logger::'.$level;
-                                    if (!defined($levelConstant)) {
-                                        throw new InvalidConfigurationException(sprintf(
-                                            'The configured minimum log level "%s" for verbosity "%s" is invalid as it is not defined in Monolog\Logger.',
-                                             $level, $verbosity
-                                        ));
+
+                                try {
+                                    if (Logger::API === 3) {
+                                        $level = Logger::toMonologLevel($level)->value;
+                                    } else {
+                                        $level = Logger::toMonologLevel(is_numeric($level) ? (int) $level : $level);
                                     }
-                                    $level = constant($levelConstant);
-                                } else {
-                                    $level = (int) $level;
+                                } catch (\Psr\Log\InvalidArgumentException $e) {
+                                    throw new InvalidConfigurationException(sprintf(
+                                        'The configured minimum log level "%s" for verbosity "%s" is invalid as it is not defined in Monolog\Logger.',
+                                         $level, $verbosity
+                                    ));
                                 }
 
                                 $map[constant($verbosityConstant)] = $level;
