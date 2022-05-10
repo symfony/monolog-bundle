@@ -363,6 +363,8 @@ class MonologExtension extends Extension
                     $handler['parse_mode'],
                     $handler['disable_webpage_preview'],
                     $handler['disable_notification'],
+                    $handler['split_long_messages'],
+                    $handler['delay_between_messages'],
                 ]);
             }
             break;
