@@ -783,6 +783,7 @@ class MonologExtension extends Extension
                 $hub,
                 $handler['level'],
                 $handler['bubble'],
+                $handler['fill_extra_context'],
             ]);
             break;
 

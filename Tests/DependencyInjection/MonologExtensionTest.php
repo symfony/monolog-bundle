@@ -487,7 +487,7 @@ class MonologExtensionTest extends DependencyInjectionTest
         $this->assertDICDefinitionMethodCallAt(1, $logger, 'pushHandler', [new Reference('monolog.handler.sentry')]);
 
         $handler = $container->getDefinition('monolog.handler.sentry');
-        $this->assertDICConstructorArguments($handler, [new Reference('sentry.hub'), \Monolog\Logger::DEBUG, true]);
+        $this->assertDICConstructorArguments($handler, [new Reference('sentry.hub'), \Monolog\Logger::DEBUG, true, false]);
     }
 
     public function testSentryHandlerWhenAHubAndAClientAreSpecified()

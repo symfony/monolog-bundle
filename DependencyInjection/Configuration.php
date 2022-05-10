@@ -224,6 +224,7 @@ use Monolog\Logger;
  *
  * - sentry:
  *   - hub_id: Sentry hub custom service id (optional)
+ *   - [fill_extra_context]: bool, defaults to false
  *
  * - newrelic:
  *   - [level]: level name or int value, defaults to DEBUG
@@ -423,6 +424,7 @@ class Configuration implements ConfigurationInterface
                 ->scalarNode('level')->defaultValue('DEBUG')->end()
                 ->booleanNode('bubble')->defaultTrue()->end()
                 ->scalarNode('app_name')->defaultNull()->end()
+                ->booleanNode('fill_extra_context')->defaultFalse()->end() // sentry
                 ->booleanNode('include_stacktraces')->defaultFalse()->end()
                 ->booleanNode('process_psr_3_messages')->defaultNull()->end()
                 ->scalarNode('path')->defaultValue('%kernel.logs_dir%/%kernel.environment%.log')->end() // stream and rotating
