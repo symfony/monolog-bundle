@@ -11,6 +11,7 @@
 
 namespace Symfony\Bundle\MonologBundle\DependencyInjection;
 
+use Monolog\Attribute\AsMonologProcessor;
 use Monolog\Handler\FingersCrossed\ErrorLevelActivationStrategy;
 use Monolog\Logger;
 use Monolog\Processor\ProcessorInterface;
@@ -147,6 +148,21 @@ class MonologExtension extends Extension
                     HttpClientInterface::class => new BoundArgument(new Reference('monolog.http_client'), false),
                 ]);
             }
+        }
+
+        if (80000 <= \PHP_VERSION_ID && method_exists($container, 'registerAttributeForAutoconfiguration')) {
+            $container->registerAttributeForAutoconfiguration(AsMonologProcessor::class, static function (ChildDefinition $definition, AsMonologProcessor $attribute, \Reflector $reflector): void {
+                $tagAttributes = get_object_vars($attribute);
+                if ($reflector instanceof \ReflectionMethod) {
+                    if (isset($tagAttributes['method'])) {
+                        throw new \LogicException(sprintf('AsMonologProcessor attribute cannot declare a method on "%s::%s()".', $reflector->class, $reflector->name));
+                    }
+
+                    $tagAttributes['method'] = $reflector->getName();
+                }
+
+                $definition->addTag('monolog.processor', $tagAttributes);
+            });
         }
     }
 
