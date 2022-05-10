@@ -316,6 +316,8 @@ class MonologExtension extends Extension
                 if ($handler['type'] === 'elastic_search') {
                     // v8 has a new Elastic\ prefix
                     $client = new Definition(class_exists('Elastic\Elasticsearch\Client') ? 'Elastic\Elasticsearch\Client' : 'Elasticsearch\Client');
+                    $factory = class_exists('Elastic\Elasticsearch\ClientBuilder') ? 'Elastic\Elasticsearch\ClientBuilder' : 'Elasticsearch\ClientBuilder');
+                    $client->setFactory([$factory, 'fromConfig']);
                     $clientArguments = [
                         'host' => $handler['elasticsearch']['host'],
                     ];
