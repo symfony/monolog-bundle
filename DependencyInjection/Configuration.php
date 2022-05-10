@@ -81,7 +81,18 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
  *
- * - elasticsearch:
+ * - elastic_search:
+ *   - elasticsearch:
+ *      - id: optional if host is given
+ *      - host: elastic search host name, with scheme (e.g. "https://127.0.0.1:9200")
+ *      - [user]: elastic search user name
+ *      - [password]: elastic search user password
+ *   - [index]: index name, defaults to monolog
+ *   - [document_type]: document_type, defaults to logs
+ *   - [level]: level name or int value, defaults to DEBUG
+ *   - [bubble]: bool, defaults to true
+ *
+ * - elastica:
  *   - elasticsearch:
  *      - id: optional if host is given
  *      - host: elastic search host name. Do not prepend with http(s)://
@@ -878,9 +889,9 @@ class Configuration implements ConfigurationInterface
                     ->thenInvalid('What must be set is either the host or the id.')
                     ->end()
                 ->end()
-                ->scalarNode('index')->defaultValue('monolog')->end() // elasticsearch
-                ->scalarNode('document_type')->defaultValue('logs')->end() // elasticsearch
-                ->scalarNode('ignore_error')->defaultValue(false)->end() // elasticsearch
+                ->scalarNode('index')->defaultValue('monolog')->end() // elasticsearch & elastic_search & elastica
+                ->scalarNode('document_type')->defaultValue('logs')->end() // elasticsearch & elastic_search & elastica
+                ->scalarNode('ignore_error')->defaultValue(false)->end() // elasticsearch & elastic_search & elastica
             ->end()
         ;
     }

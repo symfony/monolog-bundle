@@ -305,38 +305,51 @@ class MonologExtension extends Extension
             break;
 
         case 'elasticsearch':
-            if (isset($handler['elasticsearch']['id'])) {
-                $elasticaClient = new Reference($handler['elasticsearch']['id']);
-            } else {
-                // elastica client new definition
-                $elasticaClient = new Definition('Elastica\Client');
-                $elasticaClientArguments = [
-                    'host' => $handler['elasticsearch']['host'],
-                    'port' => $handler['elasticsearch']['port'],
-                    'transport' => $handler['elasticsearch']['transport'],
-                ];
+        case 'elastica':
+        case 'elastic_search':
+            if ($handler['type'] === 'elasticsearch') {
+                @trigger_error('The "elasticsearch" handler type is deprecated in MonologBundle since version 3.8.0, use the "elastica" type instead, or switch to the official Elastic client using the "elastic_search" type.', E_USER_DEPRECATED);
+            }
 
-                if (isset($handler['elasticsearch']['user'], $handler['elasticsearch']['password'])) {
-                    $elasticaClientArguments = array_merge(
-                        $elasticaClientArguments,
-                        [
-                            'headers' => [
-                                'Authorization' => 'Basic ' . base64_encode($handler['elasticsearch']['user'] . ':' . $handler['elasticsearch']['password'])
-                            ]
-                        ]
-                    );
+            if (isset($handler['elasticsearch']['id'])) {
+                $client = new Reference($handler['elasticsearch']['id']);
+            } else {
+                if ($handler['type'] === 'elastic_search') {
+                    // v8 has a new Elastic\ prefix
+                    $client = new Definition(class_exists('Elastic\Elasticsearch\Client') ? 'Elastic\Elasticsearch\Client' : 'Elasticsearch\Client');
+                    $clientArguments = [
+                        'host' => $handler['elasticsearch']['host'],
+                    ];
+
+                    if (isset($handler['elasticsearch']['user'], $handler['elasticsearch']['password'])) {
+                        $clientArguments['basicAuthentication'] = [$handler['elasticsearch']['user'], $handler['elasticsearch']['password']];
+                    }
+                } else {
+                    $client = new Definition('Elastica\Client');
+
+                    $clientArguments = [
+                        'host' => $handler['elasticsearch']['host'],
+                        'port' => $handler['elasticsearch']['port'],
+                        'transport' => $handler['elasticsearch']['transport'],
+                    ];
+
+                    if (isset($handler['elasticsearch']['user'], $handler['elasticsearch']['password'])) {
+                        $clientArguments['headers'] = [
+                            'Authorization' => 'Basic ' . base64_encode($handler['elasticsearch']['user'] . ':' . $handler['elasticsearch']['password'])
+                        ];
+                    }
                 }
 
-                $elasticaClient->setArguments([
-                    $elasticaClientArguments
+                $client->setArguments([
+                    $clientArguments
                 ]);
 
-                $elasticaClient->setPublic(false);
+                $client->setPublic(false);
             }
 
             // elastica handler definition
             $definition->setArguments([
-                $elasticaClient,
+                $client,
                 [
                     'index' => $handler['index'],
                     'type' => $handler['document_type'],
@@ -1021,7 +1034,9 @@ class MonologExtension extends Extension
         ];
 
         $v2HandlerTypesAdded = [
+            'elastica' => 'Monolog\Handler\ElasticaHandler',
             'elasticsearch' => 'Monolog\Handler\ElasticaHandler',
+            'elastic_search' => 'Monolog\Handler\ElasticsearchHandler',
             'fallbackgroup' => 'Monolog\Handler\FallbackGroupHandler',
             'noop' => 'Monolog\Handler\NoopHandler',
         ];
