@@ -350,8 +350,10 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
  *   - [parse_mode]: optional the kind of formatting that is used for the message
- *   - [disable_webpage_preview]: optional disables link previews for links in the message
- *   - [disable_notification]: optional Sends the message silently. Users will receive a notification with no sound
+ *   - [disable_webpage_preview]: bool, defaults to false, disables link previews for links in the message
+ *   - [disable_notification]: bool, defaults to false, sends the message silently. Users will receive a notification with no sound
+ *   - [split_long_messages]: bool, defaults to false, split messages longer than 4096 bytes into multiple messages
+ *   - [delay_between_messages]: bool, defaults to false, adds a 1sec delay/sleep between sending split messages
  *
  * All handlers can also be marked with `nested: true` to make sure they are never added explicitly to the stack
  *
@@ -576,6 +578,8 @@ class Configuration implements ConfigurationInterface
                 ->scalarNode('parse_mode')->defaultNull()->end() // telegram
                 ->booleanNode('disable_webpage_preview')->defaultNull()->end() // telegram
                 ->booleanNode('disable_notification')->defaultNull()->end() // telegram
+                ->booleanNode('split_long_messages')->defaultFalse()->end() // telegram
+                ->booleanNode('delay_between_messages')->defaultFalse()->end() // telegram
                 ->arrayNode('tags') // loggly
                     ->beforeNormalization()
                         ->ifString()
@@ -889,15 +893,8 @@ class Configuration implements ConfigurationInterface
                         ->then(function ($v) { return ['id' => $v]; })
                     ->end()
                     ->children()
-                        ->scalarNode('id')->end()
                         ->scalarNode('token')->end()
                         ->scalarNode('channel')->end()
-                    ->end()
-                    ->validate()
-                        ->ifTrue(function ($v) {
-                            return !isset($v['id']) && !isset($v['token']);
-                        })
-                        ->thenInvalid('What must be set is either the token with channel or the id.')
                     ->end()
                 ->end()
             ->end()
