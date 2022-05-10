@@ -12,6 +12,7 @@
 namespace Symfony\Bundle\MonologBundle\Tests\DependencyInjection;
 
 use InvalidArgumentException;
+use Monolog\Attribute\AsMonologProcessor;
 use Monolog\Handler\FingersCrossed\ErrorLevelActivationStrategy;
 use Monolog\Handler\RollbarHandler;
 use Monolog\Logger;
@@ -19,6 +20,8 @@ use Monolog\Processor\UidProcessor;
 use Symfony\Bridge\Monolog\Processor\SwitchUserTokenProcessor;
 use Symfony\Bundle\MonologBundle\DependencyInjection\MonologExtension;
 use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\LoggerChannelPass;
+use Symfony\Bundle\MonologBundle\Tests\DependencyInjection\Fixtures\AsMonologProcessor\FooProcessor;
+use Symfony\Bundle\MonologBundle\Tests\DependencyInjection\Fixtures\AsMonologProcessor\RedeclareMethodProcessor;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\ParameterBag\EnvPlaceholderParameterBag;
@@ -484,7 +487,7 @@ class MonologExtensionTest extends DependencyInjectionTest
         $this->assertDICDefinitionMethodCallAt(1, $logger, 'pushHandler', [new Reference('monolog.handler.sentry')]);
 
         $handler = $container->getDefinition('monolog.handler.sentry');
-        $this->assertDICConstructorArguments($handler, [new Reference('sentry.hub'), \Monolog\Logger::DEBUG, true]);
+        $this->assertDICConstructorArguments($handler, [new Reference('sentry.hub'), \Monolog\Logger::DEBUG, true, false]);
     }
 
     public function testSentryHandlerWhenAHubAndAClientAreSpecified()
@@ -814,6 +817,50 @@ class MonologExtensionTest extends DependencyInjectionTest
         $this->assertIsArray($tags['kernel.reset'][0]);
         $this->assertArrayHasKey('method', $tags['kernel.reset'][0]);
         $this->assertEquals('reset', $tags['kernel.reset'][0]['method']);
+    }
+
+    /**
+     * @requires PHP 8.0
+     */
+    public function testAsMonologProcessorAutoconfigurationRedeclareMethod(): void
+    {
+        if (!\class_exists(AsMonologProcessor::class, true)) {
+            $this->markTestSkipped('Monolog >= 2.3.6 is needed.');
+        }
+
+        $this->expectException(\LogicException::class);
+        $this->expectExceptionMessage('AsMonologProcessor attribute cannot declare a method on "Symfony\Bundle\MonologBundle\Tests\DependencyInjection\Fixtures\AsMonologProcessor\RedeclareMethodProcessor::__invoke()".');
+
+        $this->getContainer([], [
+            RedeclareMethodProcessor::class => (new Definition(RedeclareMethodProcessor::class))->setAutoconfigured(true),
+        ]);
+    }
+
+    /**
+     * @requires PHP 8.0
+     */
+    public function testAsMonologProcessorAutoconfiguration(): void
+    {
+        if (!\class_exists(AsMonologProcessor::class, true)) {
+            $this->markTestSkipped('Monolog >= 2.3.6 is needed.');
+        }
+
+        $container = $this->getContainer([], [
+            FooProcessor::class => (new Definition(FooProcessor::class))->setAutoconfigured(true),
+        ]);
+
+        $this->assertSame([
+            [
+                'channel' => null,
+                'handler' => 'foo_handler',
+                'method' => null,
+            ],
+            [
+                'channel' => 'ccc_channel',
+                'handler' => null,
+                'method' => '__invoke',
+            ],
+        ], $container->getDefinition(FooProcessor::class)->getTag('monolog.processor'));
     }
 
     protected function getContainer(array $config = [], array $thirdPartyDefinitions = [])

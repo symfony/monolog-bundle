@@ -12,6 +12,7 @@
 namespace Symfony\Bundle\MonologBundle\Tests\DependencyInjection;
 
 use Monolog\Handler\FingersCrossed\ErrorLevelActivationStrategy;
+use Monolog\Processor\PsrLogMessageProcessor;
 use Symfony\Bridge\Monolog\Processor\SwitchUserTokenProcessor;
 use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\LoggerChannelPass;
 use Symfony\Bundle\MonologBundle\DependencyInjection\MonologExtension;
@@ -278,6 +279,55 @@ abstract class FixtureMonologExtensionTest extends DependencyInjectionTest
         $methodCalls = $logger->getMethodCalls();
 
         $this->assertNotContainsEquals(['pushProcessor', [new Reference('monolog.processor.psr_log_message')]], $methodCalls, 'The PSR-3 processor should not be enabled');
+    }
+
+    public function testPsrLogMessageProcessorHasConstructorArguments(): void
+    {
+        $reflectionConstructor = (new \ReflectionClass(PsrLogMessageProcessor::class))->getConstructor();
+        if (null === $reflectionConstructor || $reflectionConstructor->getNumberOfParameters() <= 0) {
+            $this->markTestSkipped('Monolog >= 1.26 is needed.');
+        }
+
+        $container = $this->getContainer('process_psr_3_messages_with_arguments');
+
+        $processors = [
+            'monolog.processor.psr_log_message' => ['name' => 'without_arguments', 'arguments' => []],
+            'monolog.processor.psr_log_message.'.ContainerBuilder::hash($arguments = ['Y', false]) => [
+                'name' => 'with_arguments',
+                'arguments' => $arguments,
+            ],
+        ];
+        foreach ($processors as $processorId => $settings) {
+            $this->assertTrue($container->hasDefinition($processorId));
+            $processor = $container->getDefinition($processorId);
+            $this->assertDICConstructorArguments($processor, $settings['arguments']);
+
+            $this->assertTrue($container->hasDefinition($handlerId = 'monolog.handler.'.$settings['name']));
+            $handler = $container->getDefinition($handlerId);
+            $this->assertDICDefinitionMethodCallAt(0, $handler, 'pushProcessor', [new Reference($processorId)]);
+        }
+    }
+
+    public function testPsrLogMessageProcessorDoesNotHaveConstructorArguments(): void
+    {
+        $reflectionConstructor = (new \ReflectionClass(PsrLogMessageProcessor::class))->getConstructor();
+        if (null !== $reflectionConstructor && $reflectionConstructor->getNumberOfParameters() > 0) {
+            $this->markTestSkipped('Monolog < 1.26 is needed.');
+        }
+
+        $container = $this->getContainer('process_psr_3_messages_without_arguments');
+
+        $this->assertTrue($container->hasDefinition($processorId = 'monolog.processor.psr_log_message'));
+        $processor = $container->getDefinition($processorId);
+        $this->assertDICConstructorArguments($processor, []);
+
+        $this->assertTrue($container->hasDefinition($handlerId = 'monolog.handler.without_arguments'));
+        $handler = $container->getDefinition($handlerId);
+        $this->assertDICDefinitionMethodCallAt(0, $handler, 'pushProcessor', [new Reference($processorId)]);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Monolog 1.26 or higher is required for the "date_format" and "remove_used_context_fields" options to be used.');
+        $this->getContainer('process_psr_3_messages_with_arguments');
     }
 
     public function testNativeMailer()

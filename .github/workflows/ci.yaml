@@ -1,0 +1,51 @@
+name: CI
+
+on:
+    push:
+    pull_request:
+
+jobs:
+    test:
+        runs-on: ubuntu-latest
+        name: PHPUnit Tests
+        strategy:
+            fail-fast: false
+            matrix:
+                php: [ '7.2', '7.3', '7.4', '8.0', '8.1' ]
+                monolog: [ '1.*', '2.*' ]
+                include:
+                    -   php: '7.1'
+                    -   php: '7.4'
+                        deps: lowest
+                        deprecations: max[self]=0
+        steps:
+            -   name: Checkout
+                uses: actions/checkout@v2
+
+            -   name: Setup PHP
+                uses: shivammathur/setup-php@v2
+                with:
+                    php-version: ${{ matrix.php }}
+                    ini-values: zend.exception_ignore_args=false
+                    tools: flex
+
+            -   name: Configure composer
+                if: "${{ matrix.deps == 'highest' }}"
+                run: composer config minimum-stability dev
+
+            -   name: Require Monolog version
+                if: "${{ matrix.monolog != '' }}"
+                run: composer require --no-update monolog/monolog:${{ matrix.monolog }}
+
+            -   name: Composer install
+                uses: ramsey/composer-install@v1
+                with:
+                    dependency-versions: '${{ matrix.deps }}'
+
+            -   name: Install PHPUnit dependencies
+                run: vendor/bin/simple-phpunit install
+
+            -   name: Run tests
+                run: vendor/bin/simple-phpunit -v --coverage-text
+                env:
+                    SYMFONY_DEPRECATIONS_HELPER: '${{ matrix.deprecations }}'
