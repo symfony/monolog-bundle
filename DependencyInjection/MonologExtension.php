@@ -25,6 +25,7 @@ use Symfony\Bridge\Monolog\Processor\WebProcessor;
 use Symfony\Bundle\FullStack;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\Argument\BoundArgument;
+use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Exception\ParameterNotFoundException;
