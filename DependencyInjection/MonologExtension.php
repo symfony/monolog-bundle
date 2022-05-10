@@ -11,6 +11,7 @@
 
 namespace Symfony\Bundle\MonologBundle\DependencyInjection;
 
+use Monolog\Attribute\AsMonologProcessor;
 use Monolog\Handler\FingersCrossed\ErrorLevelActivationStrategy;
 use Monolog\Handler\HandlerInterface;
 use Monolog\Logger;
@@ -148,6 +149,21 @@ class MonologExtension extends Extension
                 ]);
             }
         }
+
+        if (80000 <= \PHP_VERSION_ID && method_exists($container, 'registerAttributeForAutoconfiguration')) {
+            $container->registerAttributeForAutoconfiguration(AsMonologProcessor::class, static function (ChildDefinition $definition, AsMonologProcessor $attribute, \Reflector $reflector): void {
+                $tagAttributes = get_object_vars($attribute);
+                if ($reflector instanceof \ReflectionMethod) {
+                    if (isset($tagAttributes['method'])) {
+                        throw new \LogicException(sprintf('AsMonologProcessor attribute cannot declare a method on "%s::%s()".', $reflector->class, $reflector->name));
+                    }
+
+                    $tagAttributes['method'] = $reflector->getName();
+                }
+
+                $definition->addTag('monolog.processor', $tagAttributes);
+            });
+        }
     }
 
     /**
@@ -271,7 +287,7 @@ class MonologExtension extends Extension
 
                 $server .= $handler['mongo']['host'].':'.$handler['mongo']['port'];
 
-                $client = new Definition('MongoClient', [
+                $client = new Definition('MongoDB\Client', [
                     $server,
                 ]);
 
