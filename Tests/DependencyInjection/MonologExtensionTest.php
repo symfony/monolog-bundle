@@ -297,8 +297,8 @@ class MonologExtensionTest extends DependencyInjectionTest
 
     public function testRavenHandlerWhenConfigurationIsWrong()
     {
-        if (Logger::API === 2) {
-            $this->markTestSkipped('Not valid for V2');
+        if (Logger::API !== 1) {
+            $this->markTestSkipped('Only valid on Monolog V1');
 
             return;
         }
@@ -313,8 +313,8 @@ class MonologExtensionTest extends DependencyInjectionTest
 
     public function testRavenHandlerWhenADSNIsSpecified()
     {
-        if (Logger::API === 2) {
-            $this->markTestSkipped('Not valid for V2');
+        if (Logger::API !== 1) {
+            $this->markTestSkipped('Only valid on Monolog V1');
 
             return;
         }
@@ -339,8 +339,8 @@ class MonologExtensionTest extends DependencyInjectionTest
 
     public function testRavenHandlerWhenADSNAndAClientAreSpecified()
     {
-        if (Logger::API === 2) {
-            $this->markTestSkipped('Not valid for V2');
+        if (Logger::API !== 1) {
+            $this->markTestSkipped('Only valid on Monolog V1');
 
             return;
         }
@@ -359,8 +359,8 @@ class MonologExtensionTest extends DependencyInjectionTest
 
     public function testRavenHandlerWhenAClientIsSpecified()
     {
-        if (Logger::API === 2) {
-            $this->markTestSkipped('Not valid for V2');
+        if (Logger::API !== 1) {
+            $this->markTestSkipped('Only valid on Monolog V1');
 
             return;
         }
@@ -692,8 +692,8 @@ class MonologExtensionTest extends DependencyInjectionTest
      */
     public function testV2AddedOnV1($handlerType)
     {
-        if (Logger::API === 2) {
-            $this->markTestSkipped('Not valid for V2');
+        if (Logger::API !== 1) {
+            $this->markTestSkipped('Only valid on Monolog V1');
 
             return;
         }

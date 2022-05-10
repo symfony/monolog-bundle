@@ -18,6 +18,9 @@ jobs:
                     -   php: '7.4'
                         deps: lowest
                         deprecations: max[self]=0
+                    -   php: '8.1'
+                        deps: highest
+                        monolog: '3.*'
         steps:
             -   name: Checkout
                 uses: actions/checkout@v2

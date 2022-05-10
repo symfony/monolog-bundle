@@ -184,6 +184,10 @@ abstract class FixtureMonologExtensionTest extends DependencyInjectionTest
 
     public function testSingleEmailRecipient()
     {
+        if (\Monolog\Logger::API >= 3) {
+            $this->markTestSkipped('This test requires Monolog v1 or v2');
+        }
+
         $container = $this->getContainer('single_email_recipient');
 
         $this->assertEquals([
@@ -212,6 +216,10 @@ abstract class FixtureMonologExtensionTest extends DependencyInjectionTest
 
     public function testMultipleEmailRecipients()
     {
+        if (\Monolog\Logger::API >= 3) {
+            $this->markTestSkipped('This test requires Monolog v1 or v2');
+        }
+
         $container = $this->getContainer('multiple_email_recipients');
 
         $this->assertEquals([
@@ -249,7 +257,7 @@ abstract class FixtureMonologExtensionTest extends DependencyInjectionTest
     public function testPsr3MessageProcessingDisabledOnNullHandler()
     {
         if (\Monolog\Logger::API < 2) {
-            $this->markTestSkipped('This test requires Monolog v2');
+            $this->markTestSkipped('This test requires Monolog v2 or above');
         }
         $container = $this->getContainer('process_psr_3_messages_null');
 
@@ -263,7 +271,7 @@ abstract class FixtureMonologExtensionTest extends DependencyInjectionTest
     public function testHandlersV2()
     {
         if (\Monolog\Logger::API < 2) {
-            $this->markTestSkipped('This test requires Monolog v2');
+            $this->markTestSkipped('This test requires Monolog v2 or above');
         }
         $this->getContainer('handlers');
 
