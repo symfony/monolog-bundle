@@ -490,6 +490,41 @@ class ConfigurationTest extends TestCase
     }
 
     /**
+     * @dataProvider processPsr3MessagesProvider
+     */
+    public function testWithProcessPsr3Messages(array $configuration, array $processedConfiguration): void
+    {
+        $configs = [
+            [
+                'handlers' => [
+                    'main' => ['type' => 'stream'] + $configuration,
+                ],
+            ],
+        ];
+
+        $config = $this->process($configs);
+
+        $this->assertEquals($processedConfiguration, $config['handlers']['main']['process_psr_3_messages']);
+    }
+
+    public function processPsr3MessagesProvider(): iterable
+    {
+        yield 'Not specified' => [[], ['enabled' => null]];
+        yield 'Null' => [['process_psr_3_messages' => null], ['enabled' => true]];
+        yield 'True' => [['process_psr_3_messages' => true], ['enabled' => true]];
+        yield 'False' => [['process_psr_3_messages' => false], ['enabled' => false]];
+
+        yield 'Date format' => [
+            ['process_psr_3_messages' => ['date_format' => 'Y']],
+            ['date_format' => 'Y', 'enabled' => null],
+        ];
+        yield 'Enabled false & remove used' => [
+            ['process_psr_3_messages' => ['enabled' => false, 'remove_used_context_fields' => true]],
+            ['enabled' => false, 'remove_used_context_fields' => true],
+        ];
+    }
+
+    /**
      * Processes an array of configurations and returns a compiled version.
      *
      * @param array $configs An array of raw configurations

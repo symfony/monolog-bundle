@@ -13,9 +13,10 @@ namespace Symfony\Bundle\MonologBundle\DependencyInjection;
 
 use Monolog\Attribute\AsMonologProcessor;
 use Monolog\Handler\FingersCrossed\ErrorLevelActivationStrategy;
+use Monolog\Handler\HandlerInterface;
 use Monolog\Logger;
 use Monolog\Processor\ProcessorInterface;
-use Monolog\Handler\HandlerInterface;
+use Monolog\Processor\PsrLogMessageProcessor;
 use Monolog\ResettableInterface;
 use Symfony\Bridge\Monolog\Handler\FingersCrossed\HttpCodeActivationStrategy;
 use Symfony\Bridge\Monolog\Processor\SwitchUserTokenProcessor;
@@ -203,21 +204,13 @@ class MonologExtension extends Extension
             $definition->setConfigurator(['Symfony\\Bundle\\MonologBundle\\MonologBundle', 'includeStacktraces']);
         }
 
-        if (null === $handler['process_psr_3_messages']) {
-            $handler['process_psr_3_messages'] = !isset($handler['handler']) && !$handler['members'];
+        if (null === $handler['process_psr_3_messages']['enabled']) {
+            $handler['process_psr_3_messages']['enabled'] = !isset($handler['handler']) && !$handler['members'];
         }
 
-        if ($handler['process_psr_3_messages']) {
-            if (method_exists($handlerClass, 'pushProcessor')) {
-                $processorId = 'monolog.processor.psr_log_message';
-                if (!$container->hasDefinition($processorId)) {
-                    $processor = new Definition('Monolog\\Processor\\PsrLogMessageProcessor');
-                    $processor->setPublic(false);
-                    $container->setDefinition($processorId, $processor);
-                }
-
-                $definition->addMethodCall('pushProcessor', [new Reference($processorId)]);
-            }
+        if ($handler['process_psr_3_messages']['enabled'] && method_exists($handlerClass, 'pushProcessor')) {
+            $processorId = $this->buildPsrLogMessageProcessor($container, $handler['process_psr_3_messages']);
+            $definition->addMethodCall('pushProcessor', [new Reference($processorId)]);
         }
 
         switch ($handler['type']) {
@@ -1039,5 +1032,41 @@ class MonologExtension extends Extension
         }
 
         return $typeToClassMapping[$handlerType];
+    }
+
+    private function buildPsrLogMessageProcessor(ContainerBuilder $container, array $processorOptions): string
+    {
+        static $hasConstructorArguments;
+
+        if (!isset($hasConstructorArguments)) {
+            $reflectionConstructor = (new \ReflectionClass(PsrLogMessageProcessor::class))->getConstructor();
+            $hasConstructorArguments = null !== $reflectionConstructor && $reflectionConstructor->getNumberOfParameters() > 0;
+            unset($reflectionConstructor);
+        }
+
+        $processorId = 'monolog.processor.psr_log_message';
+        $processorArguments = [];
+
+        unset($processorOptions['enabled']);
+
+        if (!empty($processorOptions)) {
+            if (!$hasConstructorArguments) {
+                throw new \RuntimeException('Monolog 1.26 or higher is required for the "date_format" and "remove_used_context_fields" options to be used.');
+            }
+            $processorArguments = [
+                $processorOptions['date_format'] ?? null,
+                $processorOptions['remove_used_context_fields'] ?? false,
+            ];
+            $processorId .= '.'.ContainerBuilder::hash($processorArguments);
+        }
+
+        if (!$container->hasDefinition($processorId)) {
+            $processor = new Definition(PsrLogMessageProcessor::class);
+            $processor->setPublic(false);
+            $processor->setArguments($processorArguments);
+            $container->setDefinition($processorId, $processor);
+        }
+
+        return $processorId;
     }
 }

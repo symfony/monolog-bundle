@@ -11,12 +11,12 @@
 
 namespace Symfony\Bundle\MonologBundle\DependencyInjection;
 
+use Monolog\Logger;
 use Symfony\Component\Config\Definition\BaseNode;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
-use Monolog\Logger;
 
 /**
  * This class contains the configuration information for the bundle
@@ -426,7 +426,18 @@ class Configuration implements ConfigurationInterface
                 ->scalarNode('app_name')->defaultNull()->end()
                 ->booleanNode('fill_extra_context')->defaultFalse()->end() // sentry
                 ->booleanNode('include_stacktraces')->defaultFalse()->end()
-                ->booleanNode('process_psr_3_messages')->defaultNull()->end()
+                ->arrayNode('process_psr_3_messages')
+                    ->addDefaultsIfNotSet()
+                    ->beforeNormalization()
+                        ->ifTrue(static function ($v) { return !\is_array($v); })
+                        ->then(static function ($v) { return ['enabled' => $v]; })
+                    ->end()
+                    ->children()
+                        ->booleanNode('enabled')->defaultNull()->end()
+                        ->scalarNode('date_format')->end()
+                        ->booleanNode('remove_used_context_fields')->end()
+                    ->end()
+                ->end()
                 ->scalarNode('path')->defaultValue('%kernel.logs_dir%/%kernel.environment%.log')->end() // stream and rotating
                 ->scalarNode('file_permission')  // stream and rotating
                     ->defaultNull()
