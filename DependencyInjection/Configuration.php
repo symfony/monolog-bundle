@@ -1073,7 +1073,8 @@ class Configuration implements ConfigurationInterface
                                 return null;
                             }
 
-                            return ['type' => $isExclusive ? 'exclusive' : 'inclusive', 'elements' => $elements];
+                            // de-duplicating $elements here in case the handlers are redefined, see https://github.com/symfony/monolog-bundle/issues/433
+                            return ['type' => $isExclusive ? 'exclusive' : 'inclusive', 'elements' => array_unique($elements)];
                         })
                     ->end()
                     ->children()
