@@ -305,12 +305,11 @@ class MonologExtension extends Extension
             break;
 
         case 'elasticsearch':
+            @trigger_error('The "elasticsearch" handler type is deprecated in MonologBundle since version 3.8.0, use the "elastica" type instead, or switch to the official Elastic client using the "elastic_search" type.', E_USER_DEPRECATED);
+            // no break
+
         case 'elastica':
         case 'elastic_search':
-            if ($handler['type'] === 'elasticsearch') {
-                @trigger_error('The "elasticsearch" handler type is deprecated in MonologBundle since version 3.8.0, use the "elastica" type instead, or switch to the official Elastic client using the "elastic_search" type.', E_USER_DEPRECATED);
-            }
-
             if (isset($handler['elasticsearch']['id'])) {
                 $client = new Reference($handler['elasticsearch']['id']);
             } else {
