@@ -527,7 +527,7 @@ class Configuration implements ConfigurationInterface
                 ->scalarNode('room')->end() // hipchat
                 ->scalarNode('message_format')->defaultValue('text')->end() // hipchat
                 ->scalarNode('api_version')->defaultNull()->end() // hipchat
-                ->scalarNode('channel')->defaultNull()->end() // slack & slackwebhook & slackbot
+                ->scalarNode('channel')->defaultNull()->end() // slack & slackwebhook & slackbot & telegram
                 ->scalarNode('bot_name')->defaultValue('Monolog')->end() // slack & slackwebhook
                 ->scalarNode('use_attachment')->defaultTrue()->end() // slack & slackwebhook
                 ->scalarNode('use_short_attachment')->defaultFalse()->end() // slack & slackwebhook
@@ -537,7 +537,7 @@ class Configuration implements ConfigurationInterface
                 ->scalarNode('team')->end() // slackbot
                 ->scalarNode('notify')->defaultFalse()->end() // hipchat
                 ->scalarNode('nickname')->defaultValue('Monolog')->end() // hipchat
-                ->scalarNode('token')->end() // pushover & hipchat & loggly & logentries & flowdock & rollbar & slack & slackbot & insightops
+                ->scalarNode('token')->end() // pushover & hipchat & loggly & logentries & flowdock & rollbar & slack & slackbot & insightops & telegram
                 ->scalarNode('region')->end() // insightops
                 ->scalarNode('source')->end() // flowdock
                 ->booleanNode('use_ssl')->defaultTrue()->end() // logentries & hipchat & insightops
@@ -616,7 +616,6 @@ class Configuration implements ConfigurationInterface
         $this->addMongoSection($handlerNode);
         $this->addElasticsearchSection($handlerNode);
         $this->addRedisSection($handlerNode);
-        $this->addTelegramSection($handlerNode);
         $this->addPredisSection($handlerNode);
         $this->addMailerSection($handlerNode);
         $this->addVerbosityLevelSection($handlerNode);
@@ -674,6 +673,10 @@ class Configuration implements ConfigurationInterface
             ->validate()
                 ->ifTrue(function ($v) { return 'rollbar' === $v['type'] && empty($v['id']) && empty($v['token']); })
                 ->thenInvalid('The id or the token has to be specified to use a RollbarHandler')
+            ->end()
+            ->validate()
+                ->ifTrue(function ($v) { return 'telegram' === $v['type'] && (empty($v['token']) || empty($v['channel'])); })
+                ->thenInvalid('The token and channel have to be specified to use a TelegramBotHandler')
             ->end()
             ->validate()
                 ->ifTrue(function ($v) { return 'service' === $v['type'] && !isset($v['id']); })
@@ -878,25 +881,6 @@ class Configuration implements ConfigurationInterface
                 ->scalarNode('index')->defaultValue('monolog')->end() // elasticsearch
                 ->scalarNode('document_type')->defaultValue('logs')->end() // elasticsearch
                 ->scalarNode('ignore_error')->defaultValue(false)->end() // elasticsearch
-            ->end()
-        ;
-    }
-
-    private function addTelegramSection(ArrayNodeDefinition $handerNode)
-    {
-        $handerNode
-            ->children()
-                ->arrayNode('telegram')
-                    ->canBeUnset()
-                    ->children()
-                        ->scalarNode('token')->end()
-                        ->scalarNode('channel')->end()
-                    ->end()
-                ->end()
-            ->end()
-            ->validate()
-                ->ifTrue(function ($v) { return 'telegram' === $v['type'] && empty($v['id']) && (empty($v['token']) || empty($v['channel'])); })
-                ->thenInvalid('The token and channel have to be specified to use a TelegramBotHandler')
             ->end()
         ;
     }
