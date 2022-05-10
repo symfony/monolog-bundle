@@ -243,6 +243,26 @@ class ConfigurationTest extends TestCase
         $this->assertEquals('my-index', $config['handlers']['elasticsearch']['index']);
     }
 
+    public function testWithTelegramBotHandler()
+    {
+        $configs = [
+            [
+                'handlers' => [
+                    'telegram' => [
+                        'type' => 'telegram',
+                        'token' => 'bot-token',
+                        'channel' => '-100',
+                    ]
+                ]
+            ]
+        ];
+
+        $config = $this->process($configs);
+
+        $this->assertEquals('bot-token', $config['handlers']['telegram']['token']);
+        $this->assertEquals('-100', $config['handlers']['telegram']['channel']);
+    }
+
     public function testWithConsoleHandler()
     {
         $configs = [

@@ -344,6 +344,17 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
  *
+ * - telegram:
+ *   - token: Telegram bot access token provided by BotFather
+ *   - channel: Telegram channel name
+ *   - [level]: level name or int value, defaults to DEBUG
+ *   - [bubble]: bool, defaults to true
+ *   - [parse_mode]: optional the kind of formatting that is used for the message
+ *   - [disable_webpage_preview]: bool, defaults to false, disables link previews for links in the message
+ *   - [disable_notification]: bool, defaults to false, sends the message silently. Users will receive a notification with no sound
+ *   - [split_long_messages]: bool, defaults to false, split messages longer than 4096 bytes into multiple messages
+ *   - [delay_between_messages]: bool, defaults to false, adds a 1sec delay/sleep between sending split messages
+ *
  * All handlers can also be marked with `nested: true` to make sure they are never added explicitly to the stack
  *
  * @author Jordi Boggiano <j.boggiano@seld.be>
@@ -564,6 +575,11 @@ class Configuration implements ConfigurationInterface
                 ->scalarNode('release')->defaultNull()->end() // raven_handler, sentry_handler
                 ->scalarNode('environment')->defaultNull()->end() // raven_handler, sentry_handler
                 ->scalarNode('message_type')->defaultValue(0)->end() // error_log
+                ->scalarNode('parse_mode')->defaultNull()->end() // telegram
+                ->booleanNode('disable_webpage_preview')->defaultNull()->end() // telegram
+                ->booleanNode('disable_notification')->defaultNull()->end() // telegram
+                ->booleanNode('split_long_messages')->defaultFalse()->end() // telegram
+                ->booleanNode('delay_between_messages')->defaultFalse()->end() // telegram
                 ->arrayNode('tags') // loggly
                     ->beforeNormalization()
                         ->ifString()
@@ -600,6 +616,7 @@ class Configuration implements ConfigurationInterface
         $this->addMongoSection($handlerNode);
         $this->addElasticsearchSection($handlerNode);
         $this->addRedisSection($handlerNode);
+        $this->addTelegramSection($handlerNode);
         $this->addPredisSection($handlerNode);
         $this->addMailerSection($handlerNode);
         $this->addVerbosityLevelSection($handlerNode);
@@ -861,6 +878,25 @@ class Configuration implements ConfigurationInterface
                 ->scalarNode('index')->defaultValue('monolog')->end() // elasticsearch
                 ->scalarNode('document_type')->defaultValue('logs')->end() // elasticsearch
                 ->scalarNode('ignore_error')->defaultValue(false)->end() // elasticsearch
+            ->end()
+        ;
+    }
+
+    private function addTelegramSection(ArrayNodeDefinition $handerNode)
+    {
+        $handerNode
+            ->children()
+                ->arrayNode('telegram')
+                    ->canBeUnset()
+                    ->children()
+                        ->scalarNode('token')->end()
+                        ->scalarNode('channel')->end()
+                    ->end()
+                ->end()
+            ->end()
+            ->validate()
+                ->ifTrue(function ($v) { return 'telegram' === $v['type'] && empty($v['id']) && (empty($v['token']) || empty($v['channel'])); })
+                ->thenInvalid('The token and channel have to be specified to use a TelegramBotHandler')
             ->end()
         ;
     }
