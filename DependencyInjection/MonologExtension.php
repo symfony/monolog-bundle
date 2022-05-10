@@ -348,25 +348,21 @@ class MonologExtension extends Extension
             break;
 
         case 'telegram':
-            if (isset($handler['id'])) {
-                $definition = new Reference($handler['id']);
-            } else {
-                if (!class_exists('Monolog\Handler\TelegramBotHandler')) {
-                    throw new \RuntimeException('The TelegramBotHandler is not available. Please update "monolog/monolog" to 2.2.0');
-                }
-
-                $definition->setArguments([
-                    $handler['token'],
-                    $handler['channel'],
-                    $handler['level'],
-                    $handler['bubble'],
-                    $handler['parse_mode'],
-                    $handler['disable_webpage_preview'],
-                    $handler['disable_notification'],
-                    $handler['split_long_messages'],
-                    $handler['delay_between_messages'],
-                ]);
+            if (!class_exists('Monolog\Handler\TelegramBotHandler')) {
+                throw new \RuntimeException('The TelegramBotHandler is not available. Please update "monolog/monolog" to 2.2.0');
             }
+
+            $definition->setArguments([
+                $handler['token'],
+                $handler['channel'],
+                $handler['level'],
+                $handler['bubble'],
+                $handler['parse_mode'],
+                $handler['disable_webpage_preview'],
+                $handler['disable_notification'],
+                $handler['split_long_messages'],
+                $handler['delay_between_messages'],
+            ]);
             break;
 
         case 'redis':
