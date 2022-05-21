@@ -17,6 +17,7 @@ use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
+use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * This class contains the configuration information for the bundle
@@ -1015,10 +1016,13 @@ class Configuration implements ConfigurationInterface
                         ->then(function ($v) {
                             $map = [];
                             $verbosities = ['VERBOSITY_QUIET', 'VERBOSITY_NORMAL', 'VERBOSITY_VERBOSE', 'VERBOSITY_VERY_VERBOSE', 'VERBOSITY_DEBUG'];
-                            // allow numeric indexed array with ascendning verbosity and lowercase names of the constants
+                            $verbosityConstants = [OutputInterface::VERBOSITY_QUIET, OutputInterface::VERBOSITY_NORMAL, OutputInterface::VERBOSITY_VERBOSE, OutputInterface::VERBOSITY_VERY_VERBOSE, OutputInterface::VERBOSITY_DEBUG];
+                            // allow numeric indexed array with ascending verbosity and lowercase names of the constants
                             foreach ($v as $verbosity => $level) {
                                 if (is_int($verbosity) && isset($verbosities[$verbosity])) {
                                     $map[$verbosities[$verbosity]] = strtoupper($level);
+                                } elseif (is_int($verbosity) && false !== $i = \array_search($verbosity, $verbosityConstants, true)) {
+                                    $map[$verbosities[$i]] = strtoupper($level);
                                 } else {
                                     $map[strtoupper($verbosity)] = strtoupper($level);
                                 }

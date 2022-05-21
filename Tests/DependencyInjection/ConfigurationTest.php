@@ -267,18 +267,17 @@ class ConfigurationTest extends TestCase
         $this->assertEquals('-100', $config['handlers']['telegram']['channel']);
     }
 
-    public function testWithConsoleHandler()
+    /**
+     * @dataProvider provideConsoleHandlerCases
+     */
+    public function testWithConsoleHandler(array $verbosityLevels, array $expectedVerbosityMap)
     {
         $configs = [
             [
                 'handlers' => [
                     'console' => [
                         'type' => 'console',
-                        'verbosity_levels' => [
-                            'VERBOSITY_NORMAL' => 'NOTICE',
-                            'verbosity_verbose' => 'info',
-                            'VERBOSITY_very_VERBOSE' => '200'
-                        ]
+                        'verbosity_levels' => $verbosityLevels
                     ]
                 ]
             ]
@@ -287,13 +286,39 @@ class ConfigurationTest extends TestCase
         $config = $this->process($configs);
 
         $this->assertSame('console', $config['handlers']['console']['type']);
-        $this->assertSame([
-            OutputInterface::VERBOSITY_NORMAL => Logger::NOTICE,
-            OutputInterface::VERBOSITY_VERBOSE => Logger::INFO,
-            OutputInterface::VERBOSITY_VERY_VERBOSE => 200,
-            OutputInterface::VERBOSITY_QUIET => Logger::ERROR,
-            OutputInterface::VERBOSITY_DEBUG => Logger::DEBUG
-            ], $config['handlers']['console']['verbosity_levels']);
+        $this->assertSame($expectedVerbosityMap, $config['handlers']['console']['verbosity_levels']);
+    }
+
+    public function provideConsoleHandlerCases(): iterable
+    {
+        yield 'with strings only' => [
+            [
+                'VERBOSITY_NORMAL' => 'NOTICE',
+                'verbosity_verbose' => 'info',
+                'VERBOSITY_very_VERBOSE' => '200'
+            ],
+            [
+                OutputInterface::VERBOSITY_NORMAL => Logger::NOTICE,
+                OutputInterface::VERBOSITY_VERBOSE => Logger::INFO,
+                OutputInterface::VERBOSITY_VERY_VERBOSE => Logger::INFO,
+                OutputInterface::VERBOSITY_QUIET => Logger::ERROR,
+                OutputInterface::VERBOSITY_DEBUG => Logger::DEBUG
+            ]
+        ];
+        yield 'with constants' => [
+            [
+                OutputInterface::VERBOSITY_NORMAL => Logger::NOTICE,
+                'verbosity_verbose' => 'info',
+                OutputInterface::VERBOSITY_VERY_VERBOSE => Logger::INFO
+            ],
+            [
+                OutputInterface::VERBOSITY_NORMAL => Logger::NOTICE,
+                OutputInterface::VERBOSITY_VERBOSE => Logger::INFO,
+                OutputInterface::VERBOSITY_VERY_VERBOSE => Logger::INFO,
+                OutputInterface::VERBOSITY_QUIET => Logger::ERROR,
+                OutputInterface::VERBOSITY_DEBUG => Logger::DEBUG
+            ]
+        ];
     }
 
     public function testWithType()
