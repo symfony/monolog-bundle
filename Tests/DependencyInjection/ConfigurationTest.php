@@ -189,6 +189,7 @@ class ConfigurationTest extends TestCase
         $config = $this->process($configs);
     }
 
+    /** @group legacy */
     public function testWithSwiftMailerHandler()
     {
         if (\Monolog\Logger::API >= 3) {
