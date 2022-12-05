@@ -1,0 +1,25 @@
+---------------------------------------------------------------------------
+
+by uncaught at 2022-12-02T21:54:30Z
+
+Did you check if this is even needed?
+
+Last time I checked, every monolog handler already casts the log level.
+
+I see no reason for this bundle to cast the level at all.
+
+---------------------------------------------------------------------------
+
+by GromNaN at 2022-12-02T22:06:32Z
+
+Why didn't I think of that! You are absolutely right.
+
+By default the [`AbstractHandler`](https://github.com/Seldaek/monolog/blob/main/src/Monolog/Handler/AbstractHandler.php#L38) constructor calls `setLevel`, which calls `Logger::toMonologLevel($level)`.
+
+I'll check for older versions and update the PR.
+
+---------------------------------------------------------------------------
+
+by GromNaN at 2022-12-02T22:32:38Z
+
+`Logger::toMonologLevel` is called [since monolog 1.11](https://github.com/Seldaek/monolog/commit/feb19af2d42ab598e3e5e77e8f4bd51b82538acb). This is safe to remove the call in the DI extension.
