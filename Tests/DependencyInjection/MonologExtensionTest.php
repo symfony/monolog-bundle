@@ -44,7 +44,7 @@ class MonologExtensionTest extends DependencyInjectionTest
 
         $handler = $container->getDefinition('monolog.handler.main');
         $this->assertDICDefinitionClass($handler, 'Monolog\Handler\StreamHandler');
-        $this->assertDICConstructorArguments($handler, ['%kernel.logs_dir%/%kernel.environment%.log', \Monolog\Logger::DEBUG, true, null, false]);
+        $this->assertDICConstructorArguments($handler, ['%kernel.logs_dir%/%kernel.environment%.log', 'DEBUG', true, null, false]);
         $this->assertDICDefinitionMethodCallAt(0, $handler, 'pushProcessor', [new Reference('monolog.processor.psr_log_message')]);
     }
 
@@ -62,16 +62,7 @@ class MonologExtensionTest extends DependencyInjectionTest
 
         $handler = $container->getDefinition('monolog.handler.custom');
         $this->assertDICDefinitionClass($handler, 'Monolog\Handler\StreamHandler');
-        $this->assertDICConstructorArguments($handler, ['/tmp/symfony.log', \Monolog\Logger::ERROR, false, 0666, true]);
-    }
-
-    public function testLoadWithUnknownLevel()
-    {
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Could not match "warn" to a log level.');
-        $container = $this->getContainer([['handlers' => [
-            'custom' => ['type' => 'stream', 'path' => '/tmp/symfony.log', 'bubble' => false, 'level' => 'warn', 'file_permission' => '0666', 'use_locking' => true]
-        ]]]);
+        $this->assertDICConstructorArguments($handler, ['/tmp/symfony.log', 'ERROR', false, 0666, true]);
     }
 
     public function testLoadWithNestedHandler()
@@ -91,7 +82,7 @@ class MonologExtensionTest extends DependencyInjectionTest
 
         $handler = $container->getDefinition('monolog.handler.custom');
         $this->assertDICDefinitionClass($handler, 'Monolog\Handler\StreamHandler');
-        $this->assertDICConstructorArguments($handler, ['/tmp/symfony.log', \Monolog\Logger::ERROR, false, 0666, false]);
+        $this->assertDICConstructorArguments($handler, ['/tmp/symfony.log', 'ERROR', false, 0666, false]);
     }
 
     public function testLoadWithServiceHandler()
@@ -228,7 +219,7 @@ class MonologExtensionTest extends DependencyInjectionTest
 
         $handler = $container->getDefinition('monolog.handler.main');
         $this->assertDICDefinitionClass($handler, 'Monolog\Handler\SyslogHandler');
-        $this->assertDICConstructorArguments($handler, [false, 'user', \Monolog\Logger::DEBUG, true, LOG_CONS]);
+        $this->assertDICConstructorArguments($handler, [false, 'user', 'DEBUG', true, LOG_CONS]);
     }
 
     public function testRollbarHandlerCreatesNotifier()
@@ -244,7 +235,7 @@ class MonologExtensionTest extends DependencyInjectionTest
 
         $handler = $container->getDefinition('monolog.handler.main');
         $this->assertDICDefinitionClass($handler, 'Monolog\Handler\RollbarHandler');
-        $this->assertDICConstructorArguments($handler, [new Reference('monolog.rollbar.notifier.1c8e6a67728dff6a209f828427128dd8b3c2b746'), \Monolog\Logger::DEBUG, true]);
+        $this->assertDICConstructorArguments($handler, [new Reference('monolog.rollbar.notifier.1c8e6a67728dff6a209f828427128dd8b3c2b746'), 'DEBUG', true]);
     }
 
     public function testRollbarHandlerReusesNotifier()
@@ -263,7 +254,7 @@ class MonologExtensionTest extends DependencyInjectionTest
 
         $handler = $container->getDefinition('monolog.handler.main');
         $this->assertDICDefinitionClass($handler, 'Monolog\Handler\RollbarHandler');
-        $this->assertDICConstructorArguments($handler, [new Reference('my_rollbar_id'), \Monolog\Logger::DEBUG, true]);
+        $this->assertDICConstructorArguments($handler, [new Reference('my_rollbar_id'), 'DEBUG', true]);
     }
 
     public function testSocketHandler()
@@ -288,7 +279,7 @@ class MonologExtensionTest extends DependencyInjectionTest
 
         $handler = $container->getDefinition('monolog.handler.socket');
         $this->assertDICDefinitionClass($handler, 'Monolog\Handler\SocketHandler');
-        $this->assertDICConstructorArguments($handler, ['localhost:50505', \Monolog\Logger::DEBUG, true]);
+        $this->assertDICConstructorArguments($handler, ['localhost:50505', 'DEBUG', true]);
         $this->assertDICDefinitionMethodCallAt(0, $handler, 'pushProcessor', [new Reference('monolog.processor.psr_log_message')]);
         $this->assertDICDefinitionMethodCallAt(1, $handler, 'setTimeout', ['1']);
         $this->assertDICDefinitionMethodCallAt(2, $handler, 'setConnectionTimeout', ['0.6']);
@@ -354,7 +345,7 @@ class MonologExtensionTest extends DependencyInjectionTest
         $this->assertDICDefinitionMethodCallAt(1, $logger, 'pushHandler', [new Reference('monolog.handler.raven')]);
 
         $handler = $container->getDefinition('monolog.handler.raven');
-        $this->assertDICConstructorArguments($handler, [new Reference('raven.client'), 100, true]);
+        $this->assertDICConstructorArguments($handler, [new Reference('raven.client'), 'DEBUG', true]);
     }
 
     public function testRavenHandlerWhenAClientIsSpecified()
@@ -374,7 +365,7 @@ class MonologExtensionTest extends DependencyInjectionTest
         $this->assertDICDefinitionMethodCallAt(1, $logger, 'pushHandler', [new Reference('monolog.handler.raven')]);
 
         $handler = $container->getDefinition('monolog.handler.raven');
-        $this->assertDICConstructorArguments($handler, [new Reference('raven.client'), 100, true]);
+        $this->assertDICConstructorArguments($handler, [new Reference('raven.client'), 'DEBUG', true]);
     }
 
     public function testSentryHandlerWhenConfigurationIsWrong()
@@ -487,7 +478,7 @@ class MonologExtensionTest extends DependencyInjectionTest
         $this->assertDICDefinitionMethodCallAt(1, $logger, 'pushHandler', [new Reference('monolog.handler.sentry')]);
 
         $handler = $container->getDefinition('monolog.handler.sentry');
-        $this->assertDICConstructorArguments($handler, [new Reference('sentry.hub'), \Monolog\Logger::DEBUG, true, false]);
+        $this->assertDICConstructorArguments($handler, [new Reference('sentry.hub'), 'DEBUG', true, false]);
     }
 
     public function testSentryHandlerWhenAHubAndAClientAreSpecified()
@@ -540,7 +531,7 @@ class MonologExtensionTest extends DependencyInjectionTest
         $this->assertDICDefinitionMethodCallAt(1, $logger, 'pushHandler', [new Reference('monolog.handler.loggly')]);
         $handler = $container->getDefinition('monolog.handler.loggly');
         $this->assertDICDefinitionClass($handler, 'Monolog\Handler\LogglyHandler');
-        $this->assertDICConstructorArguments($handler, [$token, \Monolog\Logger::DEBUG, true]);
+        $this->assertDICConstructorArguments($handler, [$token, 'DEBUG', true]);
         $this->assertDICDefinitionMethodCallAt(0, $handler, 'pushProcessor', [new Reference('monolog.processor.psr_log_message')]);
 
         $container = $this->getContainer([['handlers' => ['loggly' => [
@@ -558,7 +549,7 @@ class MonologExtensionTest extends DependencyInjectionTest
             $this->markTestSkipped('Symfony MonologBridge < 5.2 is needed.');
         }
 
-        $this->doTestFingersCrossedHandlerWhenExcluded404sAreSpecified(\Monolog\Logger::WARNING);
+        $this->doTestFingersCrossedHandlerWhenExcluded404sAreSpecified('WARNING');
     }
 
     /** @group legacy */
@@ -568,7 +559,7 @@ class MonologExtensionTest extends DependencyInjectionTest
             $this->markTestSkipped('Symfony MonologBridge >= 5.2 is needed.');
         }
 
-        $this->doTestFingersCrossedHandlerWhenExcluded404sAreSpecified(new Definition(ErrorLevelActivationStrategy::class, [\Monolog\Logger::WARNING]));
+        $this->doTestFingersCrossedHandlerWhenExcluded404sAreSpecified(new Definition(ErrorLevelActivationStrategy::class, ['WARNING']));
     }
 
     private function doTestFingersCrossedHandlerWhenExcluded404sAreSpecified($activation)
@@ -603,7 +594,7 @@ class MonologExtensionTest extends DependencyInjectionTest
             $this->markTestSkipped('Symfony MonologBridge < 5.2 is needed.');
         }
 
-        $this->doTestFingersCrossedHandlerWhenExcludedHttpCodesAreSpecified(\Monolog\Logger::WARNING);
+        $this->doTestFingersCrossedHandlerWhenExcludedHttpCodesAreSpecified('WARNING');
     }
 
     public function testFingersCrossedHandlerWhenExcludedHttpCodesAreSpecified()
@@ -612,7 +603,7 @@ class MonologExtensionTest extends DependencyInjectionTest
             $this->markTestSkipped('Symfony MonologBridge >= 5.2 is needed.');
         }
 
-        $this->doTestFingersCrossedHandlerWhenExcludedHttpCodesAreSpecified(new Definition(ErrorLevelActivationStrategy::class, [\Monolog\Logger::WARNING]));
+        $this->doTestFingersCrossedHandlerWhenExcludedHttpCodesAreSpecified(new Definition(ErrorLevelActivationStrategy::class, ['WARNING']));
     }
 
     private function doTestFingersCrossedHandlerWhenExcludedHttpCodesAreSpecified($activation)
@@ -716,18 +707,6 @@ class MonologExtensionTest extends DependencyInjectionTest
         ];
     }
 
-    public function testLogLevelfromInvalidparameterThrowsException()
-    {
-        $container = new ContainerBuilder();
-        $loader = new MonologExtension();
-        $config = [['handlers' => ['main' => ['type' => 'stream', 'level' => '%some_param%']]]];
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Could not match "%some_param%" to a log level.');
-
-        $loader->load($config, $container);
-    }
-
     /**
      * @dataProvider provideLoglevelParameterConfig
      */
@@ -753,13 +732,19 @@ class MonologExtensionTest extends DependencyInjectionTest
                 ['%log_level%' => 'info'],
                 ['type' => 'browser_console', 'level' => '%log_level%'],
                 'Monolog\Handler\BrowserConsoleHandler',
-                [200, true]
+                [
+                    '%log_level%',
+                    true,
+                ]
             ],
             'browser console with envvar level' => [
                 ['%env(LOG_LEVEL)%' => 'info'],
                 ['type' => 'browser_console', 'level' => '%env(LOG_LEVEL)%'],
                 'Monolog\Handler\BrowserConsoleHandler',
-                [200, true]
+                [
+                    '%env(LOG_LEVEL)%',
+                    true,
+                ]
             ],
             'stream with envvar level null or "~" (in yaml config)' => [
                 ['%env(LOG_LEVEL)%' => null],
@@ -767,7 +752,7 @@ class MonologExtensionTest extends DependencyInjectionTest
                 'Monolog\Handler\StreamHandler',
                 [
                     '%kernel.logs_dir%/%kernel.environment%.log',
-                    null,
+                    '%env(LOG_LEVEL)%',
                     true,
                     null,
                     false,
@@ -779,7 +764,7 @@ class MonologExtensionTest extends DependencyInjectionTest
                 'Monolog\Handler\StreamHandler',
                 [
                     '%kernel.logs_dir%/%kernel.environment%.log',
-                    400,
+                    '%env(LOG_LEVEL)%',
                     true,
                     null,
                     false,
@@ -791,7 +776,7 @@ class MonologExtensionTest extends DependencyInjectionTest
                 'Monolog\Handler\StreamHandler',
                 [
                     '%kernel.logs_dir%/%kernel.environment%.log',
-                    500,
+                    '%log_level%',
                     true,
                     null,
                     false,

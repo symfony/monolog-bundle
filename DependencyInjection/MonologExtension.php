@@ -28,7 +28,6 @@ use Symfony\Component\DependencyInjection\Argument\BoundArgument;
 use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
-use Symfony\Component\DependencyInjection\Exception\ParameterNotFoundException;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
@@ -46,33 +45,6 @@ class MonologExtension extends Extension
     private $nestedHandlers = [];
 
     private $swiftMailerHandlers = [];
-
-    private function levelToMonologConst($level, ContainerBuilder $container)
-    {
-        if (null === $level || is_numeric($level)) {
-            return $level;
-        }
-
-        if (defined('Monolog\Logger::'.strtoupper($level))) {
-            return constant('Monolog\Logger::' . strtoupper($level));
-        }
-
-        if ($container->hasParameter($level)) {
-            return $this->levelToMonologConst($container->getParameter($level), $container);
-        }
-
-        try {
-            $logLevel = $container->resolveEnvPlaceholders($level, true);
-        } catch (ParameterNotFoundException $notFoundException) {
-            throw new \InvalidArgumentException(sprintf('Could not match "%s" to a log level.', $level));
-        }
-
-        if ($logLevel !== '' && $logLevel !== $level) {
-            return $this->levelToMonologConst($logLevel, $container);
-        }
-
-        throw new \InvalidArgumentException(sprintf('Could not match "%s" to a log level.', $level));
-    }
 
     /**
      * Loads the Monolog configuration.
@@ -197,8 +169,6 @@ class MonologExtension extends Extension
 
         $handlerClass = $this->getHandlerClassByType($handler['type']);
         $definition = new Definition($handlerClass);
-
-        $handler['level'] = $this->levelToMonologConst($handler['level'], $container);
 
         if ($handler['include_stacktraces']) {
             $definition->setConfigurator(['Symfony\\Bundle\\MonologBundle\\MonologBundle', 'includeStacktraces']);
@@ -433,10 +403,6 @@ class MonologExtension extends Extension
             break;
 
         case 'fingers_crossed':
-            $handler['action_level'] = $this->levelToMonologConst($handler['action_level'], $container);
-            if (null !== $handler['passthru_level']) {
-                $handler['passthru_level'] = $this->levelToMonologConst($handler['passthru_level'], $container);
-            }
             $nestedHandlerId = $this->getHandlerId($handler['handler']);
             $this->markNestedHandler($nestedHandlerId);
 
@@ -482,12 +448,6 @@ class MonologExtension extends Extension
             break;
 
         case 'filter':
-            $handler['min_level'] = $this->levelToMonologConst($handler['min_level'], $container);
-            $handler['max_level'] = $this->levelToMonologConst($handler['max_level'], $container);
-            foreach (array_keys($handler['accepted_levels']) as $k) {
-                $handler['accepted_levels'][$k] = $this->levelToMonologConst($handler['accepted_levels'][$k], $container);
-            }
-
             $nestedHandlerId = $this->getHandlerId($handler['handler']);
             $this->markNestedHandler($nestedHandlerId);
             $minLevelOrList = !empty($handler['accepted_levels']) ? $handler['accepted_levels'] : $handler['min_level'];

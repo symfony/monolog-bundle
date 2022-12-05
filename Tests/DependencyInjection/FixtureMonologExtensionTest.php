@@ -29,7 +29,7 @@ abstract class FixtureMonologExtensionTest extends DependencyInjectionTest
             $this->markTestSkipped('Symfony MonologBridge < 5.2 is needed.');
         }
 
-        $this->doTestLoadWithSeveralHandlers(\Monolog\Logger::ERROR);
+        $this->doTestLoadWithSeveralHandlers('ERROR');
     }
 
     public function testLoadWithSeveralHandlers()
@@ -38,7 +38,7 @@ abstract class FixtureMonologExtensionTest extends DependencyInjectionTest
             $this->markTestSkipped('Symfony MonologBridge >= 5.2 is needed.');
         }
 
-        $this->doTestLoadWithSeveralHandlers(new Definition(ErrorLevelActivationStrategy::class, [\Monolog\Logger::ERROR]));
+        $this->doTestLoadWithSeveralHandlers(new Definition(ErrorLevelActivationStrategy::class, ['ERROR']));
     }
 
     private function doTestLoadWithSeveralHandlers($activation)
@@ -59,15 +59,15 @@ abstract class FixtureMonologExtensionTest extends DependencyInjectionTest
 
         $handler = $container->getDefinition('monolog.handler.custom');
         $this->assertDICDefinitionClass($handler, 'Monolog\Handler\StreamHandler');
-        $this->assertDICConstructorArguments($handler, ['/tmp/symfony.log', \Monolog\Logger::ERROR, false, 0666, false]);
+        $this->assertDICConstructorArguments($handler, ['/tmp/symfony.log', 'ERROR', false, 0666, false]);
 
         $handler = $container->getDefinition('monolog.handler.main');
         $this->assertDICDefinitionClass($handler, 'Monolog\Handler\FingersCrossedHandler');
-        $this->assertDICConstructorArguments($handler, [new Reference('monolog.handler.nested'), $activation, 0, true, true, \Monolog\Logger::NOTICE]);
+        $this->assertDICConstructorArguments($handler, [new Reference('monolog.handler.nested'), $activation, 0, true, true, 'NOTICE']);
 
         $handler = $container->getDefinition('monolog.handler.filtered');
         $this->assertDICDefinitionClass($handler, 'Monolog\Handler\FilterHandler');
-        $this->assertDICConstructorArguments($handler, [new Reference('monolog.handler.nested2'), [\Monolog\Logger::WARNING, \Monolog\Logger::ERROR], \Monolog\Logger::EMERGENCY, true]);
+        $this->assertDICConstructorArguments($handler, [new Reference('monolog.handler.nested2'), ['WARNING', 'ERROR'], 'EMERGENCY', true]);
     }
 
     /** @group legacy */
@@ -77,7 +77,7 @@ abstract class FixtureMonologExtensionTest extends DependencyInjectionTest
             $this->markTestSkipped('Symfony MonologBridge < 5.2 is needed.');
         }
 
-        $this->doTestLoadWithOverwriting(\Monolog\Logger::ERROR);
+        $this->doTestLoadWithOverwriting('ERROR');
     }
 
     public function testLoadWithOverwriting()
@@ -86,7 +86,7 @@ abstract class FixtureMonologExtensionTest extends DependencyInjectionTest
             $this->markTestSkipped('Symfony MonologBridge >= 5.2 is needed.');
         }
 
-        $this->doTestLoadWithOverwriting(new Definition(ErrorLevelActivationStrategy::class, [\Monolog\Logger::ERROR]));
+        $this->doTestLoadWithOverwriting(new Definition(ErrorLevelActivationStrategy::class, ['ERROR']));
     }
 
     private function doTestLoadWithOverwriting($activation)
@@ -106,7 +106,7 @@ abstract class FixtureMonologExtensionTest extends DependencyInjectionTest
 
         $handler = $container->getDefinition('monolog.handler.custom');
         $this->assertDICDefinitionClass($handler, 'Monolog\Handler\StreamHandler');
-        $this->assertDICConstructorArguments($handler, ['/tmp/symfony.log', \Monolog\Logger::WARNING, true, null, false]);
+        $this->assertDICConstructorArguments($handler, ['/tmp/symfony.log', 'WARNING', true, null, false]);
 
         $handler = $container->getDefinition('monolog.handler.main');
         $this->assertDICDefinitionClass($handler, 'Monolog\Handler\FingersCrossedHandler');
@@ -132,7 +132,7 @@ abstract class FixtureMonologExtensionTest extends DependencyInjectionTest
 
         $handler = $container->getDefinition('monolog.handler.new');
         $this->assertDICDefinitionClass($handler, 'Monolog\Handler\StreamHandler');
-        $this->assertDICConstructorArguments($handler, ['/tmp/monolog.log', \Monolog\Logger::ERROR, true, null, false]);
+        $this->assertDICConstructorArguments($handler, ['/tmp/monolog.log', 'ERROR', true, null, false]);
     }
 
     public function testLoadWithNewAndPriority()
@@ -156,15 +156,15 @@ abstract class FixtureMonologExtensionTest extends DependencyInjectionTest
 
         $handler = $container->getDefinition('monolog.handler.main');
         $this->assertDICDefinitionClass($handler, 'Monolog\Handler\BufferHandler');
-        $this->assertDICConstructorArguments($handler, [new Reference('monolog.handler.nested'), 0, \Monolog\Logger::INFO, true, false]);
+        $this->assertDICConstructorArguments($handler, [new Reference('monolog.handler.nested'), 0, 'INFO', true, false]);
 
         $handler = $container->getDefinition('monolog.handler.first');
         $this->assertDICDefinitionClass($handler, 'Monolog\Handler\RotatingFileHandler');
-        $this->assertDICConstructorArguments($handler, ['/tmp/monolog.log', 0, \Monolog\Logger::ERROR, true, null, false]);
+        $this->assertDICConstructorArguments($handler, ['/tmp/monolog.log', 0, 'ERROR', true, null, false]);
 
         $handler = $container->getDefinition('monolog.handler.last');
         $this->assertDICDefinitionClass($handler, 'Monolog\Handler\StreamHandler');
-        $this->assertDICConstructorArguments($handler, ['/tmp/last.log', \Monolog\Logger::ERROR, true, null, false]);
+        $this->assertDICConstructorArguments($handler, ['/tmp/last.log', 'ERROR', true, null, false]);
     }
 
     public function testHandlersWithChannels()
@@ -209,7 +209,7 @@ abstract class FixtureMonologExtensionTest extends DependencyInjectionTest
 
         $this->assertEquals([
             '0:9911',
-            100,
+            'DEBUG',
             true,
         ], $container->getDefinition('monolog.handler.server_log')->getArguments());
     }
