@@ -182,6 +182,7 @@ abstract class FixtureMonologExtensionTest extends DependencyInjectionTest
         );
     }
 
+    /** @group legacy */
     public function testSingleEmailRecipient()
     {
         if (\Monolog\Logger::API >= 3) {
