@@ -49,7 +49,7 @@ class AddProcessorsPass implements CompilerPassInterface
         usort(
             $processors,
             function (array $left, array $right) {
-                return $left['tag']['priority'] - $right['tag']['priority'];
+                return $left['tag']['priority'] <=> $right['tag']['priority'];
             }
         );
 
