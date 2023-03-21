@@ -386,6 +386,8 @@ class Configuration implements ConfigurationInterface
         $treeBuilder = new TreeBuilder('monolog');
         $rootNode = $treeBuilder->getRootNode();
 
+        $this->addChannelsSection($rootNode, 'handler_default_channels');
+
         $handlers = $rootNode
             ->fixXmlConfig('channel')
             ->fixXmlConfig('handler')
@@ -625,6 +627,7 @@ class Configuration implements ConfigurationInterface
                 ->end()
                 ->scalarNode('formatter')->end()
                 ->booleanNode('nested')->defaultFalse()->end()
+                ->booleanNode('use_default_channels')->defaultTrue()->end()
             ->end();
 
         $this->addGelfSection($handlerNode);
@@ -1073,11 +1076,11 @@ class Configuration implements ConfigurationInterface
         ;
     }
 
-    private function addChannelsSection(ArrayNodeDefinition $handlerNode)
+    private function addChannelsSection(ArrayNodeDefinition $handlerNode, string $nodeName = 'channels')
     {
         $handlerNode
             ->children()
-                ->arrayNode('channels')
+                ->arrayNode($nodeName)
                     ->fixXmlConfig('channel', 'elements')
                     ->canBeUnset()
                     ->beforeNormalization()
@@ -1093,7 +1096,7 @@ class Configuration implements ConfigurationInterface
                         ->thenUnset()
                     ->end()
                     ->validate()
-                        ->always(function ($v) {
+                        ->always(function ($v) use ($nodeName) {
                             $isExclusive = null;
                             if (isset($v['type'])) {
                                 $isExclusive = 'exclusive' === $v['type'];
@@ -1103,13 +1106,13 @@ class Configuration implements ConfigurationInterface
                             foreach ($v['elements'] as $element) {
                                 if (0 === strpos($element, '!')) {
                                     if (false === $isExclusive) {
-                                        throw new InvalidConfigurationException('Cannot combine exclusive/inclusive definitions in channels list.');
+                                        throw new InvalidConfigurationException(\sprintf('Cannot combine exclusive/inclusive definitions in %s list.', $nodeName));
                                     }
                                     $elements[] = substr($element, 1);
                                     $isExclusive = true;
                                 } else {
                                     if (true === $isExclusive) {
-                                        throw new InvalidConfigurationException('Cannot combine exclusive/inclusive definitions in channels list');
+                                        throw new InvalidConfigurationException(\sprintf('Cannot combine exclusive/inclusive definitions in %s list', $nodeName));
                                     }
                                     $elements[] = $element;
                                     $isExclusive = false;
@@ -1128,7 +1131,7 @@ class Configuration implements ConfigurationInterface
                         ->scalarNode('type')
                             ->validate()
                                 ->ifNotInArray(['inclusive', 'exclusive'])
-                                ->thenInvalid('The type of channels has to be inclusive or exclusive')
+                                ->thenInvalid(\sprintf('The type of %s has to be inclusive or exclusive', $nodeName))
                             ->end()
                         ->end()
                         ->arrayNode('elements')
