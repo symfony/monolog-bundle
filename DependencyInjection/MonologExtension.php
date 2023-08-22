@@ -22,6 +22,7 @@ use Symfony\Bridge\Monolog\Handler\FingersCrossed\HttpCodeActivationStrategy;
 use Symfony\Bridge\Monolog\Processor\SwitchUserTokenProcessor;
 use Symfony\Bridge\Monolog\Processor\TokenProcessor;
 use Symfony\Bridge\Monolog\Processor\WebProcessor;
+use Symfony\Bridge\Monolog\Logger as LegacyLogger;
 use Symfony\Bundle\FullStack;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\Argument\BoundArgument;
@@ -32,6 +33,7 @@ use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use Symfony\Component\HttpKernel\Kernel;
+use Symfony\Component\HttpKernel\Log\DebugLoggerConfigurator;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 /**
@@ -65,6 +67,10 @@ class MonologExtension extends Extension
         if (isset($config['handlers'])) {
             $loader = new XmlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
             $loader->load('monolog.xml');
+
+            if (!class_exists(DebugLoggerConfigurator::class)) {
+                $container->getDefinition('monolog.logger_prototype')->setClass(LegacyLogger::class);
+            }
 
             $container->setParameter('monolog.use_microseconds', $config['use_microseconds']);
 
