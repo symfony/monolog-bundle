@@ -29,6 +29,7 @@
             <xsd:element name="accepted-level" type="level" minOccurs="0" maxOccurs="unbounded" />
             <xsd:element name="to-email" type="xsd:string" minOccurs="0" maxOccurs="unbounded" />
             <xsd:element name="header" type="xsd:string" minOccurs="0" maxOccurs="unbounded" />
+            <xsd:element name="parameter" type="xsd:string" minOccurs="0" maxOccurs="unbounded" />
             <xsd:element name="process-psr-3-messages" type="process-psr-3-messages" minOccurs="0" maxOccurs="1" />
         </xsd:sequence>
         <xsd:attribute name="type" type="xsd:string" />
