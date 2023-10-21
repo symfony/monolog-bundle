@@ -21,6 +21,7 @@ use Symfony\Bridge\Monolog\Processor\SwitchUserTokenProcessor;
 use Symfony\Bundle\MonologBundle\DependencyInjection\MonologExtension;
 use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\LoggerChannelPass;
 use Symfony\Bundle\MonologBundle\Tests\DependencyInjection\Fixtures\AsMonologProcessor\FooProcessor;
+use Symfony\Bundle\MonologBundle\Tests\DependencyInjection\Fixtures\AsMonologProcessor\FooProcessorWithPriority;
 use Symfony\Bundle\MonologBundle\Tests\DependencyInjection\Fixtures\AsMonologProcessor\RedeclareMethodProcessor;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
@@ -826,8 +827,8 @@ class MonologExtensionTest extends DependencyInjectionTest
      */
     public function testAsMonologProcessorAutoconfiguration(): void
     {
-        if (!\class_exists(AsMonologProcessor::class, true)) {
-            $this->markTestSkipped('Monolog >= 2.3.6 is needed.');
+        if (!\class_exists(AsMonologProcessor::class, true) || \property_exists(AsMonologProcessor::class, 'priority')) {
+            $this->markTestSkipped('Monolog >= 2.3.6 and < 3.4.0 is needed.');
         }
 
         $container = $this->getContainer([], [
@@ -846,6 +847,35 @@ class MonologExtensionTest extends DependencyInjectionTest
                 'method' => '__invoke',
             ],
         ], $container->getDefinition(FooProcessor::class)->getTag('monolog.processor'));
+    }
+
+    /**
+     * @requires PHP 8.0
+     */
+    public function testAsMonologProcessorAutoconfigurationWithPriority(): void
+    {
+        if (!\class_exists(AsMonologProcessor::class, true) || !\property_exists(AsMonologProcessor::class, 'priority')) {
+            $this->markTestSkipped('Monolog >= 3.4.0 is needed.');
+        }
+
+        $container = $this->getContainer([], [
+            FooProcessorWithPriority::class => (new Definition(FooProcessorWithPriority::class))->setAutoconfigured(true),
+        ]);
+
+        $this->assertSame([
+            [
+                'channel' => null,
+                'handler' => 'foo_handler',
+                'method' => null,
+                'priority' => null,
+            ],
+            [
+                'channel' => 'ccc_channel',
+                'handler' => null,
+                'method' => '__invoke',
+                'priority' => 10,
+            ],
+        ], $container->getDefinition(FooProcessorWithPriority::class)->getTag('monolog.processor'));
     }
 
     protected function getContainer(array $config = [], array $thirdPartyDefinitions = [])
