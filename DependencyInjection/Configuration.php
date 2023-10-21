@@ -379,7 +379,7 @@ class Configuration implements ConfigurationInterface
     public function getConfigTreeBuilder(): TreeBuilder
     {
         $treeBuilder = new TreeBuilder('monolog');
-        $rootNode = method_exists(TreeBuilder::class, 'getRootNode') ? $treeBuilder->getRootNode() : $treeBuilder->root('monolog');
+        $rootNode = $treeBuilder->getRootNode();
 
         $handlers = $rootNode
             ->fixXmlConfig('channel')
@@ -602,7 +602,7 @@ class Configuration implements ConfigurationInterface
                 ->end()
                  // console
                 ->variableNode('console_formater_options')
-                    ->setDeprecated(...$this->getDeprecationMsg('"%path%.%node%" is deprecated, use "%path%.console_formatter_options" instead.', 3.7))
+                    ->setDeprecated('symfony/monolog-bundle', 3.7, '"%path%.%node%" is deprecated, use "%path%.console_formatter_options" instead.')
                     ->validate()
                         ->ifTrue(function ($v) {
                             return !is_array($v);
@@ -1134,28 +1134,5 @@ class Configuration implements ConfigurationInterface
                 ->end()
             ->end()
         ;
-    }
-
-    /**
-     * Returns the correct deprecation param's as an array for setDeprecated.
-     *
-     * Symfony/Config v5.1 introduces a deprecation notice when calling
-     * setDeprecation() with less than 3 args and the getDeprecation method was
-     * introduced at the same time. By checking if getDeprecation() exists,
-     * we can determine the correct param count to use when calling setDeprecated.
-     *
-     * @return array{0:string}|array{0:string, 1: numeric-string, string}
-     */
-    private function getDeprecationMsg(string $message, string $version): array
-    {
-        if (method_exists(BaseNode::class, 'getDeprecation')) {
-            return [
-                'symfony/monolog-bundle',
-                $version,
-                $message,
-            ];
-        }
-
-        return [$message];
     }
 }

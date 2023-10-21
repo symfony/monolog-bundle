@@ -32,7 +32,6 @@ use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
-use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\HttpKernel\Log\DebugLoggerConfigurator;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
@@ -56,10 +55,6 @@ class MonologExtension extends Extension
      */
     public function load(array $configs, ContainerBuilder $container)
     {
-        if (class_exists(FullStack::class) && Kernel::MAJOR_VERSION < 5 && Logger::API >= 2) {
-            throw new \RuntimeException('Symfony 5 is required for Monolog 2 support. Please downgrade Monolog to version 1.');
-        }
-
         $configuration = $this->getConfiguration($configs, $container);
         $config = $this->processConfiguration($configuration, $configs);
 
@@ -107,29 +102,27 @@ class MonologExtension extends Extension
 
         $container->setParameter('monolog.additional_channels', isset($config['channels']) ? $config['channels'] : []);
 
-        if (method_exists($container, 'registerForAutoconfiguration')) {
-            if (interface_exists(ProcessorInterface::class)) {
-                $container->registerForAutoconfiguration(ProcessorInterface::class)
-                    ->addTag('monolog.processor');
-            } else {
-                $container->registerForAutoconfiguration(WebProcessor::class)
-                    ->addTag('monolog.processor');
-            }
-            if (interface_exists(ResettableInterface::class)) {
-                $container->registerForAutoconfiguration(ResettableInterface::class)
-                    ->addTag('kernel.reset', ['method' => 'reset']);
-            }
-            $container->registerForAutoconfiguration(TokenProcessor::class)
+        if (interface_exists(ProcessorInterface::class)) {
+            $container->registerForAutoconfiguration(ProcessorInterface::class)
                 ->addTag('monolog.processor');
-            if (interface_exists(HttpClientInterface::class)) {
-                $handlerAutoconfiguration = $container->registerForAutoconfiguration(HandlerInterface::class);
-                $handlerAutoconfiguration->setBindings($handlerAutoconfiguration->getBindings() + [
-                    HttpClientInterface::class => new BoundArgument(new Reference('monolog.http_client'), false),
-                ]);
-            }
+        } else {
+            $container->registerForAutoconfiguration(WebProcessor::class)
+                ->addTag('monolog.processor');
+        }
+        if (interface_exists(ResettableInterface::class)) {
+            $container->registerForAutoconfiguration(ResettableInterface::class)
+                ->addTag('kernel.reset', ['method' => 'reset']);
+        }
+        $container->registerForAutoconfiguration(TokenProcessor::class)
+            ->addTag('monolog.processor');
+        if (interface_exists(HttpClientInterface::class)) {
+            $handlerAutoconfiguration = $container->registerForAutoconfiguration(HandlerInterface::class);
+            $handlerAutoconfiguration->setBindings($handlerAutoconfiguration->getBindings() + [
+                HttpClientInterface::class => new BoundArgument(new Reference('monolog.http_client'), false),
+            ]);
         }
 
-        if (80000 <= \PHP_VERSION_ID && method_exists($container, 'registerAttributeForAutoconfiguration')) {
+        if (80000 <= \PHP_VERSION_ID) {
             $container->registerAttributeForAutoconfiguration(AsMonologProcessor::class, static function (ChildDefinition $definition, AsMonologProcessor $attribute, \Reflector $reflector): void {
                 $tagAttributes = get_object_vars($attribute);
                 if ($reflector instanceof \ReflectionMethod) {
@@ -431,9 +424,6 @@ class MonologExtension extends Extension
                 $container->setDefinition($handlerId.'.not_found_strategy', $activationDef);
                 $activation = new Reference($handlerId.'.not_found_strategy');
             } elseif (!empty($handler['excluded_http_codes'])) {
-                if (!class_exists('Symfony\Bridge\Monolog\Handler\FingersCrossed\HttpCodeActivationStrategy')) {
-                    throw new \LogicException('"excluded_http_codes" cannot be used as your version of Monolog bridge does not support it.');
-                }
                 $activationDef = new Definition('Symfony\Bridge\Monolog\Handler\FingersCrossed\HttpCodeActivationStrategy', [
                     new Reference('request_stack'),
                     $handler['excluded_http_codes'],
@@ -888,10 +878,6 @@ class MonologExtension extends Extension
             ]);
             break;
         case 'server_log':
-            if (!class_exists('Symfony\Bridge\Monolog\Handler\ServerLogHandler')) {
-                throw new \RuntimeException('The ServerLogHandler is not available. Please update "symfony/monolog-bridge" to 3.3.');
-            }
-
             $definition->setArguments([
                 $handler['host'],
                 $handler['level'],

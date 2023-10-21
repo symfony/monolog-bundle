@@ -56,10 +56,6 @@ class LoggerChannelPassTest extends TestCase
 
     public function testTypeHintedAliasesExistForEachChannel()
     {
-        if (!\method_exists(ContainerBuilder::class, 'registerAliasForArgument')) {
-            $this->markTestSkipped('Need DependencyInjection 4.2+ to register type-hinted aliases for channels.');
-        }
-
         $container = $this->getContainer();
         $expectedChannels = ['test', 'foo', 'bar', 'additional'];
 
@@ -81,10 +77,6 @@ class LoggerChannelPassTest extends TestCase
 
     public function testAutowiredLoggerArgumentsAreReplacedWithChannelLogger()
     {
-        if (!\method_exists('Symfony\Component\DependencyInjection\Definition', 'getBindings')) {
-            $this->markTestSkipped('Need DependencyInjection 3.4+ to autowire channel logger.');
-        }
-
         $container = $this->getFunctionalContainer();
 
         $dummyService = $container->register('dummy_service', 'Symfony\Bundle\MonologBundle\Tests\DependencyInjection\Compiler\DummyService')
@@ -99,10 +91,6 @@ class LoggerChannelPassTest extends TestCase
 
     public function testAutowiredLoggerArgumentsAreReplacedWithChannelLoggerWhenAutoconfigured()
     {
-        if (!\method_exists('Symfony\Component\DependencyInjection\Definition', 'getBindings')) {
-            $this->markTestSkipped('Need DependencyInjection 3.4+ to autowire channel logger.');
-        }
-
         $container = $this->getFunctionalContainer();
 
         $container->registerForAutoconfiguration('Symfony\Bundle\MonologBundle\Tests\DependencyInjection\Compiler\DummyService')
@@ -121,10 +109,6 @@ class LoggerChannelPassTest extends TestCase
 
     public function testAutowiredLoggerArgumentsAreNotReplacedWithChannelLoggerIfLoggerArgumentIsConfiguredExplicitly()
     {
-        if (!\method_exists('Symfony\Component\DependencyInjection\Definition', 'getBindings')) {
-            $this->markTestSkipped('Need DependencyInjection 3.4+ to autowire channel logger.');
-        }
-
         $container = $this->getFunctionalContainer();
 
         $dummyService = $container->register('dummy_service', 'Symfony\Bundle\MonologBundle\Tests\DependencyInjection\Compiler\DummyService')

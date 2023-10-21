@@ -22,27 +22,9 @@ use Symfony\Component\DependencyInjection\Reference;
 
 abstract class FixtureMonologExtensionTest extends DependencyInjectionTest
 {
-    /** @group legacy */
-    public function testLegacyLoadWithSeveralHandlers()
-    {
-        if (class_exists(SwitchUserTokenProcessor::class)) {
-            $this->markTestSkipped('Symfony MonologBridge < 5.2 is needed.');
-        }
-
-        $this->doTestLoadWithSeveralHandlers('ERROR');
-    }
-
     public function testLoadWithSeveralHandlers()
     {
-        if (!class_exists(SwitchUserTokenProcessor::class)) {
-            $this->markTestSkipped('Symfony MonologBridge >= 5.2 is needed.');
-        }
-
-        $this->doTestLoadWithSeveralHandlers(new Definition(ErrorLevelActivationStrategy::class, ['ERROR']));
-    }
-
-    private function doTestLoadWithSeveralHandlers($activation)
-    {
+        $activation = new Definition(ErrorLevelActivationStrategy::class, ['ERROR']);
         $container = $this->getContainer('multiple_handlers');
 
         $this->assertTrue($container->hasDefinition('monolog.logger'));
@@ -70,27 +52,9 @@ abstract class FixtureMonologExtensionTest extends DependencyInjectionTest
         $this->assertDICConstructorArguments($handler, [new Reference('monolog.handler.nested2'), ['WARNING', 'ERROR'], 'EMERGENCY', true]);
     }
 
-    /** @group legacy */
-    public function testLegacyLoadWithOverwriting()
-    {
-        if (class_exists(SwitchUserTokenProcessor::class)) {
-            $this->markTestSkipped('Symfony MonologBridge < 5.2 is needed.');
-        }
-
-        $this->doTestLoadWithOverwriting('ERROR');
-    }
-
     public function testLoadWithOverwriting()
     {
-        if (!class_exists(SwitchUserTokenProcessor::class)) {
-            $this->markTestSkipped('Symfony MonologBridge >= 5.2 is needed.');
-        }
-
-        $this->doTestLoadWithOverwriting(new Definition(ErrorLevelActivationStrategy::class, ['ERROR']));
-    }
-
-    private function doTestLoadWithOverwriting($activation)
-    {
+        $activation = new Definition(ErrorLevelActivationStrategy::class, ['ERROR']);
         $container = $this->getContainer('overwriting');
 
         $this->assertTrue($container->hasDefinition('monolog.logger'));
@@ -202,10 +166,6 @@ abstract class FixtureMonologExtensionTest extends DependencyInjectionTest
 
     public function testServerLog()
     {
-        if (!class_exists('Symfony\Bridge\Monolog\Handler\ServerLogHandler')) {
-            $this->markTestSkipped('The ServerLogHandler is not available.');
-        }
-
         $container = $this->getContainer('server_log');
 
         $this->assertEquals([
