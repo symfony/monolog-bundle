@@ -1,0 +1,9 @@
+---------------------------------------------------------------------------
+
+by nkl-kst at 2023-09-14T10:27:17Z
+
+After the original fix, there were failing tests for `monolog/monolog` v2 because the `AsMonologProcessor::priority` attribute doesn't exist there.
+
+I decided to revert the original fix, added a new test for Monolog v3.4.0 and skip the existing and new tests conditionally based on the used Monolog version.
+
+There's still one failing test setup (PHP 7.3 with Monolog 2.*), but I think this is not related to the changes in this PR.
