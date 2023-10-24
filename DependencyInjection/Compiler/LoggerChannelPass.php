@@ -23,6 +23,8 @@ use Symfony\Component\DependencyInjection\Reference;
  * Replaces the default logger by another one with its own channel for tagged services.
  *
  * @author Christophe Coevoet <stof@notk.org>
+ *
+ * @internalsince 3.9.0
  */
 class LoggerChannelPass implements CompilerPassInterface
 {

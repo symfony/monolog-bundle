@@ -28,6 +28,8 @@ use Symfony\Component\DependencyInjection\Reference;
  * @author Fabien Potencier <fabien@symfony.com>
  *
  * @see https://github.com/Seldaek/monolog/commit/ad37b7b2d11f300cbace9f5e84f855d329519e28
+ *
+ * @internalsince 3.9.0
  */
 class FixEmptyLoggerPass implements CompilerPassInterface
 {
