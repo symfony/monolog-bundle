@@ -544,27 +544,9 @@ class MonologExtensionTest extends DependencyInjectionTest
     }
 
     /** @group legacy */
-    public function testLegacyFingersCrossedHandlerWhenExcluded404sAreSpecified()
-    {
-        if (class_exists(SwitchUserTokenProcessor::class)) {
-            $this->markTestSkipped('Symfony MonologBridge < 5.2 is needed.');
-        }
-
-        $this->doTestFingersCrossedHandlerWhenExcluded404sAreSpecified('WARNING');
-    }
-
-    /** @group legacy */
     public function testFingersCrossedHandlerWhenExcluded404sAreSpecified()
     {
-        if (!class_exists(SwitchUserTokenProcessor::class)) {
-            $this->markTestSkipped('Symfony MonologBridge >= 5.2 is needed.');
-        }
-
-        $this->doTestFingersCrossedHandlerWhenExcluded404sAreSpecified(new Definition(ErrorLevelActivationStrategy::class, ['WARNING']));
-    }
-
-    private function doTestFingersCrossedHandlerWhenExcluded404sAreSpecified($activation)
-    {
+        $activation = new Definition(ErrorLevelActivationStrategy::class, ['WARNING']);
         $container = $this->getContainer([['handlers' => [
             'main' => ['type' => 'fingers_crossed', 'handler' => 'nested', 'excluded_404s' => ['^/foo', '^/bar']],
             'nested' => ['type' => 'stream', 'path' => '/tmp/symfony.log']
@@ -588,30 +570,9 @@ class MonologExtensionTest extends DependencyInjectionTest
         $this->assertDICConstructorArguments($handler, [new Reference('monolog.handler.nested'), new Reference('monolog.handler.main.not_found_strategy'), 0, true, true, null]);
     }
 
-    /** @group legacy */
-    public function testLegacyFingersCrossedHandlerWhenExcludedHttpCodesAreSpecified()
-    {
-        if (class_exists(SwitchUserTokenProcessor::class)) {
-            $this->markTestSkipped('Symfony MonologBridge < 5.2 is needed.');
-        }
-
-        $this->doTestFingersCrossedHandlerWhenExcludedHttpCodesAreSpecified('WARNING');
-    }
-
     public function testFingersCrossedHandlerWhenExcludedHttpCodesAreSpecified()
     {
-        if (!class_exists(SwitchUserTokenProcessor::class)) {
-            $this->markTestSkipped('Symfony MonologBridge >= 5.2 is needed.');
-        }
-
-        $this->doTestFingersCrossedHandlerWhenExcludedHttpCodesAreSpecified(new Definition(ErrorLevelActivationStrategy::class, ['WARNING']));
-    }
-
-    private function doTestFingersCrossedHandlerWhenExcludedHttpCodesAreSpecified($activation)
-    {
-        if (!class_exists('Symfony\Bridge\Monolog\Handler\FingersCrossed\HttpCodeActivationStrategy')) {
-            $this->markTestSkipped('Symfony Monolog 4.1+ is needed.');
-        }
+        $activation = new Definition(ErrorLevelActivationStrategy::class, ['WARNING']);
 
         $container = $this->getContainer([['handlers' => [
             'main' => [
@@ -649,10 +610,9 @@ class MonologExtensionTest extends DependencyInjectionTest
     }
 
     /**
-     * @param array $handlerOptions
      * @dataProvider v2RemovedDataProvider
      */
-    public function testV2Removed($handlerOptions)
+    public function testV2Removed(array $handlerOptions)
     {
         if (Logger::API === 1) {
             $this->markTestSkipped('Not valid for V1');
@@ -669,7 +629,7 @@ class MonologExtensionTest extends DependencyInjectionTest
         $loader->load([['handlers' => ['main' => $handlerOptions]]], $container);
     }
 
-    public function v2RemovedDataProvider()
+    public function v2RemovedDataProvider(): array
     {
         return [
             [['type' => 'hipchat', 'token' => 'abc123', 'room' => 'foo']],
@@ -679,10 +639,9 @@ class MonologExtensionTest extends DependencyInjectionTest
     }
 
     /**
-     * @param string $handlerType
      * @dataProvider v1AddedDataProvider
      */
-    public function testV2AddedOnV1($handlerType)
+    public function testV2AddedOnV1(string $handlerType)
     {
         if (Logger::API !== 1) {
             $this->markTestSkipped('Only valid on Monolog V1');
@@ -701,7 +660,7 @@ class MonologExtensionTest extends DependencyInjectionTest
         $loader->load([['handlers' => ['main' => ['type' => $handlerType]]]], $container);
     }
 
-    public function v1AddedDataProvider()
+    public function v1AddedDataProvider(): array
     {
         return [
             ['fallbackgroup'],
@@ -726,7 +685,7 @@ class MonologExtensionTest extends DependencyInjectionTest
         $this->assertDICConstructorArguments($definition, $expectedArgs);
     }
 
-    public function provideLoglevelParameterConfig()
+    public function provideLoglevelParameterConfig(): array
     {
         return [
             'browser console with parameter level' => [
@@ -878,7 +837,7 @@ class MonologExtensionTest extends DependencyInjectionTest
         ], $container->getDefinition(FooProcessorWithPriority::class)->getTag('monolog.processor'));
     }
 
-    protected function getContainer(array $config = [], array $thirdPartyDefinitions = [])
+    protected function getContainer(array $config = [], array $thirdPartyDefinitions = []): ContainerBuilder
     {
         $container = new ContainerBuilder(new EnvPlaceholderParameterBag());
         foreach ($thirdPartyDefinitions as $id => $definition) {
