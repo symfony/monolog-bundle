@@ -1,5 +1,6 @@
 ## Unreleased
 
+* Add support for the `WithMonologChannel` attribute of Monolog 3.5.0 to autoconfigure the `monolog.logger` tag
 * Add support for Symfony 7
 * Remove support for Symfony 4
 * Add support for env placeholders in the `level` option of handlers
