@@ -2,6 +2,7 @@
 
 * Add support for Symfony 7
 * Remove support for Symfony 4
+* Mark classes as internal when relevant
 * Add support for env placeholders in the `level` option of handlers
 
 ## 3.8.0 (2022-05-10)
