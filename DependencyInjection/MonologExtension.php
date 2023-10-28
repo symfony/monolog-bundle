@@ -12,6 +12,7 @@
 namespace Symfony\Bundle\MonologBundle\DependencyInjection;
 
 use Monolog\Attribute\AsMonologProcessor;
+use Monolog\Attribute\WithMonologChannel;
 use Monolog\Handler\FingersCrossed\ErrorLevelActivationStrategy;
 use Monolog\Handler\HandlerInterface;
 use Monolog\Logger;
@@ -136,6 +137,9 @@ class MonologExtension extends Extension
                 }
 
                 $definition->addTag('monolog.processor', $tagAttributes);
+            });
+            $container->registerAttributeForAutoconfiguration(WithMonologChannel::class, static function (ChildDefinition $definition, WithMonologChannel $attribute): void {
+                $definition->addTag('monolog.logger', ['channel' => $attribute->channel]);
             });
         }
     }

@@ -13,16 +13,17 @@ namespace Symfony\Bundle\MonologBundle\Tests\DependencyInjection;
 
 use InvalidArgumentException;
 use Monolog\Attribute\AsMonologProcessor;
+use Monolog\Attribute\WithMonologChannel;
 use Monolog\Handler\FingersCrossed\ErrorLevelActivationStrategy;
 use Monolog\Handler\RollbarHandler;
 use Monolog\Logger;
 use Monolog\Processor\UidProcessor;
-use Symfony\Bridge\Monolog\Processor\SwitchUserTokenProcessor;
 use Symfony\Bundle\MonologBundle\DependencyInjection\MonologExtension;
 use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\LoggerChannelPass;
 use Symfony\Bundle\MonologBundle\Tests\DependencyInjection\Fixtures\AsMonologProcessor\FooProcessor;
 use Symfony\Bundle\MonologBundle\Tests\DependencyInjection\Fixtures\AsMonologProcessor\FooProcessorWithPriority;
 use Symfony\Bundle\MonologBundle\Tests\DependencyInjection\Fixtures\AsMonologProcessor\RedeclareMethodProcessor;
+use Symfony\Bundle\MonologBundle\Tests\DependencyInjection\Fixtures\ServiceWithChannel;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\ParameterBag\EnvPlaceholderParameterBag;
@@ -835,6 +836,26 @@ class MonologExtensionTest extends DependencyInjectionTest
                 'priority' => 10,
             ],
         ], $container->getDefinition(FooProcessorWithPriority::class)->getTag('monolog.processor'));
+    }
+
+    /**
+     * @requires PHP 8.0
+     */
+    public function testWithLoggerChannelAutoconfiguration(): void
+    {
+        if (!class_exists(WithMonologChannel::class)) {
+            $this->markTestSkipped('Monolog >= 3.5.0 is needed.');
+        }
+
+        $container = $this->getContainer([], [
+            ServiceWithChannel::class => (new Definition(ServiceWithChannel::class))->setAutoconfigured(true),
+        ]);
+
+        $this->assertSame([
+            [
+                'channel' => 'fixture',
+            ],
+        ], $container->getDefinition(ServiceWithChannel::class)->getTag('monolog.logger'));
     }
 
     protected function getContainer(array $config = [], array $thirdPartyDefinitions = []): ContainerBuilder
