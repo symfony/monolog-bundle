@@ -890,6 +890,15 @@ class MonologExtension extends Extension
                 $handler['bubble'],
             ]);
             break;
+        case 'sampling':
+            $nestedHandlerId = $this->getHandlerId($handler['handler']);
+            $this->markNestedHandler($nestedHandlerId);
+
+            $definition->setArguments([
+                new Reference($nestedHandlerId),
+                $handler['factor'],
+            ]);
+            break;
 
         // Handlers using the constructor of AbstractHandler without adding their own arguments
         case 'browser_console':
@@ -990,6 +999,7 @@ class MonologExtension extends Extension
             'redis' => 'Monolog\Handler\RedisHandler',
             'predis' => 'Monolog\Handler\RedisHandler',
             'insightops' => 'Monolog\Handler\InsightOpsHandler',
+            'sampling' => 'Monolog\Handler\SamplingHandler',
         ];
 
         $v2HandlerTypesAdded = [

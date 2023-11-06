@@ -366,6 +366,10 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
  *   - [split_long_messages]: bool, defaults to false, split messages longer than 4096 bytes into multiple messages
  *   - [delay_between_messages]: bool, defaults to false, adds a 1sec delay/sleep between sending split messages
  *
+ * - sampling:
+ *   - handler: the wrapped handler's name
+ *   - factor: the sampling factor (e.g. 10 means every ~10th record is sampled)
+ *
  * All handlers can also be marked with `nested: true` to make sure they are never added explicitly to the stack
  *
  * @author Jordi Boggiano <j.boggiano@seld.be>
@@ -591,6 +595,7 @@ class Configuration implements ConfigurationInterface
                 ->booleanNode('disable_notification')->defaultNull()->end() // telegram
                 ->booleanNode('split_long_messages')->defaultFalse()->end() // telegram
                 ->booleanNode('delay_between_messages')->defaultFalse()->end() // telegram
+                ->integerNode('factor')->defaultValue(1)->min(1)->end() // sampling
                 ->arrayNode('tags') // loggly
                     ->beforeNormalization()
                         ->ifString()
@@ -650,8 +655,8 @@ class Configuration implements ConfigurationInterface
                 ->thenInvalid('Service handlers can not have a formatter configured in the bundle, you must reconfigure the service itself instead')
             ->end()
             ->validate()
-                ->ifTrue(function ($v) { return ('fingers_crossed' === $v['type'] || 'buffer' === $v['type'] || 'filter' === $v['type']) && empty($v['handler']); })
-                ->thenInvalid('The handler has to be specified to use a FingersCrossedHandler or BufferHandler or FilterHandler')
+                ->ifTrue(function ($v) { return ('fingers_crossed' === $v['type'] || 'buffer' === $v['type'] || 'filter' === $v['type'] || 'sampling' === $v['type']) && empty($v['handler']); })
+                ->thenInvalid('The handler has to be specified to use a FingersCrossedHandler or BufferHandler or FilterHandler or SamplingHandler')
             ->end()
             ->validate()
                 ->ifTrue(function ($v) { return 'fingers_crossed' === $v['type'] && !empty($v['excluded_404s']) && !empty($v['activation_strategy']); })
