@@ -1,5 +1,9 @@
 ## Unreleased
 
+## 3.10.0 (2023-11-06)
+
+* Add configuration support for SamplingHandler
+
 ## 3.9.0 (2023-11-06)
 
 * Add support for the `WithMonologChannel` attribute of Monolog 3.5.0 to autoconfigure the `monolog.logger` tag
