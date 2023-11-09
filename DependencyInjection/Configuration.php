@@ -375,7 +375,7 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
  * @author Jordi Boggiano <j.boggiano@seld.be>
  * @author Christophe Coevoet <stof@notk.org>
  *
- * @finalsince 3.9.0
+ * @final since 3.9.0
  */
 class Configuration implements ConfigurationInterface
 {
