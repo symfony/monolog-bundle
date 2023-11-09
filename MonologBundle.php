@@ -25,7 +25,7 @@ use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\FixEmptyLoggerPass
 /**
  * @author Jordi Boggiano <j.boggiano@seld.be>
  *
- * @finalsince 3.9.0
+ * @final since 3.9.0
  */
 class MonologBundle extends Bundle
 {
