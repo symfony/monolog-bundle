@@ -306,8 +306,9 @@ abstract class FixtureMonologExtensionTest extends DependencyInjectionTest
         $logger = $container->getDefinition('monolog.handler.mailer');
         $methodCalls = $logger->getMethodCalls();
 
-        $this->assertCount(2, $methodCalls);
+        $this->assertCount(3, $methodCalls);
         $this->assertSame(['addHeader', [['Foo: bar', 'Baz: inga']]], $methodCalls[1]);
+        $this->assertSame(['addParameter', [['--foo bar', '--baz inga']]], $methodCalls[2]);
     }
 
     protected function getContainer($fixture)

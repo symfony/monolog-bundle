@@ -197,6 +197,7 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
  *   - [headers]: optional array containing additional headers: ['Foo: Bar', '...']
+ *   - [parameters]: optional array containing additional parameters: ['--for bar', '...']
  *
  * - symfony_mailer:
  *   - from_email: optional if email_prototype is given
@@ -433,6 +434,7 @@ class Configuration implements ConfigurationInterface
                 ->fixXmlConfig('tag')
                 ->fixXmlConfig('accepted_level')
                 ->fixXmlConfig('header')
+                ->fixXmlConfig('parameter')
                 ->canBeUnset();
 
         $handlerNode
@@ -978,6 +980,10 @@ class Configuration implements ConfigurationInterface
                 ->scalarNode('subject')->end() // swift_mailer, native_mailer and symfony_mailer
                 ->scalarNode('content_type')->defaultNull()->end() // swift_mailer and symfony_mailer
                 ->arrayNode('headers') // native_mailer
+                    ->canBeUnset()
+                    ->scalarPrototype()->end()
+                ->end()
+                ->arrayNode('parameters') // native_mailer
                     ->canBeUnset()
                     ->scalarPrototype()->end()
                 ->end()

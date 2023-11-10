@@ -8,3 +8,6 @@ monolog:
             headers:
                 - "Foo: bar"
                 - "Baz: inga"
+            parameters:
+                - "--foo bar"
+                - "--baz inga"
