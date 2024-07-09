@@ -268,6 +268,7 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
  *   - [bubble]: bool, defaults to true
  *   - [timeout]: float
  *   - [connection_timeout]: float
+ *   - [exclude_fields]: list of excluded fields, defaults to empty array
  *
  * - slackwebhook:
  *   - webhook_url: slack webhook URL
@@ -279,6 +280,7 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
  *   - [include_extra]: bool, defaults to false
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
+ *   - [exclude_fields]: list of excluded fields, defaults to empty array
  *
  * - slackbot:
  *   - team: slack team slug
@@ -549,6 +551,10 @@ class Configuration implements ConfigurationInterface
                 ->scalarNode('include_extra')->defaultFalse()->end() // slack & slackwebhook
                 ->scalarNode('icon_emoji')->defaultNull()->end() // slack & slackwebhook
                 ->scalarNode('webhook_url')->end() // slackwebhook
+                ->arrayNode('exclude_fields')
+                    ->canBeUnset()
+                    ->prototype('scalar')->end()
+                ->end() // slack & slackwebhook
                 ->scalarNode('team')->end() // slackbot
                 ->scalarNode('notify')->defaultFalse()->end() // hipchat
                 ->scalarNode('nickname')->defaultValue('Monolog')->end() // hipchat

@@ -666,6 +666,7 @@ class MonologExtension extends Extension
                 $handler['bubble'],
                 $handler['use_short_attachment'],
                 $handler['include_extra'],
+                $handler['exclude_fields'],
             ]);
             if (isset($handler['timeout'])) {
                 $definition->addMethodCall('setTimeout', [$handler['timeout']]);
@@ -686,6 +687,7 @@ class MonologExtension extends Extension
                 $handler['include_extra'],
                 $handler['level'],
                 $handler['bubble'],
+                $handler['exclude_fields'],
             ]);
             break;
 
