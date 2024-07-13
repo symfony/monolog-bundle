@@ -351,6 +351,7 @@ class MonologExtension extends Extension
                 $handler['disable_notification'],
                 $handler['split_long_messages'],
                 $handler['delay_between_messages'],
+                $handler['topic']
             ]);
             break;
 
