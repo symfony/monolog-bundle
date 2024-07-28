@@ -36,17 +36,17 @@ class AddSwiftMailerTransportPassTest extends TestCase
         $this->definition->expects($this->any())
             ->method('getArgument')
             ->with(0)
-            ->will($this->returnValue(new Reference('swiftmailer')));
+            ->willReturn(new Reference('swiftmailer'));
         $this->container = $this->getMockBuilder('\Symfony\Component\DependencyInjection\ContainerBuilder')
             ->setMethods(['getParameter', 'getDefinition', 'hasDefinition', 'addMethodCall'])->getMock();
         $this->container->expects($this->any())
             ->method('getParameter')
             ->with('monolog.swift_mailer.handlers')
-            ->will($this->returnValue(['foo']));
+            ->willReturn(['foo']);
         $this->container->expects($this->any())
             ->method('getDefinition')
             ->with('foo')
-            ->will($this->returnValue($this->definition));
+            ->willReturn($this->definition);
     }
 
     public function testWithRealTransport()
@@ -55,7 +55,7 @@ class AddSwiftMailerTransportPassTest extends TestCase
             ->expects($this->any())
             ->method('hasDefinition')
             ->with('swiftmailer.transport.real')
-            ->will($this->returnValue(true));
+            ->willReturn(true);
         $this->definition
             ->expects($this->once())
             ->method('addMethodCall')
@@ -72,12 +72,12 @@ class AddSwiftMailerTransportPassTest extends TestCase
         $this->container
             ->expects($this->any())
             ->method('hasDefinition')
-            ->will($this->returnValueMap(
+            ->willReturnMap(
                 [
                     ['swiftmailer.transport.real', false],
                     ['swiftmailer.transport', true],
                 ]
-            ));
+            );
         $this->definition
             ->expects($this->once())
             ->method('addMethodCall')

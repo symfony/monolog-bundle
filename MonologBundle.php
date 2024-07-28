@@ -14,13 +14,12 @@ namespace Symfony\Bundle\MonologBundle;
 use Monolog\Formatter\JsonFormatter;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\HandlerInterface;
-use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\AddSwiftMailerTransportPass;
-use Symfony\Component\HttpKernel\Bundle\Bundle;
-use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\LoggerChannelPass;
-use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\DebugHandlerPass;
 use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\AddProcessorsPass;
+use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\AddSwiftMailerTransportPass;
 use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\FixEmptyLoggerPass;
+use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\LoggerChannelPass;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\HttpKernel\Bundle\Bundle;
 
 /**
  * @author Jordi Boggiano <j.boggiano@seld.be>
@@ -44,6 +43,7 @@ class MonologBundle extends Bundle
 
     /**
      * @internal
+     *
      * @return void
      */
     public static function includeStacktraces(HandlerInterface $handler)

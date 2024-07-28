@@ -23,7 +23,7 @@ abstract class DependencyInjectionTest extends TestCase
      */
     protected function assertDICDefinitionClass($definition, $expectedClass)
     {
-        $this->assertEquals($expectedClass, $definition->getClass(), "Expected Class of the DIC Container Service Definition is wrong.");
+        $this->assertEquals($expectedClass, $definition->getClass(), 'Expected Class of the DIC Container Service Definition is wrong.');
     }
 
     protected function assertDICConstructorArguments($definition, $args)
@@ -31,13 +31,13 @@ abstract class DependencyInjectionTest extends TestCase
         $this->assertEquals($args, $definition->getArguments(), "Expected and actual DIC Service constructor arguments of definition '".$definition->getClass()."' don't match.");
     }
 
-    protected function assertDICDefinitionMethodCallAt($pos, $definition, $methodName, array $params = null)
+    protected function assertDICDefinitionMethodCallAt($pos, $definition, $methodName, ?array $params = null)
     {
         $calls = $definition->getMethodCalls();
         if (isset($calls[$pos][0])) {
             $this->assertEquals($methodName, $calls[$pos][0], "Method '".$methodName."' is expected to be called at position $pos.");
 
-            if ($params !== null) {
+            if (null !== $params) {
                 $this->assertEquals($params, $calls[$pos][1], "Expected parameters to methods '".$methodName."' do not match the actual parameters.");
             }
         } else {

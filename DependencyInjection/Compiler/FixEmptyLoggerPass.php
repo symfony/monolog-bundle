@@ -44,7 +44,7 @@ class FixEmptyLoggerPass implements CompilerPassInterface
     {
         $container->register('monolog.handler.null_internal', 'Monolog\Handler\NullHandler');
         foreach ($this->channelPass->getChannels() as $channel) {
-            $def = $container->getDefinition($channel === 'app' ? 'monolog.logger' : 'monolog.logger.'.$channel);
+            $def = $container->getDefinition('app' === $channel ? 'monolog.logger' : 'monolog.logger.'.$channel);
             foreach ($def->getMethodCalls() as $method) {
                 if ('pushHandler' === $method[0]) {
                     continue 2;
