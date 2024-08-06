@@ -13,8 +13,8 @@ namespace Symfony\Bundle\MonologBundle\DependencyInjection\Compiler;
 
 use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
+use Symfony\Component\DependencyInjection\Compiler\PriorityTaggedServiceTrait;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\DependencyInjection\Reference;
 
 /**
  * Registers processors in Monolog loggers or handlers.
@@ -25,16 +25,21 @@ use Symfony\Component\DependencyInjection\Reference;
  */
 class AddProcessorsPass implements CompilerPassInterface
 {
+    use PriorityTaggedServiceTrait;
+
     public function process(ContainerBuilder $container)
     {
         if (!$container->hasDefinition('monolog.logger')) {
             return;
         }
 
-        foreach ($container->findTaggedServiceIds('monolog.processor') as $id => $tags) {
+        // array_reverse is used because ProcessableHandlerTrait::pushProcessor prepends processors to the beginning of the stack
+        foreach (array_reverse($this->findAndSortTaggedServices('monolog.processor', $container)) as $reference) {
+            $tags = $container->getDefinition((string) $reference)->getTag('monolog.processor');
+
             foreach ($tags as $tag) {
                 if (!empty($tag['channel']) && !empty($tag['handler'])) {
-                    throw new \InvalidArgumentException(\sprintf('you cannot specify both the "handler" and "channel" attributes for the "monolog.processor" tag on service "%s"', $id));
+                    throw new \InvalidArgumentException(\sprintf('you cannot specify both the "handler" and "channel" attributes for the "monolog.processor" tag on service "%s"', $reference));
                 }
 
                 if (!empty($tag['handler'])) {
@@ -58,10 +63,10 @@ class AddProcessorsPass implements CompilerPassInterface
                 }
 
                 if (!empty($tag['method'])) {
-                    $processor = [new Reference($id), $tag['method']];
+                    $processor = [$reference, $tag['method']];
                 } else {
                     // If no method is defined, fallback to use __invoke
-                    $processor = new Reference($id);
+                    $processor = $reference;
                 }
                 $definition->addMethodCall('pushProcessor', [$processor]);
             }
