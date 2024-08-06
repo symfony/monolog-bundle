@@ -33,8 +33,8 @@ class LoggerChannelPassTest extends TestCase
         // pushHandlers for service "test"
         $expected = [
             'test' => ['monolog.handler.a', 'monolog.handler.b', 'monolog.handler.c'],
-            'foo'  => ['monolog.handler.b'],
-            'bar'  => ['monolog.handler.b', 'monolog.handler.c'],
+            'foo' => ['monolog.handler.b'],
+            'bar' => ['monolog.handler.b', 'monolog.handler.c'],
         ];
 
         foreach ($expected as $serviceName => $handlers) {
@@ -42,9 +42,9 @@ class LoggerChannelPassTest extends TestCase
             $channel = $container->getDefinition((string) $service->getArgument(1));
 
             $calls = $channel->getMethodCalls();
-            $this->assertCount(count($handlers), $calls);
+            $this->assertCount(\count($handlers), $calls);
             foreach ($handlers as $i => $handler) {
-                list($methodName, $arguments) = $calls[$i];
+                [$methodName, $arguments] = $calls[$i];
                 $this->assertEquals('pushHandler', $methodName);
                 $this->assertCount(1, $arguments);
                 $this->assertEquals($handler, (string) $arguments[0]);
@@ -60,7 +60,7 @@ class LoggerChannelPassTest extends TestCase
         $expectedChannels = ['test', 'foo', 'bar', 'additional'];
 
         foreach ($expectedChannels as $channelName) {
-            $aliasName = LoggerInterface::class.' $' .$channelName.'Logger';
+            $aliasName = LoggerInterface::class.' $'.$channelName.'Logger';
             $this->assertTrue($container->hasAlias($aliasName), 'type-hinted alias should be exists for each logger channel');
         }
     }
@@ -169,13 +169,13 @@ class LoggerChannelPassTest extends TestCase
         $container->setParameter('monolog.handlers_to_channels', [
             'monolog.handler.a' => [
                 'type' => 'inclusive',
-                'elements' => ['test']
+                'elements' => ['test'],
             ],
             'monolog.handler.b' => null,
             'monolog.handler.c' => [
                 'type' => 'exclusive',
-                'elements' => ['foo']
-            ]
+                'elements' => ['foo'],
+            ],
         ]);
 
         $container->getCompilerPassConfig()->setOptimizationPasses([]);

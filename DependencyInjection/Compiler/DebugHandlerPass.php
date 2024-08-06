@@ -11,11 +11,11 @@
 
 namespace Symfony\Bundle\MonologBundle\DependencyInjection\Compiler;
 
-use Symfony\Component\DependencyInjection\Reference;
-use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
-use Symfony\Component\DependencyInjection\Definition;
 use Monolog\Logger;
+use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Definition;
+use Symfony\Component\DependencyInjection\Reference;
 
 /**
  * Adds the DebugHandler when the profiler is enabled and kernel.debug is true.
@@ -31,7 +31,7 @@ class DebugHandlerPass implements CompilerPassInterface
 
     public function __construct(LoggerChannelPass $channelPass)
     {
-        @trigger_error('The '.__CLASS__.' class is deprecated since version 2.12 and will be removed in 4.0. Use AddDebugLogProcessorPass in FrameworkBundle instead.', E_USER_DEPRECATED);
+        @trigger_error('The '.__CLASS__.' class is deprecated since version 2.12 and will be removed in 4.0. Use AddDebugLogProcessorPass in FrameworkBundle instead.', \E_USER_DEPRECATED);
 
         $this->channelPass = $channelPass;
     }
@@ -51,7 +51,7 @@ class DebugHandlerPass implements CompilerPassInterface
 
         foreach ($this->channelPass->getChannels() as $channel) {
             $container
-                ->getDefinition($channel === 'app' ? 'monolog.logger' : 'monolog.logger.'.$channel)
+                ->getDefinition('app' === $channel ? 'monolog.logger' : 'monolog.logger.'.$channel)
                 ->addMethodCall('pushHandler', [new Reference('monolog.handler.debug')]);
         }
     }
