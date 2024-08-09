@@ -724,7 +724,7 @@ class MonologExtension extends Extension
 
             case 'sentry':
                 if (null !== $handler['hub_id']) {
-                    $hub = new Reference($handler['hub_id']);
+                    $hubId = $handler['hub_id'];
                 } else {
                     if (null !== $handler['client_id']) {
                         $clientId = $handler['client_id'];
@@ -755,21 +755,32 @@ class MonologExtension extends Extension
                         }
                     }
 
-                    $hub = new Definition(
+                    $hubId = \sprintf('monolog.handler.%s.hub', $name);
+                    $hub = $container->setDefinition($hubId, new Definition(
                         'Sentry\\State\\Hub',
                         [new Reference($clientId)]
-                    );
-                    $container->setDefinition(\sprintf('monolog.handler.%s.hub', $name), $hub);
+                    ));
 
                     // can't set the hub to the current hub, getting into a recursion otherwise...
                     // $hub->addMethodCall('setCurrent', array($hub));
                 }
 
                 $definition->setArguments([
-                    $hub,
+                    new Reference($hubId),
                     $handler['level'],
                     $handler['bubble'],
                     $handler['fill_extra_context'],
+                ]);
+                break;
+
+            case 'sentry_breadcrumb':
+                $sentryHandlerId = $this->getHandlerId($handler['sentry_handler']);
+                $hubId = (string) $container->getDefinition($sentryHandlerId)->getArgument(0);
+
+                $definition->setArguments([
+                    new Reference($hubId),
+                    $handler['level'],
+                    $handler['bubble'],
                 ]);
                 break;
 
@@ -977,6 +988,7 @@ class MonologExtension extends Extension
             'pushover' => 'Monolog\Handler\PushoverHandler',
             'raven' => 'Monolog\Handler\RavenHandler',
             'sentry' => 'Sentry\Monolog\Handler',
+            'sentry_breadcrumb' => 'Sentry\Monolog\BreadcrumbHandler',
             'newrelic' => 'Monolog\Handler\NewRelicHandler',
             'hipchat' => 'Monolog\Handler\HipChatHandler',
             'slack' => 'Monolog\Handler\SlackHandler',
