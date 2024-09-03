@@ -12,14 +12,13 @@
 namespace Symfony\Bundle\MonologBundle\DependencyInjection;
 
 use Monolog\Logger;
-use Symfony\Component\Config\Definition\BaseNode;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 
 /**
- * This class contains the configuration information for the bundle
+ * This class contains the configuration information for the bundle.
  *
  * This information is solely responsible for how the different configuration
  * sections are normalized, and merged.
@@ -423,7 +422,7 @@ class Configuration implements ConfigurationInterface
                 'custom' => [
                     'type' => 'service',
                     'id' => 'my_handler',
-                ]
+                ],
             ]);
 
         $handlerNode = $handlers
@@ -471,7 +470,7 @@ class Configuration implements ConfigurationInterface
                     ->beforeNormalization()
                         ->ifString()
                         ->then(function ($v) {
-                            if (substr($v, 0, 1) === '0') {
+                            if ('0' === substr($v, 0, 1)) {
                                 return octdec($v);
                             }
 
@@ -480,10 +479,10 @@ class Configuration implements ConfigurationInterface
                     ->end()
                 ->end()
                 ->booleanNode('use_locking')->defaultFalse()->end() // stream and rotating
-                ->scalarNode('filename_format')->defaultValue('{filename}-{date}')->end() //rotating
-                ->scalarNode('date_format')->defaultValue('Y-m-d')->end() //rotating
+                ->scalarNode('filename_format')->defaultValue('{filename}-{date}')->end() // rotating
+                ->scalarNode('date_format')->defaultValue('Y-m-d')->end() // rotating
                 ->scalarNode('ident')->defaultFalse()->end() // syslog and syslogudp
-                ->scalarNode('logopts')->defaultValue(LOG_PID)->end() // syslog
+                ->scalarNode('logopts')->defaultValue(\LOG_PID)->end() // syslog
                 ->scalarNode('facility')->defaultValue('user')->end() // syslog
                 ->scalarNode('max_files')->defaultValue(0)->end() // rotating
                 ->scalarNode('action_level')->defaultValue('WARNING')->end() // fingers_crossed
@@ -511,7 +510,7 @@ class Configuration implements ConfigurationInterface
                                  *   <monolog:excluded-http-code code="404" />
                                  */
 
-                                if (is_array($value)) {
+                                if (\is_array($value)) {
                                     return isset($value['code']) ? $value : ['code' => key($value), 'urls' => current($value)];
                                 }
 
@@ -533,7 +532,7 @@ class Configuration implements ConfigurationInterface
                     ->prototype('scalar')->end()
                 ->end()
                 ->scalarNode('min_level')->defaultValue('DEBUG')->end() // filter
-                ->scalarNode('max_level')->defaultValue('EMERGENCY')->end() //filter
+                ->scalarNode('max_level')->defaultValue('EMERGENCY')->end() // filter
                 ->scalarNode('buffer_size')->defaultValue(0)->end() // fingers_crossed and buffer
                 ->booleanNode('flush_on_overflow')->defaultFalse()->end() // buffer
                 ->scalarNode('handler')->end() // fingers_crossed and buffer
@@ -560,7 +559,7 @@ class Configuration implements ConfigurationInterface
                 ->variableNode('user') // pushover
                     ->validate()
                         ->ifTrue(function ($v) {
-                            return !is_string($v) && !is_array($v);
+                            return !\is_string($v) && !\is_array($v);
                         })
                         ->thenInvalid('User must be a string or an array.')
                     ->end()
@@ -614,7 +613,7 @@ class Configuration implements ConfigurationInterface
                     ->setDeprecated('symfony/monolog-bundle', 3.7, '"%path%.%node%" is deprecated, use "%path%.console_formatter_options" instead.')
                     ->validate()
                         ->ifTrue(function ($v) {
-                            return !is_array($v);
+                            return !\is_array($v);
                         })
                         ->thenInvalid('The console_formater_options must be an array.')
                     ->end()
@@ -622,7 +621,7 @@ class Configuration implements ConfigurationInterface
                 ->variableNode('console_formatter_options')
                     ->defaultValue([])
                     ->validate()
-                        ->ifTrue(static function ($v) { return !is_array($v); })
+                        ->ifTrue(static function ($v) { return !\is_array($v); })
                         ->thenInvalid('The console_formatter_options must be an array.')
                     ->end()
                 ->end()
@@ -650,7 +649,11 @@ class Configuration implements ConfigurationInterface
                 })
             ->end()
             ->validate()
-                ->always(static function ($v) { unset($v['console_formater_options']); return $v; })
+                ->always(static function ($v) {
+                    unset($v['console_formater_options']);
+
+                    return $v;
+                })
             ->end()
             ->validate()
                 ->ifTrue(function ($v) { return 'service' === $v['type'] && !empty($v['formatter']); })
@@ -677,11 +680,11 @@ class Configuration implements ConfigurationInterface
                 ->thenInvalid('You can only use excluded_http_codes/excluded_404s with a FingersCrossedHandler definition')
             ->end()
             ->validate()
-                ->ifTrue(function ($v) { return 'filter' === $v['type'] && "DEBUG" !== $v['min_level'] && !empty($v['accepted_levels']); })
+                ->ifTrue(function ($v) { return 'filter' === $v['type'] && 'DEBUG' !== $v['min_level'] && !empty($v['accepted_levels']); })
                 ->thenInvalid('You can not use min_level together with accepted_levels in a FilterHandler')
             ->end()
             ->validate()
-                ->ifTrue(function ($v) { return 'filter' === $v['type'] && "EMERGENCY" !== $v['max_level'] && !empty($v['accepted_levels']); })
+                ->ifTrue(function ($v) { return 'filter' === $v['type'] && 'EMERGENCY' !== $v['max_level'] && !empty($v['accepted_levels']); })
                 ->thenInvalid('You can not use max_level together with accepted_levels in a FilterHandler')
             ->end()
             ->validate()
@@ -713,11 +716,11 @@ class Configuration implements ConfigurationInterface
                 ->thenInvalid('The token and user have to be specified to use a PushoverHandler')
             ->end()
             ->validate()
-                ->ifTrue(function ($v) { return 'raven' === $v['type'] && !array_key_exists('dsn', $v) && null === $v['client_id']; })
+                ->ifTrue(function ($v) { return 'raven' === $v['type'] && !\array_key_exists('dsn', $v) && null === $v['client_id']; })
                 ->thenInvalid('The DSN has to be specified to use a RavenHandler')
             ->end()
             ->validate()
-                ->ifTrue(function ($v) { return 'sentry' === $v['type'] && !array_key_exists('dsn', $v) && null === $v['hub_id'] && null === $v['client_id']; })
+                ->ifTrue(function ($v) { return 'sentry' === $v['type'] && !\array_key_exists('dsn', $v) && null === $v['hub_id'] && null === $v['client_id']; })
                 ->thenInvalid('The DSN has to be specified to use Sentry\'s handler')
             ->end()
             ->validate()
@@ -729,11 +732,11 @@ class Configuration implements ConfigurationInterface
                 ->thenInvalid('The token and room have to be specified to use a HipChatHandler')
             ->end()
             ->validate()
-                ->ifTrue(function ($v) { return 'hipchat' === $v['type'] && !in_array($v['message_format'], ['text', 'html']); })
+                ->ifTrue(function ($v) { return 'hipchat' === $v['type'] && !\in_array($v['message_format'], ['text', 'html']); })
                 ->thenInvalid('The message_format has to be "text" or "html" in a HipChatHandler')
             ->end()
             ->validate()
-                ->ifTrue(function ($v) { return 'hipchat' === $v['type'] && null !== $v['api_version'] && !in_array($v['api_version'], ['v1', 'v2'], true); })
+                ->ifTrue(function ($v) { return 'hipchat' === $v['type'] && null !== $v['api_version'] && !\in_array($v['api_version'], ['v1', 'v2'], true); })
                 ->thenInvalid('The api_version has to be "v1" or "v2" in a HipChatHandler')
             ->end()
             ->validate()
@@ -763,9 +766,9 @@ class Configuration implements ConfigurationInterface
             ->validate()
                 ->ifTrue(function ($v) { return 'loggly' === $v['type'] && !empty($v['tags']); })
                 ->then(function ($v) {
-                    $invalidTags = preg_grep('/^[a-z0-9][a-z0-9\.\-_]*$/i', $v['tags'], PREG_GREP_INVERT);
+                    $invalidTags = preg_grep('/^[a-z0-9][a-z0-9\.\-_]*$/i', $v['tags'], \PREG_GREP_INVERT);
                     if (!empty($invalidTags)) {
-                        throw new InvalidConfigurationException(sprintf('The following Loggly tags are invalid: %s.', implode(', ', $invalidTags)));
+                        throw new InvalidConfigurationException(\sprintf('The following Loggly tags are invalid: %s.', implode(', ', $invalidTags)));
                     }
 
                     return $v;
@@ -1024,7 +1027,7 @@ class Configuration implements ConfigurationInterface
                             $verbosities = ['VERBOSITY_QUIET', 'VERBOSITY_NORMAL', 'VERBOSITY_VERBOSE', 'VERBOSITY_VERY_VERBOSE', 'VERBOSITY_DEBUG'];
                             // allow numeric indexed array with ascendning verbosity and lowercase names of the constants
                             foreach ($v as $verbosity => $level) {
-                                if (is_int($verbosity) && isset($verbosities[$verbosity])) {
+                                if (\is_int($verbosity) && isset($verbosities[$verbosity])) {
                                     $map[$verbosities[$verbosity]] = strtoupper($level);
                                 } else {
                                     $map[strtoupper($verbosity)] = strtoupper($level);
@@ -1047,11 +1050,8 @@ class Configuration implements ConfigurationInterface
                             foreach ($v as $verbosity => $level) {
                                 $verbosityConstant = 'Symfony\Component\Console\Output\OutputInterface::'.$verbosity;
 
-                                if (!defined($verbosityConstant)) {
-                                    throw new InvalidConfigurationException(sprintf(
-                                        'The configured verbosity "%s" is invalid as it is not defined in Symfony\Component\Console\Output\OutputInterface.',
-                                         $verbosity
-                                    ));
+                                if (!\defined($verbosityConstant)) {
+                                    throw new InvalidConfigurationException(\sprintf('The configured verbosity "%s" is invalid as it is not defined in Symfony\Component\Console\Output\OutputInterface.', $verbosity));
                                 }
 
                                 try {
@@ -1061,13 +1061,10 @@ class Configuration implements ConfigurationInterface
                                         $level = Logger::toMonologLevel(is_numeric($level) ? (int) $level : $level);
                                     }
                                 } catch (\Psr\Log\InvalidArgumentException $e) {
-                                    throw new InvalidConfigurationException(sprintf(
-                                        'The configured minimum log level "%s" for verbosity "%s" is invalid as it is not defined in Monolog\Logger.',
-                                         $level, $verbosity
-                                    ));
+                                    throw new InvalidConfigurationException(\sprintf('The configured minimum log level "%s" for verbosity "%s" is invalid as it is not defined in Monolog\Logger.', $level, $verbosity));
                                 }
 
-                                $map[constant($verbosityConstant)] = $level;
+                                $map[\constant($verbosityConstant)] = $level;
                             }
 
                             return $map;
@@ -1090,7 +1087,7 @@ class Configuration implements ConfigurationInterface
                         ->then(function ($v) { return ['elements' => [$v]]; })
                     ->end()
                     ->beforeNormalization()
-                        ->ifTrue(function ($v) { return is_array($v) && is_numeric(key($v)); })
+                        ->ifTrue(function ($v) { return \is_array($v) && is_numeric(key($v)); })
                         ->then(function ($v) { return ['elements' => $v]; })
                     ->end()
                     ->validate()
@@ -1121,7 +1118,7 @@ class Configuration implements ConfigurationInterface
                                 }
                             }
 
-                            if (!count($elements)) {
+                            if (!\count($elements)) {
                                 return null;
                             }
 

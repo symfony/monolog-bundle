@@ -34,24 +34,24 @@ class AddProcessorsPass implements CompilerPassInterface
         foreach ($container->findTaggedServiceIds('monolog.processor') as $id => $tags) {
             foreach ($tags as $tag) {
                 if (!empty($tag['channel']) && !empty($tag['handler'])) {
-                    throw new \InvalidArgumentException(sprintf('you cannot specify both the "handler" and "channel" attributes for the "monolog.processor" tag on service "%s"', $id));
+                    throw new \InvalidArgumentException(\sprintf('you cannot specify both the "handler" and "channel" attributes for the "monolog.processor" tag on service "%s"', $id));
                 }
 
                 if (!empty($tag['handler'])) {
-                    $definition = $container->findDefinition(sprintf('monolog.handler.%s', $tag['handler']));
+                    $definition = $container->findDefinition(\sprintf('monolog.handler.%s', $tag['handler']));
                     $parentDef = $definition;
                     while (!$parentDef->getClass() && $parentDef instanceof ChildDefinition) {
                         $parentDef = $container->findDefinition($parentDef->getParent());
                     }
                     $class = $container->getParameterBag()->resolveValue($parentDef->getClass());
                     if (!method_exists($class, 'pushProcessor')) {
-                        throw new \InvalidArgumentException(sprintf('The "%s" handler does not accept processors', $tag['handler']));
+                        throw new \InvalidArgumentException(\sprintf('The "%s" handler does not accept processors', $tag['handler']));
                     }
                 } elseif (!empty($tag['channel'])) {
                     if ('app' === $tag['channel']) {
                         $definition = $container->getDefinition('monolog.logger');
                     } else {
-                        $definition = $container->getDefinition(sprintf('monolog.logger.%s', $tag['channel']));
+                        $definition = $container->getDefinition(\sprintf('monolog.logger.%s', $tag['channel']));
                     }
                 } else {
                     $definition = $container->getDefinition('monolog.logger_prototype');

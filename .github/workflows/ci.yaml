@@ -5,19 +5,43 @@ on:
     pull_request:
 
 jobs:
+    php-cs-fixer:
+        runs-on: ubuntu-latest
+        name: Coding Standards
+        steps:
+            -   name: Checkout
+                uses: actions/checkout@v4
+
+            -   name: Setup PHP
+                uses: shivammathur/setup-php@v2
+
+                with:
+                    php-version: 8.3
+                    coverage: none
+                    tools: php-cs-fixer, cs2pr
+
+            -   name: Run PHP-CS-Fixer
+                run: php-cs-fixer fix --dry-run --format checkstyle | cs2pr
+
     test:
         runs-on: ubuntu-latest
         name: PHPUnit Tests
         strategy:
             fail-fast: false
             matrix:
-                php: [ '7.2', '7.3', '7.4', '8.0', '8.1' ]
+                php: [ '7.2', '7.3', '7.4', '8.0', '8.1', '8.2', '8.3' ]
                 monolog: [ '1.*', '2.*' ]
                 include:
                     -   php: '7.4'
                         deps: lowest
                         deprecations: max[self]=0
                     -   php: '8.1'
+                        monolog: '3.*'
+                    -   php: '8.2'
+                        monolog: '3.*'
+                    -   php: '8.3'
+                        monolog: '3.*'
+                    -   php: '8.4'
                         deps: highest
                         monolog: '3.*'
         steps:
