@@ -19,7 +19,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
 
-abstract class FixtureMonologExtensionTest extends DependencyInjectionTest
+abstract class FixtureMonologExtensionTestCase extends DependencyInjectionTestCase
 {
     public function testLoadWithSeveralHandlers()
     {

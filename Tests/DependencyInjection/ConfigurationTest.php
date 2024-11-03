@@ -42,7 +42,7 @@ class ConfigurationTest extends TestCase
         $this->assertFalse($config['handlers']['foobar']['nested']);
     }
 
-    public function provideProcessStringChannels()
+    public static function provideProcessStringChannels(): array
     {
         return [
             ['foo', 'foo', true],
@@ -74,7 +74,7 @@ class ConfigurationTest extends TestCase
         $this->assertEquals($expectedString, $config['handlers']['foobar']['channels']['elements'][0]);
     }
 
-    public function provideGelfPublisher()
+    public static function provideGelfPublisher(): array
     {
         return [
             [
@@ -532,7 +532,7 @@ class ConfigurationTest extends TestCase
         $this->assertEquals($processedConfiguration, $config['handlers']['main']['process_psr_3_messages']);
     }
 
-    public function processPsr3MessagesProvider(): iterable
+    public static function processPsr3MessagesProvider(): iterable
     {
         yield 'Not specified' => [[], ['enabled' => null]];
 

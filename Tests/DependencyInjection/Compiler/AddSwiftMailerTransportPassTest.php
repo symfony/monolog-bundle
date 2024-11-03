@@ -28,10 +28,7 @@ class AddSwiftMailerTransportPassTest extends TestCase
 
     private $definition;
 
-    /**
-     * @before
-     */
-    protected function doSetUp()
+    protected function setUp(): void
     {
         $this->compilerPass = new AddSwiftMailerTransportPass();
         $this->definition = new Definition(null, [new Reference('swiftmailer')]);
