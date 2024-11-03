@@ -50,7 +50,12 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
  *   - [bubble]: bool, defaults to true
  *
  * - gelf:
- *   - publisher: {id: ...} or {hostname: ..., port: ..., chunk_size: ...}
+ *   - publiser:
+ *      - id: string, service id of a publisher implementation, optional if hostname is given
+ *      - hostname: string, optional if id is given
+ *      - [port]: int, defaults to 12201
+ *      - [chunk_size]: int, defaults to 1420
+ *      - [encoder]: string, its value can be 'json' or 'compressed_json'
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
  *
@@ -816,6 +821,7 @@ class Configuration implements ConfigurationInterface
                         ->scalarNode('hostname')->end()
                         ->scalarNode('port')->defaultValue(12201)->end()
                         ->scalarNode('chunk_size')->defaultValue(1420)->end()
+                        ->scalarNode('encoder')->end()
                     ->end()
                     ->validate()
                         ->ifTrue(function ($v) {
