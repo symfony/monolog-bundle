@@ -11,6 +11,7 @@
 
 namespace Symfony\Bundle\MonologBundle\Tests\DependencyInjection;
 
+use Composer\InstalledVersions;
 use Monolog\Logger;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MonologBundle\DependencyInjection\Configuration;
@@ -534,7 +535,13 @@ class ConfigurationTest extends TestCase
     public function processPsr3MessagesProvider(): iterable
     {
         yield 'Not specified' => [[], ['enabled' => null]];
-        yield 'Null' => [['process_psr_3_messages' => null], ['enabled' => true]];
+
+        if (version_compare(InstalledVersions::getVersion('symfony/config'), '7.2', '>=')) {
+            yield 'Null' => [['process_psr_3_messages' => null], ['enabled' => null]];
+        } else {
+            yield 'Null' => [['process_psr_3_messages' => null], ['enabled' => true]];
+        }
+
         yield 'True' => [['process_psr_3_messages' => true], ['enabled' => true]];
         yield 'False' => [['process_psr_3_messages' => false], ['enabled' => false]];
 
