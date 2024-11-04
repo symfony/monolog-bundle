@@ -50,7 +50,7 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
  *   - [bubble]: bool, defaults to true
  *
  * - gelf:
- *   - publiser:
+ *   - publisher:
  *      - id: string, service id of a publisher implementation, optional if hostname is given
  *      - hostname: string, optional if id is given
  *      - [port]: int, defaults to 12201
