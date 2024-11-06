@@ -13,6 +13,8 @@ namespace Symfony\Bundle\MonologBundle\Tests\DependencyInjection\Compiler;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\AddSwiftMailerTransportPass;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
 
 /**
@@ -32,60 +34,27 @@ class AddSwiftMailerTransportPassTest extends TestCase
     protected function doSetUp()
     {
         $this->compilerPass = new AddSwiftMailerTransportPass();
-        $this->definition = $this->getMockBuilder('\Symfony\Component\DependencyInjection\Definition')->getMock();
-        $this->definition->expects($this->any())
-            ->method('getArgument')
-            ->with(0)
-            ->willReturn(new Reference('swiftmailer'));
-        $this->container = $this->getMockBuilder('\Symfony\Component\DependencyInjection\ContainerBuilder')
-            ->setMethods(['getParameter', 'getDefinition', 'hasDefinition', 'addMethodCall'])->getMock();
-        $this->container->expects($this->any())
-            ->method('getParameter')
-            ->with('monolog.swift_mailer.handlers')
-            ->willReturn(['foo']);
-        $this->container->expects($this->any())
-            ->method('getDefinition')
-            ->with('foo')
-            ->willReturn($this->definition);
+        $this->definition = new Definition(null, [new Reference('swiftmailer')]);
+        $this->container = new ContainerBuilder();
+        $this->container->setParameter('monolog.swift_mailer.handlers', ['foo']);
+        $this->container->setDefinition('foo', $this->definition);
     }
 
     public function testWithRealTransport()
     {
-        $this->container
-            ->expects($this->any())
-            ->method('hasDefinition')
-            ->with('swiftmailer.transport.real')
-            ->willReturn(true);
-        $this->definition
-            ->expects($this->once())
-            ->method('addMethodCall')
-            ->with(
-                'setTransport',
-                $this->equalTo([new Reference('swiftmailer.transport.real')])
-            );
+        $this->container->register('swiftmailer.transport.real');
 
         $this->compilerPass->process($this->container);
+
+        $this->assertEquals([['setTransport', [new Reference('swiftmailer.transport.real')]]], $this->definition->getMethodCalls());
     }
 
     public function testWithoutRealTransport()
     {
-        $this->container
-            ->expects($this->any())
-            ->method('hasDefinition')
-            ->willReturnMap(
-                [
-                    ['swiftmailer.transport.real', false],
-                    ['swiftmailer.transport', true],
-                ]
-            );
-        $this->definition
-            ->expects($this->once())
-            ->method('addMethodCall')
-            ->with(
-                'setTransport',
-                $this->equalTo([new Reference('swiftmailer.transport')])
-            );
+        $this->container->register('swiftmailer.transport');
 
         $this->compilerPass->process($this->container);
+
+        $this->assertEquals([['setTransport', [new Reference('swiftmailer.transport')]]], $this->definition->getMethodCalls());
     }
 }
