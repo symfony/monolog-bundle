@@ -1,0 +1,17 @@
+---------------------------------------------------------------------------
+
+by derrabus at 2024-11-04T13:27:22Z
+
+Thank you. Your change makes our test suite green again, which is great of course. But, are we sure this subtle change in behavior won't break stuff downstream?
+
+---------------------------------------------------------------------------
+
+by alexandre-daubois at 2024-11-04T15:02:33Z
+
+I had a look while creating the PR, and it seems the `null` possibility was actually handled, even if not possible until now : https://github.com/symfony/monolog-bundle/blob/ed0e4a287282971d110fd8c99d9ac391559a43ce/DependencyInjection/MonologExtension.php#L180-L182
+
+---------------------------------------------------------------------------
+
+by derrabus at 2024-11-06T11:48:45Z
+
+Thank you @alexandre-daubois.
