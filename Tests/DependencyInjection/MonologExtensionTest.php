@@ -30,7 +30,7 @@ use Symfony\Component\DependencyInjection\ParameterBag\EnvPlaceholderParameterBa
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpFoundation\RequestStack;
 
-class MonologExtensionTest extends DependencyInjectionTest
+class MonologExtensionTest extends DependencyInjectionTestCase
 {
     public function testLoadWithDefault()
     {
@@ -628,7 +628,7 @@ class MonologExtensionTest extends DependencyInjectionTest
         $loader->load([['handlers' => ['main' => $handlerOptions]]], $container);
     }
 
-    public function v2RemovedDataProvider(): array
+    public static function v2RemovedDataProvider(): array
     {
         return [
             [['type' => 'hipchat', 'token' => 'abc123', 'room' => 'foo']],
@@ -637,33 +637,19 @@ class MonologExtensionTest extends DependencyInjectionTest
         ];
     }
 
-    /**
-     * @dataProvider v1AddedDataProvider
-     */
-    public function testV2AddedOnV1(string $handlerType)
+    public function testV2AddedOnV1()
     {
         if (Logger::API !== 1) {
             $this->markTestSkipped('Only valid on Monolog V1');
-
-            return;
         }
 
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage(
-            \sprintf('"%s" was added in Monolog v2, please upgrade if you wish to use it.', $handlerType)
-        );
+        $this->expectExceptionMessage('"fallbackgroup" was added in Monolog v2, please upgrade if you wish to use it.');
 
         $container = new ContainerBuilder();
         $loader = new MonologExtension();
 
-        $loader->load([['handlers' => ['main' => ['type' => $handlerType]]]], $container);
-    }
-
-    public function v1AddedDataProvider(): array
-    {
-        return [
-            ['fallbackgroup'],
-        ];
+        $loader->load([['handlers' => ['main' => ['type' => 'fallbackgroup']]]], $container);
     }
 
     /**
@@ -684,7 +670,7 @@ class MonologExtensionTest extends DependencyInjectionTest
         $this->assertDICConstructorArguments($definition, $expectedArgs);
     }
 
-    public function provideLoglevelParameterConfig(): array
+    public static function provideLoglevelParameterConfig(): array
     {
         return [
             'browser console with parameter level' => [

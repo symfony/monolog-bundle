@@ -16,7 +16,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 
-class XmlMonologExtensionTest extends FixtureMonologExtensionTest
+class XmlMonologExtensionTest extends FixtureMonologExtensionTestCase
 {
     protected function loadFixture(ContainerBuilder $container, $fixture)
     {
