@@ -22,7 +22,6 @@ use Symfony\Bundle\MonologBundle\DependencyInjection\MonologExtension;
 use Symfony\Bundle\MonologBundle\Tests\DependencyInjection\Fixtures\AsMonologProcessor\FooProcessor;
 use Symfony\Bundle\MonologBundle\Tests\DependencyInjection\Fixtures\AsMonologProcessor\FooProcessorWithPriority;
 use Symfony\Bundle\MonologBundle\Tests\DependencyInjection\Fixtures\AsMonologProcessor\RedeclareMethodProcessor;
-use Symfony\Bundle\MonologBundle\Tests\DependencyInjection\Fixtures\DummyClassForClassExistsCheck;
 use Symfony\Bundle\MonologBundle\Tests\DependencyInjection\Fixtures\ServiceWithChannel;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -185,97 +184,6 @@ class MonologExtensionTest extends DependencyInjectionTest
         $this->expectException(InvalidConfigurationException::class);
 
         $loader->load([['handlers' => ['gelf' => ['type' => 'gelf', 'publisher' => []]]]], $container);
-    }
-
-    public function testExceptionWhenUsingLegacyGelfImplementationWithUnsupportedEncoder(): void
-    {
-        if (!class_exists('Gelf\MessagePublisher')) {
-            class_alias(DummyClassForClassExistsCheck::class, 'Gelf\MessagePublisher');
-        }
-
-        $container = new ContainerBuilder();
-        $loader = new MonologExtension();
-
-        $this->expectException(InvalidConfigurationException::class);
-
-        $loader->load([['handlers' => ['gelf' => ['type' => 'gelf', 'publisher' => ['hostname' => 'localhost', 'encoder' => 'json']]]]], $container);
-    }
-
-    /**
-     * @dataProvider encoderOptionsProvider
-     */
-    public function testLegacyGelfImplementationEncoderOption(array $config): void
-    {
-        if (!class_exists('Gelf\MessagePublisher')) {
-            class_alias(DummyClassForClassExistsCheck::class, 'Gelf\MessagePublisher');
-        }
-
-        $container = $this->getContainer($config);
-        $this->assertTrue($container->hasDefinition('monolog.handler.gelf'));
-
-        $handler = $container->getDefinition('monolog.handler.gelf');
-        /** @var Definition $publisher */
-        $publisher = $handler->getArguments()[0];
-
-        $this->assertDICConstructorArguments($publisher, ['localhost', 12201, 1420]);
-    }
-
-    public function encoderOptionsProvider(): array
-    {
-        return [
-            [
-                [['handlers' => ['gelf' => ['type' => 'gelf', 'publisher' => ['hostname' => 'localhost', 'encoder' => 'compressed_json']]]]],
-            ],
-            [
-                [['handlers' => ['gelf' => ['type' => 'gelf', 'publisher' => ['hostname' => 'localhost']]]]],
-            ],
-        ];
-    }
-
-    public function testExceptionWhenUsingGelfWithInvalidEncoder(): void
-    {
-        if (!class_exists('Gelf\Transport\UdpTransport')) {
-            class_alias(DummyClassForClassExistsCheck::class, 'Gelf\Transport\UdpTransport');
-        }
-
-        $container = new ContainerBuilder();
-        $loader = new MonologExtension();
-
-        $this->expectException(InvalidConfigurationException::class);
-
-        $loader->load([['handlers' => ['gelf' => ['type' => 'gelf', 'publisher' => ['hostname' => 'localhost', 'encoder' => 'invalid_encoder']]]]], $container);
-    }
-
-    /**
-     * @dataProvider gelfEncoderProvider
-     */
-    public function testGelfWithEncoder($encoderValue, $expectedClass): void
-    {
-        if (!class_exists('Gelf\Transport\UdpTransport')) {
-            class_alias(DummyClassForClassExistsCheck::class, 'Gelf\Transport\UdpTransport');
-        }
-
-        $container = $this->getContainer([['handlers' => ['gelf' => ['type' => 'gelf', 'publisher' => ['hostname' => 'localhost', 'encoder' => $encoderValue]]]]]);
-        $this->assertTrue($container->hasDefinition('monolog.handler.gelf'));
-
-        $handler = $container->getDefinition('monolog.handler.gelf');
-        /** @var Definition $publisher */
-        $publisher = $handler->getArguments()[0];
-        /** @var Definition $transport */
-        $transport = $publisher->getMethodCalls()[0][1][0];
-        $encoder = $transport->getMethodCalls()[0][1][0];
-
-        $this->assertDICConstructorArguments($transport, ['localhost', 12201, 1420]);
-        $this->assertDICDefinitionClass($encoder, $expectedClass);
-        $this->assertDICConstructorArguments($handler, [$publisher, 'DEBUG', true]);
-    }
-
-    public function gelfEncoderProvider(): array
-    {
-        return [
-            ['json', 'Gelf\Encoder\JsonEncoder'],
-            ['compressed_json', 'Gelf\Encoder\CompressedJsonEncoder'],
-        ];
     }
 
     public function testExceptionWhenUsingServiceWithoutId()
