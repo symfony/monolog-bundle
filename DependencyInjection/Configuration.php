@@ -50,14 +50,17 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
  *   - [bubble]: bool, defaults to true
  *
  * - gelf:
- *   - publisher:
- *      - id: string, service id of a publisher implementation, optional if hostname is given
- *      - hostname: string, optional if id is given
- *      - [port]: int, defaults to 12201
- *      - [chunk_size]: int, defaults to 1420
- *      - [encoder]: string, its value can be 'json' or 'compressed_json'
- *   - [level]: level name or int value, defaults to DEBUG
- *   - [bubble]: bool, defaults to true
+ * - publisher: (one of the following configurations)
+ *   # Option 1: Service-based configuration
+ *   - id: string, service id of a publisher implementation
+ *
+ *   # Option 2: Direct connection configuration
+ *   - hostname: string, server hostname
+ *   - [port]: int, server port (default: 12201)
+ *   - [chunk_size]: int, UDP packet size (default: 1420)
+ *   - [encoder]: string, encoding format ('json' or 'compressed_json')
+ * - [level]: level name or int value, defaults to DEBUG
+ * - [bubble]: bool, defaults to true
  *
  * - chromephp:
  *   - [level]: level name or int value, defaults to DEBUG
