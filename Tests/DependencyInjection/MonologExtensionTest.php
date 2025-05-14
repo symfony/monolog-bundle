@@ -777,6 +777,7 @@ class MonologExtensionTest extends DependencyInjectionTestCase
         }
 
         $container = $this->getContainer([], [
+            'monolog.handler.foo_handler' => (new Definition(ConsoleHandler::class))->setAutoconfigured(true),
             'monolog.logger.ccc_channel' => (new Definition(Logger::class))->setAutoconfigured(true),
             FooProcessor::class => (new Definition(FooProcessor::class))->setAutoconfigured(true),
         ]);
