@@ -203,6 +203,7 @@ class MonologExtension extends Extension
                     $handler['bubble'],
                     $handler['verbosity_levels'] ?? [],
                     $handler['console_formatter_options'],
+                    $handler['interactive_only'],
                 ]);
                 $definition->addTag('kernel.event_subscriber');
                 break;

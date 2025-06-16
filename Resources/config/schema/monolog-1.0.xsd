@@ -35,6 +35,7 @@
         <xsd:attribute name="priority" type="xsd:integer" />
         <xsd:attribute name="level" type="level" />
         <xsd:attribute name="bubble" type="xsd:boolean" />
+        <xsd:attribute name="interactive-only" type="xsd:boolean" />
         <xsd:attribute name="process-psr-3-messages" type="xsd:boolean" />
         <xsd:attribute name="use_locking" type="xsd:boolean" />
         <xsd:attribute name="app-name" type="xsd:string" />
