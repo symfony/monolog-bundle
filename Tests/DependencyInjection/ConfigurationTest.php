@@ -11,6 +11,7 @@
 
 namespace Symfony\Bundle\MonologBundle\Tests\DependencyInjection;
 
+use Composer\InstalledVersions;
 use Monolog\Logger;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MonologBundle\DependencyInjection\Configuration;
@@ -28,8 +29,8 @@ class ConfigurationTest extends TestCase
     {
         $configs = [
             [
-                'handlers' => ['foobar' => ['type' => 'stream', 'path' => '/foo/bar']]
-            ]
+                'handlers' => ['foobar' => ['type' => 'stream', 'path' => '/foo/bar']],
+            ],
         ];
 
         $config = $this->process($configs);
@@ -41,11 +42,11 @@ class ConfigurationTest extends TestCase
         $this->assertFalse($config['handlers']['foobar']['nested']);
     }
 
-    public function provideProcessStringChannels()
+    public static function provideProcessStringChannels(): array
     {
         return [
             ['foo', 'foo', true],
-            ['!foo', 'foo', false]
+            ['!foo', 'foo', false],
         ];
     }
 
@@ -60,10 +61,10 @@ class ConfigurationTest extends TestCase
                     'foobar' => [
                         'type' => 'stream',
                         'path' => '/foo/bar',
-                        'channels' => $string
-                    ]
-                ]
-            ]
+                        'channels' => $string,
+                    ],
+                ],
+            ],
         ];
 
         $config = $this->process($configs);
@@ -73,17 +74,17 @@ class ConfigurationTest extends TestCase
         $this->assertEquals($expectedString, $config['handlers']['foobar']['channels']['elements'][0]);
     }
 
-    public function provideGelfPublisher()
+    public static function provideGelfPublisher(): array
     {
         return [
             [
-                'gelf.publisher'
+                'gelf.publisher',
             ],
             [
                 [
-                    'id' => 'gelf.publisher'
-                ]
-            ]
+                    'id' => 'gelf.publisher',
+                ],
+            ],
         ];
     }
 
@@ -99,8 +100,8 @@ class ConfigurationTest extends TestCase
                         'type' => 'gelf',
                         'publisher' => $publisher,
                     ],
-                ]
-            ]
+                ],
+            ],
         ];
 
         $config = $this->process($configs);
@@ -118,15 +119,15 @@ class ConfigurationTest extends TestCase
                     'foo' => [
                         'type' => 'stream',
                         'path' => '/foo',
-                        'channels' => ['A', 'B']
+                        'channels' => ['A', 'B'],
                     ],
                     'bar' => [
                         'type' => 'stream',
                         'path' => '/foo',
-                        'channels' => ['!C', '!D']
+                        'channels' => ['!C', '!D'],
                     ],
-                ]
-            ]
+                ],
+            ],
         ];
 
         $config = $this->process($configs);
@@ -152,10 +153,10 @@ class ConfigurationTest extends TestCase
                     'foo' => [
                         'type' => 'stream',
                         'path' => '/foo',
-                        'channels' => ['A', '!B']
-                    ]
-                ]
-            ]
+                        'channels' => ['A', '!B'],
+                    ],
+                ],
+            ],
         ];
 
         $this->expectException(InvalidConfigurationException::class);
@@ -172,16 +173,16 @@ class ConfigurationTest extends TestCase
                         'type' => 'stream',
                         'path' => '/foo',
                         'channels' => 'A',
-                    ]
-                ]
+                    ],
+                ],
             ],
             [
                 'handlers' => [
                     'foo' => [
                         'channels' => '!B',
-                    ]
-                ]
-            ]
+                    ],
+                ],
+            ],
         ];
 
         $this->expectException(InvalidConfigurationException::class);
@@ -192,7 +193,7 @@ class ConfigurationTest extends TestCase
     /** @group legacy */
     public function testWithSwiftMailerHandler()
     {
-        if (\Monolog\Logger::API >= 3) {
+        if (Logger::API >= 3) {
             $this->markTestSkipped('This test requires Monolog v1 or v2');
         }
 
@@ -204,14 +205,14 @@ class ConfigurationTest extends TestCase
                         'from_email' => 'foo@bar.com',
                         'to_email' => 'foo@bar.com',
                         'subject' => 'Subject',
-                        'mailer'  => 'mailer',
+                        'mailer' => 'mailer',
                         'email_prototype' => [
                             'id' => 'monolog.prototype',
-                            'method' => 'getPrototype'
-                        ]
-                    ]
-                ]
-            ]
+                            'method' => 'getPrototype',
+                        ],
+                    ],
+                ],
+            ],
         ];
 
         $config = $this->process($configs);
@@ -231,19 +232,19 @@ class ConfigurationTest extends TestCase
                     'elasticsearch' => [
                         'type' => 'elasticsearch',
                         'elasticsearch' => [
-                            'id' => 'elastica.client'
+                            'id' => 'elastica.client',
                         ],
                         'index' => 'my-index',
                         'document_type' => 'my-record',
-                        'ignore_error' => true
-                    ]
-                ]
-            ]
+                        'ignore_error' => true,
+                    ],
+                ],
+            ],
         ];
 
         $config = $this->process($configs);
 
-        $this->assertEquals(true, $config['handlers']['elasticsearch']['ignore_error']);
+        $this->assertTrue($config['handlers']['elasticsearch']['ignore_error']);
         $this->assertEquals('my-record', $config['handlers']['elasticsearch']['document_type']);
         $this->assertEquals('my-index', $config['handlers']['elasticsearch']['index']);
     }
@@ -257,9 +258,9 @@ class ConfigurationTest extends TestCase
                         'type' => 'telegram',
                         'token' => 'bot-token',
                         'channel' => '-100',
-                    ]
-                ]
-            ]
+                    ],
+                ],
+            ],
         ];
 
         $config = $this->process($configs);
@@ -278,11 +279,11 @@ class ConfigurationTest extends TestCase
                         'verbosity_levels' => [
                             'VERBOSITY_NORMAL' => 'NOTICE',
                             'verbosity_verbose' => 'info',
-                            'VERBOSITY_very_VERBOSE' => '200'
-                        ]
-                    ]
-                ]
-            ]
+                            'VERBOSITY_very_VERBOSE' => '200',
+                        ],
+                    ],
+                ],
+            ],
         ];
 
         $config = $this->process($configs);
@@ -293,8 +294,8 @@ class ConfigurationTest extends TestCase
             OutputInterface::VERBOSITY_VERBOSE => Logger::INFO,
             OutputInterface::VERBOSITY_VERY_VERBOSE => 200,
             OutputInterface::VERBOSITY_QUIET => Logger::ERROR,
-            OutputInterface::VERBOSITY_DEBUG => Logger::DEBUG
-            ], $config['handlers']['console']['verbosity_levels']);
+            OutputInterface::VERBOSITY_DEBUG => Logger::DEBUG,
+        ], $config['handlers']['console']['verbosity_levels']);
     }
 
     public function testWithType()
@@ -307,11 +308,11 @@ class ConfigurationTest extends TestCase
                         'path' => '/foo',
                         'channels' => [
                             'type' => 'inclusive',
-                            'elements' => ['A', 'B']
-                        ]
-                    ]
-                ]
-            ]
+                            'elements' => ['A', 'B'],
+                        ],
+                    ],
+                ],
+            ],
         ];
 
         $config = $this->process($configs);
@@ -336,10 +337,10 @@ class ConfigurationTest extends TestCase
                     'bar' => [
                         'type' => 'stream',
                         'path' => '/bar',
-                        'file_permission' => 0777
-                    ]
-                ]
-            ]
+                        'file_permission' => 0777,
+                    ],
+                ],
+            ],
         ];
 
         $config = $this->process($configs);
@@ -362,9 +363,9 @@ class ConfigurationTest extends TestCase
                         'type' => 'rotating_file',
                         'path' => '/bar',
                         'use_locking' => true,
-                    ]
-                ]
-            ]
+                    ],
+                ],
+            ],
         ];
 
         $config = $this->process($configs);
@@ -377,12 +378,11 @@ class ConfigurationTest extends TestCase
     {
         $configs = [
             [
-                'handlers' => ['foobar' => ['type' => 'stream', 'path' => '/foo/bar', 'nested' => true]]
-            ]
+                'handlers' => ['foobar' => ['type' => 'stream', 'path' => '/foo/bar', 'nested' => true]],
+            ],
         ];
 
         $config = $this->process($configs);
-
 
         $this->assertTrue($config['handlers']['foobar']['nested']);
     }
@@ -399,11 +399,11 @@ class ConfigurationTest extends TestCase
                             'password' => 'pa$$w0rd',
                             'port' => 1234,
                             'database' => 1,
-                            'key_name' => 'monolog_redis_test'
-                        ]
-                    ]
-                ]
-            ]
+                            'key_name' => 'monolog_redis_test',
+                        ],
+                    ],
+                ],
+            ],
         ];
         $config = $this->process($configs);
 
@@ -420,11 +420,11 @@ class ConfigurationTest extends TestCase
                         'type' => 'predis',
                         'redis' => [
                             'host' => '127.0.1.1',
-                            'key_name' => 'monolog_redis_test'
-                        ]
-                    ]
-                ]
-            ]
+                            'key_name' => 'monolog_redis_test',
+                        ],
+                    ],
+                ],
+            ],
         ];
         $config = $this->process($configs);
 
@@ -532,10 +532,16 @@ class ConfigurationTest extends TestCase
         $this->assertEquals($processedConfiguration, $config['handlers']['main']['process_psr_3_messages']);
     }
 
-    public function processPsr3MessagesProvider(): iterable
+    public static function processPsr3MessagesProvider(): iterable
     {
         yield 'Not specified' => [[], ['enabled' => null]];
-        yield 'Null' => [['process_psr_3_messages' => null], ['enabled' => true]];
+
+        if (version_compare(InstalledVersions::getVersion('symfony/config'), '7.2', '>=')) {
+            yield 'Null' => [['process_psr_3_messages' => null], ['enabled' => null]];
+        } else {
+            yield 'Null' => [['process_psr_3_messages' => null], ['enabled' => true]];
+        }
+
         yield 'True' => [['process_psr_3_messages' => true], ['enabled' => true]];
         yield 'False' => [['process_psr_3_messages' => false], ['enabled' => false]];
 

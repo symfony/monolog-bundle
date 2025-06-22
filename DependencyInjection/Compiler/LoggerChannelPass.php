@@ -30,9 +30,6 @@ class LoggerChannelPass implements CompilerPassInterface
 {
     protected $channels = ['app'];
 
-    /**
-     * {@inheritDoc}
-     */
     public function process(ContainerBuilder $container)
     {
         if (!$container->hasDefinition('monolog.logger')) {
@@ -49,7 +46,7 @@ class LoggerChannelPass implements CompilerPassInterface
                 $resolvedChannel = $container->getParameterBag()->resolveValue($tag['channel']);
 
                 $definition = $container->getDefinition($id);
-                $loggerId = sprintf('monolog.logger.%s', $resolvedChannel);
+                $loggerId = \sprintf('monolog.logger.%s', $resolvedChannel);
                 $this->createLogger($resolvedChannel, $loggerId, $container);
 
                 foreach ($definition->getArguments() as $index => $argument) {
@@ -84,10 +81,10 @@ class LoggerChannelPass implements CompilerPassInterface
 
         // create additional channels
         foreach ($container->getParameter('monolog.additional_channels') as $chan) {
-            if ($chan === 'app') {
+            if ('app' === $chan) {
                 continue;
             }
-            $loggerId = sprintf('monolog.logger.%s', $chan);
+            $loggerId = \sprintf('monolog.logger.%s', $chan);
             $this->createLogger($chan, $loggerId, $container);
             $container->getDefinition($loggerId)->setPublic(true);
         }
@@ -98,7 +95,7 @@ class LoggerChannelPass implements CompilerPassInterface
         foreach ($handlersToChannels as $handler => $channels) {
             foreach ($this->processChannels($channels) as $channel) {
                 try {
-                    $logger = $container->getDefinition($channel === 'app' ? 'monolog.logger' : 'monolog.logger.'.$channel);
+                    $logger = $container->getDefinition('app' === $channel ? 'monolog.logger' : 'monolog.logger.'.$channel);
                 } catch (InvalidArgumentException $e) {
                     $msg = 'Monolog configuration error: The logging channel "'.$channel.'" assigned to the "'.substr($handler, 16).'" handler does not exist.';
                     throw new \InvalidArgumentException($msg, 0, $e);
@@ -133,22 +130,20 @@ class LoggerChannelPass implements CompilerPassInterface
     }
 
     /**
-     * Create new logger from the monolog.logger_prototype
+     * Create new logger from the monolog.logger_prototype.
      *
      * @return void
      */
     protected function createLogger(string $channel, string $loggerId, ContainerBuilder $container)
     {
-        if (!in_array($channel, $this->channels)) {
+        if (!\in_array($channel, $this->channels)) {
             $logger = new ChildDefinition('monolog.logger_prototype');
             $logger->replaceArgument(0, $channel);
             $container->setDefinition($loggerId, $logger);
             $this->channels[] = $channel;
         }
 
-        $parameterName = $channel . 'Logger';
-
-        $container->registerAliasForArgument($loggerId, LoggerInterface::class, $parameterName);
+        $container->registerAliasForArgument($loggerId, LoggerInterface::class, $channel.'.logger');
     }
 
     /**
