@@ -73,7 +73,7 @@ class MonologExtension extends Extension
             $handlers = [];
 
             foreach ($config['handlers'] as $name => $handler) {
-                if(false === $handler['enabled']) {
+                if (!$handler['enabled']) {
                     continue;
                 }
                 $handlers[$handler['priority']][] = [
