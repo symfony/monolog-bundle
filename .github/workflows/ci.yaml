@@ -14,7 +14,6 @@ jobs:
 
             -   name: Setup PHP
                 uses: shivammathur/setup-php@v2
-
                 with:
                     php-version: 8.3
                     coverage: none
@@ -44,9 +43,10 @@ jobs:
                     -   php: '8.4'
                         deps: highest
                         monolog: '3.*'
+
         steps:
             -   name: Checkout
-                uses: actions/checkout@v2
+                uses: actions/checkout@v4
 
             -   name: Setup PHP
                 uses: shivammathur/setup-php@v2
@@ -64,7 +64,7 @@ jobs:
                 run: composer require --no-update monolog/monolog:${{ matrix.monolog }}
 
             -   name: Composer install
-                uses: ramsey/composer-install@v1
+                uses: ramsey/composer-install@v3
                 with:
                     dependency-versions: '${{ matrix.deps }}'
 
