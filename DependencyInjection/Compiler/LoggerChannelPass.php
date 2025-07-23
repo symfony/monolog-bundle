@@ -13,8 +13,10 @@ namespace Symfony\Bundle\MonologBundle\DependencyInjection\Compiler;
 
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Argument\BoundArgument;
+use Symfony\Component\DependencyInjection\Argument\TaggedIteratorArgument;
 use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
+use Symfony\Component\DependencyInjection\Compiler\PriorityTaggedServiceTrait;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
 use Symfony\Component\DependencyInjection\Reference;
@@ -28,6 +30,8 @@ use Symfony\Component\DependencyInjection\Reference;
  */
 class LoggerChannelPass implements CompilerPassInterface
 {
+    use PriorityTaggedServiceTrait;
+
     protected $channels = ['app'];
 
     public function process(ContainerBuilder $container)
@@ -103,6 +107,8 @@ class LoggerChannelPass implements CompilerPassInterface
                 $logger->addMethodCall('pushHandler', [new Reference($handler)]);
             }
         }
+
+        $this->addProcessors($container);
     }
 
     /**
@@ -152,5 +158,68 @@ class LoggerChannelPass implements CompilerPassInterface
     private function changeReference(Reference $reference, string $serviceId): Reference
     {
         return new Reference($serviceId, $reference->getInvalidBehavior());
+    }
+
+    private function addProcessors(ContainerBuilder $container)
+    {
+        $indexedTags = [];
+        $i = 1;
+
+        foreach ($container->findTaggedServiceIds('monolog.processor') as $id => $tags) {
+            foreach ($tags as &$tag) {
+                $indexedTags[$tag['index'] = $i++] = $tag;
+            }
+            unset($tag);
+            $definition = $container->getDefinition($id);
+            $definition->setTags(array_merge($definition->getTags(), ['monolog.processor' => $tags]));
+        }
+
+        $taggedIteratorArgument = new TaggedIteratorArgument('monolog.processor', 'index', null, true);
+        // array_reverse is used because ProcessableHandlerTrait::pushProcessor prepends processors to the beginning of the stack
+        foreach (array_reverse($this->findAndSortTaggedServices($taggedIteratorArgument, $container), true) as $index => $reference) {
+            $tag = $indexedTags[$index];
+
+            if (!empty($tag['channel']) && !empty($tag['handler'])) {
+                throw new \InvalidArgumentException(\sprintf('you cannot specify both the "handler" and "channel" attributes for the "monolog.processor" tag on service "%s"', $reference));
+            }
+
+            if (!empty($tag['handler'])) {
+                $parentDef = $container->findDefinition(\sprintf('monolog.handler.%s', $tag['handler']));
+                $definitions = [$parentDef];
+                while (!$parentDef->getClass() && $parentDef instanceof ChildDefinition) {
+                    $parentDef = $container->findDefinition($parentDef->getParent());
+                }
+                $class = $container->getParameterBag()->resolveValue($parentDef->getClass());
+                if (!method_exists($class, 'pushProcessor')) {
+                    throw new \InvalidArgumentException(\sprintf('The "%s" handler does not accept processors', $tag['handler']));
+                }
+            } elseif (!empty($tag['channel'])) {
+                if ('app' === $tag['channel']) {
+                    $definitions = [$container->getDefinition('monolog.logger')];
+                } else {
+                    $definitions = [$container->getDefinition(\sprintf('monolog.logger.%s', $tag['channel']))];
+                }
+            } else {
+                $definitions = [$container->getDefinition('monolog.logger')];
+                foreach ($this->channels as $channel) {
+                    if ('app' === $channel) {
+                        continue;
+                    }
+
+                    $definitions[] = $container->getDefinition(\sprintf('monolog.logger.%s', $channel));
+                }
+            }
+
+            if (!empty($tag['method'])) {
+                $processor = [$reference, $tag['method']];
+            } else {
+                // If no method is defined, fallback to use __invoke
+                $processor = $reference;
+            }
+
+            foreach ($definitions as $definition) {
+                $definition->addMethodCall('pushProcessor', [$processor]);
+            }
+        }
     }
 }

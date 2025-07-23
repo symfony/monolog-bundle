@@ -17,6 +17,7 @@ use Monolog\Handler\FingersCrossed\ErrorLevelActivationStrategy;
 use Monolog\Handler\RollbarHandler;
 use Monolog\Logger;
 use Monolog\Processor\UidProcessor;
+use Symfony\Bridge\Monolog\Handler\ConsoleHandler;
 use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\LoggerChannelPass;
 use Symfony\Bundle\MonologBundle\DependencyInjection\MonologExtension;
 use Symfony\Bundle\MonologBundle\Tests\DependencyInjection\Fixtures\AsMonologProcessor\FooProcessor;
@@ -776,6 +777,8 @@ class MonologExtensionTest extends DependencyInjectionTestCase
         }
 
         $container = $this->getContainer([], [
+            'monolog.handler.foo_handler' => (new Definition(ConsoleHandler::class))->setAutoconfigured(true),
+            'monolog.logger.ccc_channel' => (new Definition(Logger::class))->setAutoconfigured(true),
             FooProcessor::class => (new Definition(FooProcessor::class))->setAutoconfigured(true),
         ]);
 
@@ -784,11 +787,13 @@ class MonologExtensionTest extends DependencyInjectionTestCase
                 'channel' => null,
                 'handler' => 'foo_handler',
                 'method' => null,
+                'index' => 1,
             ],
             [
                 'channel' => 'ccc_channel',
                 'handler' => null,
                 'method' => '__invoke',
+                'index' => 2,
             ],
         ], $container->getDefinition(FooProcessor::class)->getTag('monolog.processor'));
     }
@@ -803,6 +808,8 @@ class MonologExtensionTest extends DependencyInjectionTestCase
         }
 
         $container = $this->getContainer([], [
+            'monolog.handler.foo_handler' => (new Definition(ConsoleHandler::class))->setAutoconfigured(true),
+            'monolog.logger.ccc_channel' => (new Definition(Logger::class))->setAutoconfigured(true),
             FooProcessorWithPriority::class => (new Definition(FooProcessorWithPriority::class))->setAutoconfigured(true),
         ]);
 
@@ -812,12 +819,14 @@ class MonologExtensionTest extends DependencyInjectionTestCase
                 'handler' => 'foo_handler',
                 'method' => null,
                 'priority' => null,
+                'index' => 1,
             ],
             [
                 'channel' => 'ccc_channel',
                 'handler' => null,
                 'method' => '__invoke',
                 'priority' => 10,
+                'index' => 2,
             ],
         ], $container->getDefinition(FooProcessorWithPriority::class)->getTag('monolog.processor'));
     }
