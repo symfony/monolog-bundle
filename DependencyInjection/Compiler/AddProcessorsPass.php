@@ -28,6 +28,13 @@ class AddProcessorsPass implements CompilerPassInterface
 {
     use PriorityTaggedServiceTrait;
 
+    private $channelPass;
+
+    public function __construct(?LoggerChannelPass $channelPass = null)
+    {
+        $this->channelPass = $channelPass;
+    }
+
     public function process(ContainerBuilder $container)
     {
         if (!$container->hasDefinition('monolog.logger')) {
@@ -56,8 +63,8 @@ class AddProcessorsPass implements CompilerPassInterface
             }
 
             if (!empty($tag['handler'])) {
-                $definition = $container->findDefinition(\sprintf('monolog.handler.%s', $tag['handler']));
-                $parentDef = $definition;
+                $parentDef = $container->findDefinition(\sprintf('monolog.handler.%s', $tag['handler']));
+                $definitions = [$parentDef];
                 while (!$parentDef->getClass() && $parentDef instanceof ChildDefinition) {
                     $parentDef = $container->findDefinition($parentDef->getParent());
                 }
@@ -66,13 +73,18 @@ class AddProcessorsPass implements CompilerPassInterface
                     throw new \InvalidArgumentException(\sprintf('The "%s" handler does not accept processors', $tag['handler']));
                 }
             } elseif (!empty($tag['channel'])) {
-                if ('app' === $tag['channel']) {
-                    $definition = $container->getDefinition('monolog.logger');
-                } else {
-                    $definition = $container->getDefinition(\sprintf('monolog.logger.%s', $tag['channel']));
-                }
+                $loggerId = 'app' === $tag['channel'] ? 'monolog.logger' : \sprintf('monolog.logger.%s', $tag['channel']);
+                $definitions = [$container->getDefinition($loggerId)];
             } else {
-                $definition = $container->getDefinition('monolog.logger_prototype');
+                if ($this->channelPass) {
+                    $definitions = [];
+                    foreach ($this->channelPass->getChannels() as $channel) {
+                        $loggerId = 'app' === $channel ? 'monolog.logger' : \sprintf('monolog.logger.%s', $channel);
+                        $definitions[] = $container->getDefinition($loggerId);
+                    }
+                } else {
+                    $definitions = [$container->getDefinition('monolog.logger_prototype')];
+                }
             }
 
             if (!empty($tag['method'])) {
@@ -81,7 +93,9 @@ class AddProcessorsPass implements CompilerPassInterface
                 // If no method is defined, fallback to use __invoke
                 $processor = $reference;
             }
-            $definition->addMethodCall('pushProcessor', [$processor]);
+            foreach ($definitions as $definition) {
+                $definition->addMethodCall('pushProcessor', [$processor]);
+            }
         }
     }
 }
