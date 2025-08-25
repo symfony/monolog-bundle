@@ -19,7 +19,7 @@ use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\AddProcessorsPass;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
-use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
+use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
 use Symfony\Component\DependencyInjection\Reference;
 
 class AddProcessorsPassTest extends TestCase
@@ -42,8 +42,8 @@ class AddProcessorsPassTest extends TestCase
     public function testFailureOnHandlerWithoutPushProcessor()
     {
         $container = new ContainerBuilder();
-        $loader = new XmlFileLoader($container, new FileLocator(__DIR__.'/../../../Resources/config'));
-        $loader->load('monolog.xml');
+        $loader = new PhpFileLoader($container, new FileLocator(__DIR__.'/../../../Resources/config'));
+        $loader->load('monolog.php');
 
         $service = new Definition(NullHandler::class);
         $service->addTag('monolog.processor', ['handler' => 'test3']);
@@ -68,8 +68,8 @@ class AddProcessorsPassTest extends TestCase
     protected function getContainer()
     {
         $container = new ContainerBuilder();
-        $loader = new XmlFileLoader($container, new FileLocator(__DIR__.'/../../../Resources/config'));
-        $loader->load('monolog.xml');
+        $loader = new PhpFileLoader($container, new FileLocator(__DIR__.'/../../../Resources/config'));
+        $loader->load('monolog.php');
 
         $definition = $container->getDefinition('monolog.logger_prototype');
         $container->setParameter('monolog.handler.console.class', ConsoleHandler::class);

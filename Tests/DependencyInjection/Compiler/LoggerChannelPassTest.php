@@ -17,7 +17,7 @@ use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\LoggerChannelPass;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
-use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
+use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
 use Symfony\Component\DependencyInjection\Reference;
 
 class LoggerChannelPassTest extends TestCase
@@ -147,8 +147,8 @@ class LoggerChannelPassTest extends TestCase
     private function getContainer()
     {
         $container = new ContainerBuilder();
-        $loader = new XmlFileLoader($container, new FileLocator(__DIR__.'/../../../Resources/config'));
-        $loader->load('monolog.xml');
+        $loader = new PhpFileLoader($container, new FileLocator(__DIR__.'/../../../Resources/config'));
+        $loader->load('monolog.php');
         $definition = $container->getDefinition('monolog.logger_prototype');
         $container->set('monolog.handler.test', new Definition('%monolog.handler.null.class%', [100, false]));
         $definition->addMethodCall('pushHandler', [new Reference('monolog.handler.test')]);
@@ -189,8 +189,8 @@ class LoggerChannelPassTest extends TestCase
     private function getContainerWithSetter()
     {
         $container = new ContainerBuilder();
-        $loader = new XmlFileLoader($container, new FileLocator(__DIR__.'/../../../Resources/config'));
-        $loader->load('monolog.xml');
+        $loader = new PhpFileLoader($container, new FileLocator(__DIR__.'/../../../Resources/config'));
+        $loader->load('monolog.php');
         $definition = $container->getDefinition('monolog.logger_prototype');
         $container->set('monolog.handler.test', new Definition('%monolog.handler.null.class%', [100, false]));
         $definition->addMethodCall('pushHandler', [new Reference('monolog.handler.test')]);
@@ -222,8 +222,8 @@ class LoggerChannelPassTest extends TestCase
         $container->setParameter('monolog.handlers_to_channels', []);
         $container->setParameter('monolog.use_microseconds', true);
 
-        $loader = new XmlFileLoader($container, new FileLocator(__DIR__.'/../../../Resources/config'));
-        $loader->load('monolog.xml');
+        $loader = new PhpFileLoader($container, new FileLocator(__DIR__.'/../../../Resources/config'));
+        $loader->load('monolog.php');
 
         $container->addCompilerPass(new LoggerChannelPass());
 
