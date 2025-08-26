@@ -25,7 +25,7 @@ use Symfony\Component\DependencyInjection\Reference;
  */
 class AddSwiftMailerTransportPass implements CompilerPassInterface
 {
-    public function process(ContainerBuilder $container)
+    public function process(ContainerBuilder $container): void
     {
         $handlers = $container->getParameter('monolog.swift_mailer.handlers');
 

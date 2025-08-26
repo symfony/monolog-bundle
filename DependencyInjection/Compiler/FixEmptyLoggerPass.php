@@ -40,7 +40,7 @@ class FixEmptyLoggerPass implements CompilerPassInterface
         $this->channelPass = $channelPass;
     }
 
-    public function process(ContainerBuilder $container)
+    public function process(ContainerBuilder $container): void
     {
         $container->register('monolog.handler.null_internal', 'Monolog\Handler\NullHandler');
         foreach ($this->channelPass->getChannels() as $channel) {
