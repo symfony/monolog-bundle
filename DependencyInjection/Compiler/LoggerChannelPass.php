@@ -30,7 +30,7 @@ class LoggerChannelPass implements CompilerPassInterface
 {
     protected $channels = ['app'];
 
-    public function process(ContainerBuilder $container)
+    public function process(ContainerBuilder $container): void
     {
         if (!$container->hasDefinition('monolog.logger')) {
             return;

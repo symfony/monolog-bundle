@@ -36,7 +36,7 @@ class DebugHandlerPass implements CompilerPassInterface
         $this->channelPass = $channelPass;
     }
 
-    public function process(ContainerBuilder $container)
+    public function process(ContainerBuilder $container): void
     {
         if (!$container->hasDefinition('profiler')) {
             return;
