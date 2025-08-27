@@ -784,11 +784,13 @@ class MonologExtensionTest extends DependencyInjectionTestCase
                 'channel' => null,
                 'handler' => 'foo_handler',
                 'method' => null,
+                'priority' => null
             ],
             [
                 'channel' => 'ccc_channel',
                 'handler' => null,
                 'method' => '__invoke',
+                'priority' => null
             ],
         ], $container->getDefinition(FooProcessor::class)->getTag('monolog.processor'));
     }
