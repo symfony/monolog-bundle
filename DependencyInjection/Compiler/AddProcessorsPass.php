@@ -32,6 +32,10 @@ class AddProcessorsPass implements CompilerPassInterface
         }
 
         foreach ($container->findTaggedServiceIds('monolog.processor') as $id => $tags) {
+            if (array_any($tags, $closure = function (array $tag) { return (bool) $tag; })) {
+                $tags = array_filter($tags, $closure);
+            }
+
             foreach ($tags as $tag) {
                 if (!empty($tag['channel']) && !empty($tag['handler'])) {
                     throw new \InvalidArgumentException(\sprintf('you cannot specify both the "handler" and "channel" attributes for the "monolog.processor" tag on service "%s"', $id));

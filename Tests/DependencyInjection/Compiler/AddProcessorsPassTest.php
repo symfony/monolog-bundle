@@ -16,7 +16,10 @@ use Monolog\Logger;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bridge\Monolog\Handler\ConsoleHandler;
 use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\AddProcessorsPass;
+use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\LoggerChannelPass;
 use Symfony\Component\Config\FileLocator;
+use Symfony\Component\DependencyInjection\Compiler\PassConfig;
+use Symfony\Component\DependencyInjection\Compiler\ResolveChildDefinitionsPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
@@ -63,6 +66,61 @@ class AddProcessorsPassTest extends TestCase
             $this->expectExceptionMessage('The "test3" handler does not accept processors');
             $container->compile();
         }
+    }
+
+    /**
+     * @dataProvider provideEmptyTagsData
+     */
+    public function testEmptyTagsAreIgnoredWhenNonEmptyArePresent(
+        array $tagAttributesList,
+        array $expectedLoggerCalls,
+        array $expectedMyChannelLoggerCalls
+    ) {
+        $container = new ContainerBuilder();
+        $loader = new PhpFileLoader($container, new FileLocator(__DIR__.'/../../../Resources/config'));
+        $loader->load('monolog.php');
+
+        $container->setParameter('monolog.additional_channels', ['my_channel']);
+        $container->setParameter('monolog.handlers_to_channels', []);
+
+        $container->register('TestClass')->setTags(['monolog.processor' => $tagAttributesList]);
+
+        $container->getCompilerPassConfig()->setOptimizationPasses([]);
+        $container->getCompilerPassConfig()->setRemovingPasses([]);
+        $container->addCompilerPass(new ResolveChildDefinitionsPass(), PassConfig::TYPE_OPTIMIZE);
+        $container->addCompilerPass(new LoggerChannelPass());
+        $container->addCompilerPass(new AddProcessorsPass());
+        $container->compile();
+
+        $this->assertEquals($expectedLoggerCalls, $container->getDefinition('monolog.logger')->getMethodCalls());
+        $this->assertEquals($expectedMyChannelLoggerCalls, $container->getDefinition('monolog.logger.my_channel')->getMethodCalls());
+    }
+
+    public static function provideEmptyTagsData(): iterable
+    {
+        yield 'with empty tag' => [
+            [[]],
+            [['pushProcessor', [new Reference('TestClass')]], ['useMicrosecondTimestamps', ['%monolog.use_microseconds%']]],
+            [['pushProcessor', [new Reference('TestClass')]]],
+        ];
+
+        yield 'with app channel' => [
+            [[], ['channel' => 'app']],
+            [['useMicrosecondTimestamps', ['%monolog.use_microseconds%']], ['pushProcessor', [new Reference('TestClass')]]],
+            [],
+        ];
+
+        yield 'with my_channel channel' => [
+            [[], ['channel' => 'my_channel']],
+            [['useMicrosecondTimestamps', ['%monolog.use_microseconds%']]],
+            [['pushProcessor', [new Reference('TestClass')]]],
+        ];
+
+        yield 'with method and no channel' => [
+            [[], ['method' => 'foo']],
+            [['pushProcessor', [[new Reference('TestClass'), 'foo']]], ['useMicrosecondTimestamps', ['%monolog.use_microseconds%']]],
+            [['pushProcessor', [[new Reference('TestClass'), 'foo']]]],
+        ];
     }
 
     protected function getContainer()
