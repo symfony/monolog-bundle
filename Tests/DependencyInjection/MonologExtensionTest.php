@@ -371,12 +371,10 @@ class MonologExtensionTest extends DependencyInjectionTestCase
 
     public function testSentryHandlerWhenConfigurationIsWrong()
     {
-        try {
-            $this->getContainer([['handlers' => ['sentry' => ['type' => 'sentry']]]]);
-            $this->fail();
-        } catch (InvalidConfigurationException $e) {
-            $this->assertStringContainsString('DSN', $e->getMessage());
-        }
+        $this->expectException(InvalidConfigurationException::class);
+        $this->expectExceptionMessage('The DSN has to be specified to use Sentry\'s handler');
+
+        $this->getContainer([['handlers' => ['sentry' => ['type' => 'sentry']]]]);
     }
 
     public function testSentryHandlerWhenADSNIsSpecified()
@@ -396,8 +394,9 @@ class MonologExtensionTest extends DependencyInjectionTestCase
 
         $handler = $container->getDefinition('monolog.handler.sentry');
         $this->assertDICDefinitionClass($handler, 'Sentry\Monolog\Handler');
+        $this->assertDICConstructorArguments($handler, [new Reference('monolog.handler.sentry.hub'), 'DEBUG', true, false]);
 
-        $hub = $container->getDefinition('monolog.handler.sentry.hub');
+        $hub = $container->getDefinition($handler->getArguments()[0]);
         $this->assertDICDefinitionClass($hub, 'Sentry\State\Hub');
         $this->assertDICConstructorArguments($hub, [new Reference('monolog.sentry.client.'.sha1($dsn))]);
     }
@@ -426,7 +425,12 @@ class MonologExtensionTest extends DependencyInjectionTestCase
         $this->assertDICDefinitionMethodCallAt(1, $logger, 'pushHandler', [new Reference('monolog.handler.sentry')]);
 
         $handler = $container->getDefinition('monolog.handler.sentry');
-        $this->assertDICConstructorArguments($handler->getArguments()[0], [new Reference('sentry.client')]);
+        $this->assertDICDefinitionClass($handler, 'Sentry\Monolog\Handler');
+        $this->assertDICConstructorArguments($handler, [new Reference('monolog.handler.sentry.hub'), 'DEBUG', true, false]);
+
+        $hub = $container->getDefinition($handler->getArguments()[0]);
+        $this->assertDICDefinitionClass($hub, 'Sentry\State\Hub');
+        $this->assertDICConstructorArguments($hub, [new Reference('sentry.client')]);
     }
 
     public function testSentryHandlerWhenAClientIsSpecified()
@@ -452,7 +456,12 @@ class MonologExtensionTest extends DependencyInjectionTestCase
         $this->assertDICDefinitionMethodCallAt(1, $logger, 'pushHandler', [new Reference('monolog.handler.sentry')]);
 
         $handler = $container->getDefinition('monolog.handler.sentry');
-        $this->assertDICConstructorArguments($handler->getArguments()[0], [new Reference('sentry.client')]);
+        $this->assertDICDefinitionClass($handler, 'Sentry\Monolog\Handler');
+        $this->assertDICConstructorArguments($handler, [new Reference('monolog.handler.sentry.hub'), 'DEBUG', true, false]);
+
+        $hub = $container->getDefinition($handler->getArguments()[0]);
+        $this->assertDICDefinitionClass($hub, 'Sentry\State\Hub');
+        $this->assertDICConstructorArguments($hub, [new Reference('sentry.client')]);
     }
 
     public function testSentryHandlerWhenAHubIsSpecified()
@@ -478,6 +487,7 @@ class MonologExtensionTest extends DependencyInjectionTestCase
         $this->assertDICDefinitionMethodCallAt(1, $logger, 'pushHandler', [new Reference('monolog.handler.sentry')]);
 
         $handler = $container->getDefinition('monolog.handler.sentry');
+        $this->assertDICDefinitionClass($handler, 'Sentry\Monolog\Handler');
         $this->assertDICConstructorArguments($handler, [new Reference('sentry.hub'), 'DEBUG', true, false]);
     }
 

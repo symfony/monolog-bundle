@@ -534,7 +534,7 @@ class Configuration implements ConfigurationInterface
                 ->scalarNode('max_level')->defaultValue('EMERGENCY')->end() // filter
                 ->scalarNode('buffer_size')->defaultValue(0)->end() // fingers_crossed and buffer
                 ->booleanNode('flush_on_overflow')->defaultFalse()->end() // buffer
-                ->scalarNode('handler')->end() // fingers_crossed and buffer
+                ->scalarNode('handler')->end() // fingers_crossed, buffer, filter, deduplication, sampling
                 ->scalarNode('url')->end() // cube
                 ->scalarNode('exchange')->end() // amqp
                 ->scalarNode('exchange_name')->defaultValue('log')->end() // amqp
@@ -658,8 +658,8 @@ class Configuration implements ConfigurationInterface
                 ->thenInvalid('Service handlers can not have a formatter configured in the bundle, you must reconfigure the service itself instead')
             ->end()
             ->validate()
-                ->ifTrue(function ($v) { return ('fingers_crossed' === $v['type'] || 'buffer' === $v['type'] || 'filter' === $v['type'] || 'sampling' === $v['type']) && empty($v['handler']); })
-                ->thenInvalid('The handler has to be specified to use a FingersCrossedHandler or BufferHandler or FilterHandler or SamplingHandler')
+                ->ifTrue(function ($v) { return \in_array($v['type'], ['fingers_crossed', 'buffer', 'filter', 'deduplication', 'sampling'], true) && empty($v['handler']); })
+                ->thenInvalid('The handler has to be specified to use a FingersCrossedHandler, BufferHandler, FilterHandler, DeduplicationHandler or SamplingHandler')
             ->end()
             ->validate()
                 ->ifTrue(function ($v) { return 'fingers_crossed' === $v['type'] && !empty($v['excluded_404s']) && !empty($v['activation_strategy']); })
@@ -801,9 +801,9 @@ class Configuration implements ConfigurationInterface
         return $treeBuilder;
     }
 
-    private function addGelfSection(ArrayNodeDefinition $handerNode)
+    private function addGelfSection(ArrayNodeDefinition $handlerNode)
     {
-        $handerNode
+        $handlerNode
             ->children()
                 ->arrayNode('publisher')
                     ->canBeUnset()
@@ -832,9 +832,9 @@ class Configuration implements ConfigurationInterface
         ;
     }
 
-    private function addMongoSection(ArrayNodeDefinition $handerNode)
+    private function addMongoSection(ArrayNodeDefinition $handlerNode)
     {
-        $handerNode
+        $handlerNode
             ->children()
                 ->arrayNode('mongo')
                     ->canBeUnset()
@@ -872,9 +872,9 @@ class Configuration implements ConfigurationInterface
         ;
     }
 
-    private function addElasticsearchSection(ArrayNodeDefinition $handerNode)
+    private function addElasticsearchSection(ArrayNodeDefinition $handlerNode)
     {
-        $handerNode
+        $handlerNode
             ->children()
                 ->arrayNode('elasticsearch')
                     ->canBeUnset()
@@ -904,9 +904,9 @@ class Configuration implements ConfigurationInterface
         ;
     }
 
-    private function addRedisSection(ArrayNodeDefinition $handerNode)
+    private function addRedisSection(ArrayNodeDefinition $handlerNode)
     {
-        $handerNode
+        $handlerNode
             ->children()
                 ->arrayNode('redis')
                     ->canBeUnset()
@@ -937,9 +937,9 @@ class Configuration implements ConfigurationInterface
         ;
     }
 
-    private function addPredisSection(ArrayNodeDefinition $handerNode)
+    private function addPredisSection(ArrayNodeDefinition $handlerNode)
     {
-        $handerNode
+        $handlerNode
             ->children()
                 ->arrayNode('predis')
                     ->canBeUnset()
@@ -966,9 +966,9 @@ class Configuration implements ConfigurationInterface
         ;
     }
 
-    private function addMailerSection(ArrayNodeDefinition $handerNode)
+    private function addMailerSection(ArrayNodeDefinition $handlerNode)
     {
-        $handerNode
+        $handlerNode
             ->children()
                 ->scalarNode('from_email')->end() // swift_mailer, native_mailer, symfony_mailer and flowdock
                 ->arrayNode('to_email') // swift_mailer, native_mailer and symfony_mailer
@@ -1013,9 +1013,9 @@ class Configuration implements ConfigurationInterface
         ;
     }
 
-    private function addVerbosityLevelSection(ArrayNodeDefinition $handerNode)
+    private function addVerbosityLevelSection(ArrayNodeDefinition $handlerNode)
     {
-        $handerNode
+        $handlerNode
             ->children()
                 ->arrayNode('verbosity_levels') // console
                     ->beforeNormalization()
@@ -1073,9 +1073,9 @@ class Configuration implements ConfigurationInterface
         ;
     }
 
-    private function addChannelsSection(ArrayNodeDefinition $handerNode)
+    private function addChannelsSection(ArrayNodeDefinition $handlerNode)
     {
-        $handerNode
+        $handlerNode
             ->children()
                 ->arrayNode('channels')
                     ->fixXmlConfig('channel', 'elements')
