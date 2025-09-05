@@ -511,6 +511,51 @@ class MonologExtensionTest extends DependencyInjectionTestCase
         );
     }
 
+    public function testSentryBreadcrumbHandlerWhenConfigurationIsWrong()
+    {
+        $this->expectException(InvalidConfigurationException::class);
+        $this->expectExceptionMessage('The sentry_handler has to be specified to use a Sentry BreadcrumbHandler');
+
+        $this->getContainer([['handlers' => ['sentry_breadcrumb' => ['type' => 'sentry_breadcrumb']]]]);
+    }
+
+    /**
+     * @testWith [{"dsn": "http://a:b@c.com:9000/1"}, "monolog.handler.sentry.hub"]
+     *           [{"hub_id": "sentry.hub"}, "sentry.hub"]
+     */
+    public function testSentryBreadcrumbHandlerWhenConfigurationIsOk(array $config, string $hubId)
+    {
+        $container = $this->getContainer(
+            [
+                [
+                    'handlers' => [
+                        'sentry_breadcrumb' => ['type' => 'sentry_breadcrumb', 'sentry_handler' => 'sentry'],
+                        'sentry' => ['type' => 'sentry'] + $config,
+                    ],
+                ],
+            ],
+            [
+                'sentry.hub' => new Definition(\Sentry\State\HubInterface::class),
+            ]
+        );
+
+        $this->assertTrue($container->hasDefinition('monolog.logger'));
+        $this->assertTrue($container->hasDefinition('monolog.handler.sentry'));
+        $this->assertTrue($container->hasDefinition('monolog.handler.sentry_breadcrumb'));
+
+        $logger = $container->getDefinition('monolog.logger');
+        $this->assertDICDefinitionMethodCallAt(0, $logger, 'useMicrosecondTimestamps', ['%monolog.use_microseconds%']);
+        $this->assertDICDefinitionMethodCallAt(1, $logger, 'pushHandler', [new Reference('monolog.handler.sentry')]);
+        $this->assertDICDefinitionMethodCallAt(2, $logger, 'pushHandler', [new Reference('monolog.handler.sentry_breadcrumb')]);
+
+        $handler = $container->getDefinition('monolog.handler.sentry_breadcrumb');
+        $this->assertDICDefinitionClass($handler, 'Sentry\Monolog\BreadcrumbHandler');
+        $this->assertDICConstructorArguments($handler, [new Reference($hubId), 'DEBUG', true]);
+
+        $sentry = $container->getDefinition('monolog.handler.sentry');
+        $this->assertSame((string) $sentry->getArgument(0), (string) $handler->getArgument(0));
+    }
+
     public function testLogglyHandler()
     {
         $token = '026308d8-2b63-4225-8fe9-e01294b6e472';
