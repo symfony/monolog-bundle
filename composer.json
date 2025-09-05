@@ -21,7 +21,8 @@
         "symfony/config": "^5.4 || ^6.0 || ^7.0",
         "symfony/dependency-injection": "^5.4 || ^6.0 || ^7.0",
         "symfony/http-kernel": "^5.4 || ^6.0 || ^7.0",
-        "symfony/monolog-bridge": "^5.4 || ^6.0 || ^7.0"
+        "symfony/monolog-bridge": "^5.4 || ^6.0 || ^7.0",
+        "symfony/polyfill-php84": "^1.30"
     },
     "require-dev": {
         "symfony/console": "^5.4 || ^6.0 || ^7.0",
