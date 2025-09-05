@@ -724,7 +724,7 @@ class MonologExtension extends Extension
 
             case 'sentry':
                 if (null !== $handler['hub_id']) {
-                    $hub = new Reference($handler['hub_id']);
+                    $hubId = $handler['hub_id'];
                 } else {
                     if (null !== $handler['client_id']) {
                         $clientId = $handler['client_id'];
@@ -755,18 +755,18 @@ class MonologExtension extends Extension
                         }
                     }
 
-                    $hub = new Definition(
+                    $hubId = \sprintf('monolog.handler.%s.hub', $name);
+                    $hub = $container->setDefinition($hubId, new Definition(
                         'Sentry\\State\\Hub',
                         [new Reference($clientId)]
-                    );
-                    $container->setDefinition(\sprintf('monolog.handler.%s.hub', $name), $hub);
+                    ));
 
                     // can't set the hub to the current hub, getting into a recursion otherwise...
                     // $hub->addMethodCall('setCurrent', array($hub));
                 }
 
                 $definition->setArguments([
-                    $hub,
+                    new Reference($hubId),
                     $handler['level'],
                     $handler['bubble'],
                     $handler['fill_extra_context'],
