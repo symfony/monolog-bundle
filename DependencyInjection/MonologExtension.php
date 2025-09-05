@@ -29,7 +29,7 @@ use Symfony\Component\DependencyInjection\Argument\BoundArgument;
 use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
-use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
+use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use Symfony\Component\HttpKernel\Log\DebugLoggerConfigurator;
@@ -61,8 +61,8 @@ class MonologExtension extends Extension
         $config = $this->processConfiguration($configuration, $configs);
 
         if (isset($config['handlers'])) {
-            $loader = new XmlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
-            $loader->load('monolog.xml');
+            $loader = new PhpFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
+            $loader->load('monolog.php');
 
             if (!class_exists(DebugLoggerConfigurator::class)) {
                 $container->getDefinition('monolog.logger_prototype')->setClass(LegacyLogger::class);
