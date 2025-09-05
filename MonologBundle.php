@@ -37,7 +37,7 @@ class MonologBundle extends Bundle
 
         $container->addCompilerPass($channelPass = new LoggerChannelPass());
         $container->addCompilerPass(new FixEmptyLoggerPass($channelPass));
-        $container->addCompilerPass(new AddProcessorsPass());
+        $container->addCompilerPass(new AddProcessorsPass($channelPass));
         $container->addCompilerPass(new AddSwiftMailerTransportPass());
     }
 
