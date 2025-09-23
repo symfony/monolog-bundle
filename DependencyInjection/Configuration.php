@@ -800,7 +800,7 @@ class Configuration implements ConfigurationInterface
                 ->thenInvalid('The host has to be specified to use a ServerLogHandler')
             ->end()
             ->validate()
-                ->ifTrue(function ($v) { return $v['interactive_only'] && version_compare(InstalledVersions::getVersion('symfony/monolog-bridge'), '7.3.0', '<'); })
+                ->ifTrue(function ($v) { return $v['interactive_only'] && version_compare(InstalledVersions::getVersion('symfony/monolog-bridge'), '7.4.0', '<'); })
                 ->thenInvalid('The interactive_only flag requires symfony/monolog-bridge 7.4 or higher')
             ->end()
         ;
