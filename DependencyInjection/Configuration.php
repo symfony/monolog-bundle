@@ -801,7 +801,7 @@ class Configuration implements ConfigurationInterface
             ->end()
             ->validate()
                 ->ifTrue(function ($v) { return $v['interactive_only'] && version_compare(InstalledVersions::getVersion('symfony/monolog-bridge'), '7.3.0', '<'); })
-                ->thenInvalid('The interactive_only flag is available with symfony/monolog-bridge 7.3.0 or higher')
+                ->thenInvalid('The interactive_only flag requires symfony/monolog-bridge 7.4 or higher')
             ->end()
         ;
 
