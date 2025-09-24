@@ -1,0 +1,7 @@
+---------------------------------------------------------------------------
+
+by HypeMC at 2025-08-30T15:31:53Z
+
+~~CI failure is false positive, trailing_comma_in_multiline is not supported in PHP 7.2.~~
+
+Decided to put in in one line instead.
