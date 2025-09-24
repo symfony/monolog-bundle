@@ -1,0 +1,23 @@
+---------------------------------------------------------------------------
+
+by GromNaN at 2025-09-24T07:59:07Z
+
+Hi @derrabus! Would you like to rebase this PR on 4.x?
+
+---------------------------------------------------------------------------
+
+by derrabus at 2025-09-24T08:39:52Z
+
+Done.
+
+---------------------------------------------------------------------------
+
+by derrabus at 2025-09-24T08:52:22Z
+
+I've also removed code paths exclusive to Monolog 2, given that version 3 is the minimum now.
+
+---------------------------------------------------------------------------
+
+by derrabus at 2025-09-24T09:16:40Z
+
+We had some logic to support Monolog before 3.5 which I would also consider obsolete now. I've removed that as well.
