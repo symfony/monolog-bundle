@@ -1,0 +1,17 @@
+---------------------------------------------------------------------------
+
+by GromNaN at 2025-09-25T06:57:35Z
+
+Could you include in this PR the changes on Symfony version constraint suggested by @stof  please? https://github.com/symfony/monolog-bundle/pull/518#discussion_r2376432602
+
+---------------------------------------------------------------------------
+
+by HypeMC at 2025-09-25T07:27:36Z
+
+@GromNaN Sure, will something like this do: https://github.com/symfony/monolog-bundle/compare/b3898c3352cab744f9a1fac678799927f31c9722..dedec00337221c8c7984847b52eb98efa7814715
+
+---------------------------------------------------------------------------
+
+by GromNaN at 2025-09-25T07:49:37Z
+
+Yes, `false` disables the `SYMFONY_REQUIRE` constraint. I see Symfony `7.3.3` and `7.4.x-dev` installed, which is expected.
