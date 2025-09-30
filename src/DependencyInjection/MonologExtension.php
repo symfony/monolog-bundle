@@ -597,58 +597,6 @@ final class MonologExtension extends Extension
                 ]);
                 break;
 
-            case 'sentry':
-                trigger_deprecation('symfony/monolog-bundle', '3.11', 'The "sentry" handler type is deprecated, use the "sentry/sentry-symfony" and a "service" handler instead.');
-                if (null !== $handler['hub_id']) {
-                    $hubId = $handler['hub_id'];
-                } else {
-                    if (null !== $handler['client_id']) {
-                        $clientId = $handler['client_id'];
-                    } else {
-                        $options = new Definition(
-                            'Sentry\\Options',
-                            [['dsn' => $handler['dsn']]]
-                        );
-
-                        if (!empty($handler['environment'])) {
-                            $options->addMethodCall('setEnvironment', [$handler['environment']]);
-                        }
-
-                        if (!empty($handler['release'])) {
-                            $options->addMethodCall('setRelease', [$handler['release']]);
-                        }
-
-                        $builder = new Definition('Sentry\\ClientBuilder', [$options]);
-
-                        $client = new Definition('Sentry\\Client');
-                        $client->setFactory([$builder, 'getClient']);
-
-                        $clientId = 'monolog.sentry.client.'.sha1($handler['dsn']);
-                        $container->setDefinition($clientId, $client);
-
-                        if (!$container->hasAlias('Sentry\\ClientInterface')) {
-                            $container->setAlias('Sentry\\ClientInterface', $clientId);
-                        }
-                    }
-
-                    $hubId = \sprintf('monolog.handler.%s.hub', $name);
-                    $hub = $container->setDefinition($hubId, new Definition(
-                        'Sentry\\State\\Hub',
-                        [new Reference($clientId)]
-                    ));
-
-                    // can't set the hub to the current hub, getting into a recursion otherwise...
-                    // $hub->addMethodCall('setCurrent', array($hub));
-                }
-
-                $definition->setArguments([
-                    new Reference($hubId),
-                    $handler['level'],
-                    $handler['bubble'],
-                    $handler['fill_extra_context'],
-                ]);
-                break;
-
             case 'loggly':
                 $definition->setArguments([
                     $handler['token'],
@@ -828,7 +776,6 @@ final class MonologExtension extends Extension
             'symfony_mailer' => 'Symfony\Bridge\Monolog\Handler\MailerHandler',
             'socket' => 'Monolog\Handler\SocketHandler',
             'pushover' => 'Monolog\Handler\PushoverHandler',
-            'sentry' => 'Sentry\Monolog\Handler',
             'newrelic' => 'Monolog\Handler\NewRelicHandler',
             'slack' => 'Monolog\Handler\SlackHandler',
             'slackwebhook' => 'Monolog\Handler\SlackWebhookHandler',
