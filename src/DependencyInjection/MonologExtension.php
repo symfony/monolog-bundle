@@ -201,7 +201,7 @@ final class MonologExtension extends Extension
                     $publisher->addMethodCall('addTransport', [$transport]);
                     $publisher->setPublic(false);
                 } else {
-                    throw new \RuntimeException('The gelf handler requires the graylog2/gelf-php package to be installed');
+                    throw new \RuntimeException('The gelf handler requires the graylog2/gelf-php package to be installed.');
                 }
 
                 $definition->setArguments([
@@ -598,6 +598,7 @@ final class MonologExtension extends Extension
                 break;
 
             case 'sentry':
+                trigger_deprecation('symfony/monolog-bundle', '3.11', 'The "sentry" handler type is deprecated, use the "sentry/sentry-symfony" and a "service" handler instead.');
                 if (null !== $handler['hub_id']) {
                     $hubId = $handler['hub_id'];
                 } else {
@@ -769,7 +770,7 @@ final class MonologExtension extends Extension
                     $nullWarning = ', if you meant to define a null handler in a yaml config, make sure you quote "null" so it does not get converted to a php null';
                 }
 
-                throw new \InvalidArgumentException(\sprintf('Invalid handler type "%s" given for handler "%s"'.$nullWarning, $handler['type'], $name));
+                throw new \InvalidArgumentException(\sprintf('Invalid handler type "%s" given for handler "%s".'.$nullWarning, $handler['type'], $name));
         }
 
         if (!empty($handler['nested']) && true === $handler['nested']) {

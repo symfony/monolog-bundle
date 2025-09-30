@@ -15,6 +15,7 @@ use Monolog\Handler\FingersCrossed\ErrorLevelActivationStrategy;
 use Monolog\Handler\RollbarHandler;
 use Monolog\Processor\UidProcessor;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Symfony\Bridge\PhpUnit\ExpectUserDeprecationMessageTrait;
 use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\LoggerChannelPass;
 use Symfony\Bundle\MonologBundle\DependencyInjection\MonologExtension;
 use Symfony\Bundle\MonologBundle\Tests\DependencyInjection\Fixtures\AsMonologProcessor\FooProcessorWithPriority;
@@ -29,6 +30,8 @@ use Symfony\Component\HttpFoundation\RequestStack;
 
 class MonologExtensionTest extends DependencyInjectionTestCase
 {
+    use ExpectUserDeprecationMessageTrait;
+
     public function testLoadWithDefault()
     {
         $container = $this->getContainer([['handlers' => ['main' => ['type' => 'stream']]]]);
@@ -292,8 +295,11 @@ class MonologExtensionTest extends DependencyInjectionTestCase
         $this->getContainer([['handlers' => ['sentry' => ['type' => 'sentry']]]]);
     }
 
+    /** @group legacy */
     public function testSentryHandlerWhenADSNIsSpecified()
     {
+        $this->expectDeprecation('Since symfony/monolog-bundle 3.11: The "sentry" handler type is deprecated, use the "sentry/sentry-symfony" and a "service" handler instead.');
+
         $dsn = 'http://43f6017361224d098402974103bfc53d:a6a0538fc2934ba2bed32e08741b2cd3@marca.python.live.cheggnet.com:9000/1';
 
         $container = $this->getContainer([['handlers' => ['sentry' => [
@@ -316,8 +322,11 @@ class MonologExtensionTest extends DependencyInjectionTestCase
         $this->assertDICConstructorArguments($hub, [new Reference('monolog.sentry.client.'.sha1($dsn))]);
     }
 
+    /** @group legacy */
     public function testSentryHandlerWhenADSNAndAClientAreSpecified()
     {
+        $this->expectDeprecation('Since symfony/monolog-bundle 3.11: The "sentry" handler type is deprecated, use the "sentry/sentry-symfony" and a "service" handler instead.');
+
         $container = $this->getContainer(
             [
                 [
@@ -348,8 +357,11 @@ class MonologExtensionTest extends DependencyInjectionTestCase
         $this->assertDICConstructorArguments($hub, [new Reference('sentry.client')]);
     }
 
+    /** @group legacy */
     public function testSentryHandlerWhenAClientIsSpecified()
     {
+        $this->expectDeprecation('Since symfony/monolog-bundle 3.11: The "sentry" handler type is deprecated, use the "sentry/sentry-symfony" and a "service" handler instead.');
+
         $container = $this->getContainer(
             [
                 [
@@ -379,8 +391,11 @@ class MonologExtensionTest extends DependencyInjectionTestCase
         $this->assertDICConstructorArguments($hub, [new Reference('sentry.client')]);
     }
 
+    /** @group legacy */
     public function testSentryHandlerWhenAHubIsSpecified()
     {
+        $this->expectDeprecation('Since symfony/monolog-bundle 3.11: The "sentry" handler type is deprecated, use the "sentry/sentry-symfony" and a "service" handler instead.');
+
         $container = $this->getContainer(
             [
                 [
@@ -442,7 +457,7 @@ class MonologExtensionTest extends DependencyInjectionTestCase
             ]]]]);
             $this->fail();
         } catch (InvalidConfigurationException $e) {
-            $this->assertStringContainsString('-us, apache$', $e->getMessage());
+            $this->assertSame('The following Loggly tags are invalid: "-us", "apache$".', $e->getMessage());
         }
 
         $container = $this->getContainer([['handlers' => ['loggly' => [

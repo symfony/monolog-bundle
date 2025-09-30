@@ -98,8 +98,7 @@ class LoggerChannelPass implements CompilerPassInterface
                 try {
                     $logger = $container->getDefinition('app' === $channel ? 'monolog.logger' : 'monolog.logger.'.$channel);
                 } catch (InvalidArgumentException $e) {
-                    $msg = 'Monolog configuration error: The logging channel "'.$channel.'" assigned to the "'.substr($handler, 16).'" handler does not exist.';
-                    throw new \InvalidArgumentException($msg, 0, $e);
+                    throw new \InvalidArgumentException(\sprintf('Monolog configuration error: The logging channel "%s" assigned to the "%s" handler does not exist.', $channel, substr($handler, 16)), 0, $e);
                 }
                 $logger->addMethodCall('pushHandler', [new Reference($handler)]);
             }

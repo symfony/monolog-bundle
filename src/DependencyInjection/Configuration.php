@@ -676,7 +676,7 @@ final class Configuration implements ConfigurationInterface
                 ->then(function ($v) {
                     $invalidTags = preg_grep('/^[a-z0-9][a-z0-9\.\-_]*$/i', $v['tags'], \PREG_GREP_INVERT);
                     if (!empty($invalidTags)) {
-                        throw new InvalidConfigurationException(\sprintf('The following Loggly tags are invalid: %s.', implode(', ', $invalidTags)));
+                        throw new InvalidConfigurationException(\sprintf('The following Loggly tags are invalid: "%s".', implode('", "', $invalidTags)));
                     }
 
                     return $v;
@@ -1014,7 +1014,7 @@ final class Configuration implements ConfigurationInterface
                                     $isExclusive = true;
                                 } else {
                                     if (true === $isExclusive) {
-                                        throw new InvalidConfigurationException('Cannot combine exclusive/inclusive definitions in channels list');
+                                        throw new InvalidConfigurationException('Cannot combine exclusive/inclusive definitions in channels list.');
                                     }
                                     $elements[] = $element;
                                     $isExclusive = false;

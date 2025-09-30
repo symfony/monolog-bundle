@@ -38,7 +38,7 @@ class AddProcessorsPass implements CompilerPassInterface
 
             foreach ($tags as $tag) {
                 if (!empty($tag['channel']) && !empty($tag['handler'])) {
-                    throw new \InvalidArgumentException(\sprintf('you cannot specify both the "handler" and "channel" attributes for the "monolog.processor" tag on service "%s"', $id));
+                    throw new \InvalidArgumentException(\sprintf('you cannot specify both the "handler" and "channel" attributes for the "monolog.processor" tag on service "%s".', $id));
                 }
 
                 if (!empty($tag['handler'])) {
@@ -49,7 +49,7 @@ class AddProcessorsPass implements CompilerPassInterface
                     }
                     $class = $container->getParameterBag()->resolveValue($parentDef->getClass());
                     if (!method_exists($class, 'pushProcessor')) {
-                        throw new \InvalidArgumentException(\sprintf('The "%s" handler does not accept processors', $tag['handler']));
+                        throw new \InvalidArgumentException(\sprintf('The "%s" handler does not accept processors.', $tag['handler']));
                     }
                 } elseif (!empty($tag['channel'])) {
                     if ('app' === $tag['channel']) {

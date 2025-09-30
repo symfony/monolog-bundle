@@ -11,6 +11,7 @@
 * Drop support for PHP < 8.1
 * Drop support for Symfony < 6.4
 * Add TelegramBotHandler `topic` support
+* Deprecate `sentry` and `raven` handler, use a `service` handler with [`sentry/sentry-symfony`](https://docs.sentry.io/platforms/php/guides/symfony/logs/) instead
 
 ## 3.10.0 (2023-11-06)
 
@@ -78,7 +79,7 @@
 
 ## 3.3.1 (2018-11-04)
 
-* Fixed compatiblity with Symfony 4.2
+* Fixed compatibility with Symfony 4.2
 
 ## 3.3.0 (2018-06-04)
 
