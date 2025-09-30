@@ -214,17 +214,6 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
  *   - [timeout]: float
  *   - [connection_timeout]: float
  *
- * - sentry:
- *   - dsn: connection string
- *   - client_id: Sentry client custom service id (optional)
- *   - hub_id: Sentry hub custom service id (optional)
- *   - [release]: release number of the application that will be attached to logs, defaults to null
- *   - [level]: level name or int value, defaults to DEBUG
- *   - [bubble]: bool, defaults to true
- *   - [auto_log_stacks]: bool, defaults to false
- *   - [environment]: string, default to null (no env specified)
- *   - [fill_extra_context]: bool, defaults to false
- *
  * - newrelic:
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
@@ -418,7 +407,6 @@ final class Configuration implements ConfigurationInterface
                 ->booleanNode('bubble')->defaultTrue()->end()
                 ->booleanNode('interactive_only')->defaultFalse()->end()
                 ->scalarNode('app_name')->defaultNull()->end()
-                ->booleanNode('fill_extra_context')->defaultFalse()->end() // sentry
                 ->booleanNode('include_stacktraces')->defaultFalse()->end()
                 ->arrayNode('process_psr_3_messages')
                     ->addDefaultsIfNotSet()
@@ -545,11 +533,6 @@ final class Configuration implements ConfigurationInterface
                 ->scalarNode('store')->defaultNull()->end() // deduplication
                 ->scalarNode('connection_timeout')->end() // socket_handler, logentries, pushover & slack
                 ->booleanNode('persistent')->end() // socket_handler
-                ->scalarNode('dsn')->end() // sentry_handler
-                ->scalarNode('hub_id')->defaultNull()->end() // sentry_handler
-                ->scalarNode('client_id')->defaultNull()->end() // sentry_handler
-                ->scalarNode('release')->defaultNull()->end() // sentry_handler
-                ->scalarNode('environment')->defaultNull()->end() // sentry_handler
                 ->scalarNode('message_type')->defaultValue(0)->end() // error_log
                 ->scalarNode('parse_mode')->defaultNull()->end() // telegram
                 ->booleanNode('disable_webpage_preview')->defaultNull()->end() // telegram
@@ -642,14 +625,6 @@ final class Configuration implements ConfigurationInterface
             ->validate()
                 ->ifTrue(function ($v) { return 'pushover' === $v['type'] && (empty($v['token']) || empty($v['user'])); })
                 ->thenInvalid('The token and user have to be specified to use a PushoverHandler')
-            ->end()
-            ->validate()
-                ->ifTrue(function ($v) { return 'sentry' === $v['type'] && !\array_key_exists('dsn', $v) && null === $v['hub_id'] && null === $v['client_id']; })
-                ->thenInvalid('The DSN has to be specified to use Sentry\'s handler')
-            ->end()
-            ->validate()
-                ->ifTrue(function ($v) { return 'sentry' === $v['type'] && null !== $v['hub_id'] && null !== $v['client_id']; })
-                ->thenInvalid('You can not use both a hub_id and a client_id in a Sentry handler')
             ->end()
             ->validate()
                 ->ifTrue(function ($v) { return 'slack' === $v['type'] && (empty($v['token']) || empty($v['channel'])); })

@@ -15,7 +15,6 @@ use Monolog\Handler\FingersCrossed\ErrorLevelActivationStrategy;
 use Monolog\Handler\RollbarHandler;
 use Monolog\Processor\UidProcessor;
 use PHPUnit\Framework\Attributes\DataProvider;
-use Symfony\Bridge\PhpUnit\ExpectUserDeprecationMessageTrait;
 use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\LoggerChannelPass;
 use Symfony\Bundle\MonologBundle\DependencyInjection\MonologExtension;
 use Symfony\Bundle\MonologBundle\Tests\DependencyInjection\Fixtures\AsMonologProcessor\FooProcessorWithPriority;
@@ -30,8 +29,6 @@ use Symfony\Component\HttpFoundation\RequestStack;
 
 class MonologExtensionTest extends DependencyInjectionTestCase
 {
-    use ExpectUserDeprecationMessageTrait;
-
     public function testLoadWithDefault()
     {
         $container = $this->getContainer([['handlers' => ['main' => ['type' => 'stream']]]]);
@@ -285,160 +282,6 @@ class MonologExtensionTest extends DependencyInjectionTestCase
         $this->assertDICDefinitionMethodCallAt(1, $handler, 'setTimeout', ['1']);
         $this->assertDICDefinitionMethodCallAt(2, $handler, 'setConnectionTimeout', ['0.6']);
         $this->assertDICDefinitionMethodCallAt(3, $handler, 'setPersistent', [true]);
-    }
-
-    public function testSentryHandlerWhenConfigurationIsWrong()
-    {
-        $this->expectException(InvalidConfigurationException::class);
-        $this->expectExceptionMessage('The DSN has to be specified to use Sentry\'s handler');
-
-        $this->getContainer([['handlers' => ['sentry' => ['type' => 'sentry']]]]);
-    }
-
-    /** @group legacy */
-    public function testSentryHandlerWhenADSNIsSpecified()
-    {
-        $this->expectDeprecation('Since symfony/monolog-bundle 3.11: The "sentry" handler type is deprecated, use the "sentry/sentry-symfony" and a "service" handler instead.');
-
-        $dsn = 'http://43f6017361224d098402974103bfc53d:a6a0538fc2934ba2bed32e08741b2cd3@marca.python.live.cheggnet.com:9000/1';
-
-        $container = $this->getContainer([['handlers' => ['sentry' => [
-            'type' => 'sentry', 'dsn' => $dsn,
-        ]]]]);
-        $this->assertTrue($container->hasDefinition('monolog.logger'));
-        $this->assertTrue($container->hasDefinition('monolog.handler.sentry'));
-        $this->assertTrue($container->hasDefinition('monolog.handler.sentry.hub'));
-
-        $logger = $container->getDefinition('monolog.logger');
-        $this->assertDICDefinitionMethodCallAt(0, $logger, 'useMicrosecondTimestamps', ['%monolog.use_microseconds%']);
-        $this->assertDICDefinitionMethodCallAt(1, $logger, 'pushHandler', [new Reference('monolog.handler.sentry')]);
-
-        $handler = $container->getDefinition('monolog.handler.sentry');
-        $this->assertDICDefinitionClass($handler, 'Sentry\Monolog\Handler');
-        $this->assertDICConstructorArguments($handler, [new Reference('monolog.handler.sentry.hub'), 'DEBUG', true, false]);
-
-        $hub = $container->getDefinition($handler->getArguments()[0]);
-        $this->assertDICDefinitionClass($hub, 'Sentry\State\Hub');
-        $this->assertDICConstructorArguments($hub, [new Reference('monolog.sentry.client.'.sha1($dsn))]);
-    }
-
-    /** @group legacy */
-    public function testSentryHandlerWhenADSNAndAClientAreSpecified()
-    {
-        $this->expectDeprecation('Since symfony/monolog-bundle 3.11: The "sentry" handler type is deprecated, use the "sentry/sentry-symfony" and a "service" handler instead.');
-
-        $container = $this->getContainer(
-            [
-                [
-                    'handlers' => [
-                        'sentry' => [
-                            'type' => 'sentry',
-                            'dsn' => 'foobar',
-                            'client_id' => 'sentry.client',
-                        ],
-                    ],
-                ],
-            ],
-            [
-                'sentry.client' => new Definition('Sentry\Client'),
-            ]
-        );
-
-        $logger = $container->getDefinition('monolog.logger');
-        $this->assertDICDefinitionMethodCallAt(0, $logger, 'useMicrosecondTimestamps', ['%monolog.use_microseconds%']);
-        $this->assertDICDefinitionMethodCallAt(1, $logger, 'pushHandler', [new Reference('monolog.handler.sentry')]);
-
-        $handler = $container->getDefinition('monolog.handler.sentry');
-        $this->assertDICDefinitionClass($handler, 'Sentry\Monolog\Handler');
-        $this->assertDICConstructorArguments($handler, [new Reference('monolog.handler.sentry.hub'), 'DEBUG', true, false]);
-
-        $hub = $container->getDefinition($handler->getArguments()[0]);
-        $this->assertDICDefinitionClass($hub, 'Sentry\State\Hub');
-        $this->assertDICConstructorArguments($hub, [new Reference('sentry.client')]);
-    }
-
-    /** @group legacy */
-    public function testSentryHandlerWhenAClientIsSpecified()
-    {
-        $this->expectDeprecation('Since symfony/monolog-bundle 3.11: The "sentry" handler type is deprecated, use the "sentry/sentry-symfony" and a "service" handler instead.');
-
-        $container = $this->getContainer(
-            [
-                [
-                    'handlers' => [
-                        'sentry' => [
-                            'type' => 'sentry',
-                            'client_id' => 'sentry.client',
-                        ],
-                    ],
-                ],
-            ],
-            [
-                'sentry.client' => new Definition('Sentry\Client'),
-            ]
-        );
-
-        $logger = $container->getDefinition('monolog.logger');
-        $this->assertDICDefinitionMethodCallAt(0, $logger, 'useMicrosecondTimestamps', ['%monolog.use_microseconds%']);
-        $this->assertDICDefinitionMethodCallAt(1, $logger, 'pushHandler', [new Reference('monolog.handler.sentry')]);
-
-        $handler = $container->getDefinition('monolog.handler.sentry');
-        $this->assertDICDefinitionClass($handler, 'Sentry\Monolog\Handler');
-        $this->assertDICConstructorArguments($handler, [new Reference('monolog.handler.sentry.hub'), 'DEBUG', true, false]);
-
-        $hub = $container->getDefinition($handler->getArguments()[0]);
-        $this->assertDICDefinitionClass($hub, 'Sentry\State\Hub');
-        $this->assertDICConstructorArguments($hub, [new Reference('sentry.client')]);
-    }
-
-    /** @group legacy */
-    public function testSentryHandlerWhenAHubIsSpecified()
-    {
-        $this->expectDeprecation('Since symfony/monolog-bundle 3.11: The "sentry" handler type is deprecated, use the "sentry/sentry-symfony" and a "service" handler instead.');
-
-        $container = $this->getContainer(
-            [
-                [
-                    'handlers' => [
-                        'sentry' => [
-                            'type' => 'sentry',
-                            'hub_id' => 'sentry.hub',
-                        ],
-                    ],
-                ],
-            ],
-            [
-                'sentry.hub' => new Definition(\Sentry\State\HubInterface::class),
-            ]
-        );
-
-        $logger = $container->getDefinition('monolog.logger');
-        $this->assertDICDefinitionMethodCallAt(0, $logger, 'useMicrosecondTimestamps', ['%monolog.use_microseconds%']);
-        $this->assertDICDefinitionMethodCallAt(1, $logger, 'pushHandler', [new Reference('monolog.handler.sentry')]);
-
-        $handler = $container->getDefinition('monolog.handler.sentry');
-        $this->assertDICDefinitionClass($handler, 'Sentry\Monolog\Handler');
-        $this->assertDICConstructorArguments($handler, [new Reference('sentry.hub'), 'DEBUG', true, false]);
-    }
-
-    public function testSentryHandlerWhenAHubAndAClientAreSpecified()
-    {
-        $this->expectException(InvalidConfigurationException::class);
-        $this->expectExceptionMessage('You can not use both a hub_id and a client_id in a Sentry handler');
-
-        $this->getContainer(
-            [
-                [
-                    'handlers' => [
-                        'sentry' => [
-                            'type' => 'sentry',
-                            'hub_id' => 'sentry.hub',
-                            'client_id' => 'sentry.client',
-                        ],
-                    ],
-                ],
-            ]
-        );
     }
 
     public function testLogglyHandler()
