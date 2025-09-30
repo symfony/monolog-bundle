@@ -1,0 +1,32 @@
+---------------------------------------------------------------------------
+
+by GromNaN at 2025-09-26T22:12:30Z
+
+I don't know how to resolve: https://github.com/symfony/monolog-bundle/actions/runs/18050485556/job/51371262303?pr=537
+```
+ Remaining self deprecation notices (3)
+
+  3x: Since symfony/monolog-bundle 3.11: The "sentry" handler type is deprecated, use the "sentry/sentry-symfony" and a "service" handler instead.
+    1x in MonologExtensionTest::testRavenHandlerWhenADSNIsSpecified from Symfony\Bundle\MonologBundle\Tests\DependencyInjection
+    1x in MonologExtensionTest::testRavenHandlerWhenADSNAndAClientAreSpecified from Symfony\Bundle\MonologBundle\Tests\DependencyInjection
+    1x in MonologExtensionTest::testRavenHandlerWhenAClientIsSpecified from Symfony\Bundle\MonologBundle\Tests\DependencyInjection
+
+```
+
+---------------------------------------------------------------------------
+
+by HypeMC at 2025-09-27T08:32:45Z
+
+Don't you need to add `@group legacy` to those three methods as well?
+
+---------------------------------------------------------------------------
+
+by GromNaN at 2025-09-27T10:21:33Z
+
+Thanks, the `@group legacy` was missing on tests requiring monolog v1.
+
+---------------------------------------------------------------------------
+
+by GromNaN at 2025-09-30T13:34:45Z
+
+I think the [documentation on Sentry-Symfony](https://docs.sentry.io/platforms/php/guides/symfony/logs/#setup) is good enough. I don't want to duplicate it here as it would become obsolete.
