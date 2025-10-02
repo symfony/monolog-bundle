@@ -12,6 +12,7 @@
 * Drop support for Symfony < 6.4
 * Add TelegramBotHandler `topic` support
 * Deprecate `sentry` and `raven` handler, use a `service` handler with [`sentry/sentry-symfony`](https://docs.sentry.io/platforms/php/guides/symfony/logs/) instead
+* Add configuration for Gelf encoders
 
 ## 3.10.0 (2023-11-06)
 
