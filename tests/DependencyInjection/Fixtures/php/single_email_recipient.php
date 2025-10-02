@@ -1,0 +1,20 @@
+<?php
+
+/*
+ * This file is part of the Symfony package.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+return static function (Symfony\Config\MonologConfig $monologConfig): void {
+    $monologConfig
+        ->handler('swift')
+        ->type('swift_mailer')
+        ->fromEmail('error@example.com')
+        ->toEmail('error@example.com')
+        ->subject('An Error Occurred!')
+        ->level('debug');
+};

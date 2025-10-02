@@ -1,3 +1,4 @@
+tests/var
 vendor
 .php-cs-fixer.cache
 composer.phar
