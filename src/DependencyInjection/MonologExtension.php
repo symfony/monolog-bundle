@@ -215,17 +215,6 @@ final class MonologExtension extends Extension
                     $publisher = new Definition('Gelf\Publisher', []);
                     $publisher->addMethodCall('addTransport', [$transport]);
                     $publisher->setPublic(false);
-                } elseif (class_exists('Gelf\MessagePublisher')) {
-                    if (isset($handler['publisher']['encoder']) && 'compressed_json' !== $handler['publisher']['encoder']) {
-                        throw new \RuntimeException('The Gelf\MessagePublisher publisher supports only the compressed json encoding. Omit the option to use the default encoding or use "compressed_json" as the encoder option.');
-                    }
-                    $publisher = new Definition('Gelf\MessagePublisher', [
-                        $handler['publisher']['hostname'],
-                        $handler['publisher']['port'],
-                        $handler['publisher']['chunk_size'],
-                    ]);
-
-                    $publisher->setPublic(false);
                 } else {
                     throw new \RuntimeException('The gelf handler requires the graylog2/gelf-php package to be installed.');
                 }
