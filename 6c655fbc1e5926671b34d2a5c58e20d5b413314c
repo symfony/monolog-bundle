@@ -1,0 +1,32 @@
+---------------------------------------------------------------------------
+
+by Tib-z at 2024-11-03T13:29:33Z
+
+Well class_alias(\stdClass::class, 'Gelf\Transport\UdpTransport'); in the tests obviously does not work in <8.3 😓
+Generally, workarounds involving class existence checks are hacky, but I wanted to ensure the tests provided meaningful coverage.
+
+To address the compatibility issue, I've added a simple dummy class as a workaround. Another option could be creating the class dynamically with eval, though that also smells... A potential refactor might involve wrapping class_exists checks and mocking them, but I'm unsure if the benefit would justify the effort.
+
+Let me know your thoughts
+
+---------------------------------------------------------------------------
+
+by Tib-z at 2024-11-04T19:28:24Z
+
+In our infra, in the logstash pipeline comporessed json is a contraint, does not work without comporession, so the change in the gelf package broke the logging. Likely it's a specific setup, not sure exactly how is configured, I'll try to figure out (it's not maintained by me/my team) and see if it could affect others as well.
+
+As the encoder is a dependency and straightforward to change it, it was logical move to expose it as a monolog config option and make the implementation easier. In a microservice architecture with 30-40 services, this approach significantly reduces the need for repetitive boilerplate service definitions in favor of a single configuration option. That said, I understand your point about using the service ID workaround as an alternative.
+
+---------------------------------------------------------------------------
+
+by derrabus at 2024-11-04T20:12:58Z
+
+That makes perfect sense. Thank you for the explanation.
+
+---------------------------------------------------------------------------
+
+by Tib-z at 2025-09-17T05:12:00Z
+
+> Thanks, I've tested the changes and everything seems to work as expected. Just have a few minor comments.
+
+Thanks for the review.
