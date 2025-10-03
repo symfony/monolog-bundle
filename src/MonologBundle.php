@@ -15,7 +15,6 @@ use Monolog\Formatter\JsonFormatter;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\HandlerInterface;
 use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\AddProcessorsPass;
-use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\FixEmptyLoggerPass;
 use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\LoggerChannelPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
@@ -29,8 +28,7 @@ final class MonologBundle extends Bundle
     {
         parent::build($container);
 
-        $container->addCompilerPass($channelPass = new LoggerChannelPass());
-        $container->addCompilerPass(new FixEmptyLoggerPass($channelPass));
+        $container->addCompilerPass(new LoggerChannelPass());
         $container->addCompilerPass(new AddProcessorsPass());
     }
 
