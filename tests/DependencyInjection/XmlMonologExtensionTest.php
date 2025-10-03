@@ -11,7 +11,7 @@
 
 namespace Symfony\Bundle\MonologBundle\Tests\DependencyInjection;
 
-use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\IgnoreDeprecations;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
@@ -19,11 +19,15 @@ use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 /**
  * XML configuration deprecated since Symfony 7.4.
  */
-#[Group('legacy')]
+#[IgnoreDeprecations]
 class XmlMonologExtensionTest extends FixtureMonologExtensionTestCase
 {
     protected function loadFixture(ContainerBuilder $container, string $fixture)
     {
+        if (!class_exists(XmlFileLoader::class)) {
+            $this->markTestSkipped('The XML configuration has been removed in Symfony 8.0.');
+        }
+
         $loader = new XmlFileLoader($container, new FileLocator(__DIR__.'/Fixtures/xml'));
         $loader->load($fixture.'.xml');
     }
