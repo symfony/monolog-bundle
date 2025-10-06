@@ -28,14 +28,14 @@ use Symfony\Component\DependencyInjection\Reference;
  */
 class LoggerChannelPass implements CompilerPassInterface
 {
-    /** @var list<string> */
-    protected array $channels = ['app'];
-
     public function process(ContainerBuilder $container): void
     {
         if (!$container->hasDefinition('monolog.logger')) {
             return;
         }
+
+        /** @var list<string> $createdLoggers */
+        $createdLoggers = ['app'];
 
         // create channels necessary for the handlers
         foreach ($container->findTaggedServiceIds('monolog.logger') as $id => $tags) {
@@ -48,7 +48,7 @@ class LoggerChannelPass implements CompilerPassInterface
 
                 $definition = $container->getDefinition($id);
                 $loggerId = \sprintf('monolog.logger.%s', $resolvedChannel);
-                $this->createLogger($resolvedChannel, $loggerId, $container);
+                $this->createLogger($resolvedChannel, $loggerId, $container, $createdLoggers);
 
                 foreach ($definition->getArguments() as $index => $argument) {
                     if ($argument instanceof Reference && 'logger' === (string) $argument) {
@@ -86,7 +86,7 @@ class LoggerChannelPass implements CompilerPassInterface
                 continue;
             }
             $loggerId = \sprintf('monolog.logger.%s', $chan);
-            $this->createLogger($chan, $loggerId, $container);
+            $this->createLogger($chan, $loggerId, $container, $createdLoggers);
             $container->getDefinition($loggerId)->setPublic(true);
         }
         $container->getParameterBag()->remove('monolog.additional_channels');
@@ -94,7 +94,7 @@ class LoggerChannelPass implements CompilerPassInterface
         // wire handlers to channels
         $handlersToChannels = $container->getParameter('monolog.handlers_to_channels');
         foreach ($handlersToChannels as $handler => $channels) {
-            foreach ($this->processChannels($channels) as $channel) {
+            foreach ($this->processChannels($channels, $createdLoggers) as $channel) {
                 try {
                     $logger = $container->getDefinition('app' === $channel ? 'monolog.logger' : 'monolog.logger.'.$channel);
                 } catch (InvalidArgumentException $e) {
@@ -105,37 +105,29 @@ class LoggerChannelPass implements CompilerPassInterface
         }
     }
 
-    /**
-     * @return list<string>
-     */
-    public function getChannels(): array
-    {
-        return $this->channels;
-    }
-
-    protected function processChannels(?array $configuration): array
+    protected function processChannels(?array $configuration, array $createdLoggers): array
     {
         if (null === $configuration) {
-            return $this->channels;
+            return $createdLoggers;
         }
 
         if ('inclusive' === $configuration['type']) {
-            return $configuration['elements'] ?: $this->channels;
+            return $configuration['elements'] ?: $createdLoggers;
         }
 
-        return array_diff($this->channels, $configuration['elements']);
+        return array_diff($createdLoggers, $configuration['elements']);
     }
 
     /**
      * Create new logger from the monolog.logger_prototype.
      */
-    protected function createLogger(string $channel, string $loggerId, ContainerBuilder $container): void
+    protected function createLogger(string $channel, string $loggerId, ContainerBuilder $container, array &$createdLoggers): void
     {
-        if (!\in_array($channel, $this->channels, true)) {
+        if (!\in_array($channel, $createdLoggers, true)) {
             $logger = new ChildDefinition('monolog.logger_prototype');
             $logger->replaceArgument(0, $channel);
             $container->setDefinition($loggerId, $logger);
-            $this->channels[] = $channel;
+            $createdLoggers[] = $channel;
         }
 
         $container->registerAliasForArgument($loggerId, LoggerInterface::class, $channel.'.logger');
