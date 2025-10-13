@@ -265,7 +265,7 @@ final class MonologExtension extends Extension
                         $factory = class_exists('Elastic\Elasticsearch\ClientBuilder') ? 'Elastic\Elasticsearch\ClientBuilder' : 'Elasticsearch\ClientBuilder';
                         $client->setFactory([$factory, 'fromConfig']);
                         $clientArguments = [
-                            'host' => $handler['elasticsearch']['host'],
+                            'hosts' => [$handler['elasticsearch']['host']],
                         ];
 
                         if (isset($handler['elasticsearch']['user'], $handler['elasticsearch']['password'])) {
