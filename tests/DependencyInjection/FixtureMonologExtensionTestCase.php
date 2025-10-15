@@ -13,6 +13,7 @@ namespace Symfony\Bundle\MonologBundle\Tests\DependencyInjection;
 
 use Monolog\Handler\FingersCrossed\ErrorLevelActivationStrategy;
 use Monolog\Handler\NoopHandler;
+use Monolog\Handler\NullHandler;
 use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\LoggerChannelPass;
 use Symfony\Bundle\MonologBundle\DependencyInjection\MonologExtension;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -241,6 +242,16 @@ abstract class FixtureMonologExtensionTestCase extends DependencyInjectionTestCa
 
         $this->assertCount(2, $methodCalls);
         $this->assertSame(['addHeader', [['Foo: bar', 'Baz: inga']]], $methodCalls[1]);
+    }
+
+    public function testTypeNull()
+    {
+        $container = $this->getContainer('type_null');
+
+        $logger = $container->getDefinition('monolog.handler.null_handler');
+
+        $this->assertSame(NullHandler::class, $logger->getClass());
+        $this->assertSame('DEBUG', $logger->getArgument(0));
     }
 
     protected function getContainer($fixture): ContainerBuilder
