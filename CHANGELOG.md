@@ -14,6 +14,7 @@
 * Deprecate `sentry` and `raven` handler, use a `service` handler with [`sentry/sentry-symfony`](https://docs.sentry.io/platforms/php/guides/symfony/logs/) instead
 * Add configuration for Gelf encoders
 * Fix `host` configuration for `elastic_search` handler
+* Add `enabled` option to `handlers` configuration
 
 ## 3.10.0 (2023-11-06)
 

@@ -1,0 +1,13 @@
+monolog:
+    handlers:
+        default:
+            type: stream
+            path: /tmp/symfony.log
+        enabled:
+            type: stream
+            path: /tmp/symfony.log
+            enabled: true
+        disabled:
+            type: stream
+            path: /tmp/symfony.log
+            enabled: false

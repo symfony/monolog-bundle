@@ -254,6 +254,15 @@ abstract class FixtureMonologExtensionTestCase extends DependencyInjectionTestCa
         $this->assertSame('DEBUG', $logger->getArgument(0));
     }
 
+    public function testEnabledHandleOption()
+    {
+        $container = $this->getContainer('enabled_handlers');
+
+        $this->assertTrue($container->hasDefinition('monolog.handler.default'));
+        $this->assertTrue($container->hasDefinition('monolog.handler.enabled'));
+        $this->assertFalse($container->hasDefinition('monolog.handler.disabled'));
+    }
+
     protected function getContainer($fixture): ContainerBuilder
     {
         $container = new ContainerBuilder();

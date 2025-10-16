@@ -60,6 +60,9 @@ final class MonologExtension extends Extension
             $handlers = [];
 
             foreach ($config['handlers'] as $name => $handler) {
+                if (!$handler['enabled']) {
+                    continue;
+                }
                 $handlers[$handler['priority']][] = [
                     'id' => $this->buildHandler($container, $name, $handler),
                     'channels' => empty($handler['channels']) ? null : $handler['channels'],

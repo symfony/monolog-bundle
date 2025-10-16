@@ -11,9 +11,11 @@
 
 namespace Symfony\Bundle\MonologBundle\Tests\DependencyInjection\Compiler;
 
+use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\LoggerChannelPass;
+use Symfony\Bundle\MonologBundle\DependencyInjection\MonologExtension;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
@@ -228,6 +230,29 @@ class LoggerChannelPassTest extends TestCase
         $container->getCompilerPassConfig()->setRemovingPasses([]);
 
         return $container;
+    }
+
+    #[TestWith([true])]
+    #[TestWith([false])]
+    public function testEnabledHandler(bool $enabled)
+    {
+        $container = new ContainerBuilder();
+        $loader = new MonologExtension();
+
+        $config = [
+            'handlers' => [
+                'main' => [
+                    'enabled' => $enabled,
+                    'type' => 'stream',
+                    'path' => '%kernel.logs_dir%/%kernel.environment%.log',
+                    'level' => 'debug',
+                ],
+            ],
+        ];
+
+        $loader->load([$config], $container);
+
+        $this->assertSame($enabled, $container->hasDefinition('monolog.handler.main'));
     }
 }
 
