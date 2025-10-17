@@ -782,6 +782,7 @@ final class Configuration implements ConfigurationInterface
                     ->end()
                     ->children()
                         ->scalarNode('id')->end()
+                        ->arrayNode('hosts')->prototype('scalar')->end()->end()
                         ->scalarNode('host')->end()
                         ->scalarNode('port')->defaultValue(9200)->end()
                         ->scalarNode('transport')->defaultValue('Http')->end()
@@ -790,7 +791,7 @@ final class Configuration implements ConfigurationInterface
                     ->end()
                     ->validate()
                     ->ifTrue(function ($v) {
-                        return !isset($v['id']) && !isset($v['host']);
+                        return !isset($v['id']) && !isset($v['host']) && !isset($v['hosts']);
                     })
                     ->thenInvalid('What must be set is either the host or the id.')
                     ->end()

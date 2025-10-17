@@ -268,7 +268,7 @@ final class MonologExtension extends Extension
                         $factory = class_exists('Elastic\Elasticsearch\ClientBuilder') ? 'Elastic\Elasticsearch\ClientBuilder' : 'Elasticsearch\ClientBuilder';
                         $client->setFactory([$factory, 'fromConfig']);
                         $clientArguments = [
-                            'hosts' => [$handler['elasticsearch']['host']],
+                            'hosts' => $handler['elasticsearch']['hosts'] ?? [$handler['elasticsearch']['host']],
                         ];
 
                         if (isset($handler['elasticsearch']['user'], $handler['elasticsearch']['password'])) {
@@ -277,11 +277,18 @@ final class MonologExtension extends Extension
                     } else {
                         $client = new Definition('Elastica\Client');
 
-                        $clientArguments = [
-                            'host' => $handler['elasticsearch']['host'],
-                            'port' => $handler['elasticsearch']['port'],
-                            'transport' => $handler['elasticsearch']['transport'],
-                        ];
+                        if (isset($handler['elasticsearch']['hosts'])) {
+                            $clientArguments = [
+                                'hosts' => $handler['elasticsearch']['hosts'],
+                                'transport' => $handler['elasticsearch']['transport'],
+                            ];
+                        } else {
+                            $clientArguments = [
+                                'host' => $handler['elasticsearch']['host'],
+                                'port' => $handler['elasticsearch']['port'],
+                                'transport' => $handler['elasticsearch']['transport'],
+                            ];
+                        }
 
                         if (isset($handler['elasticsearch']['user'], $handler['elasticsearch']['password'])) {
                             $clientArguments['headers'] = [
