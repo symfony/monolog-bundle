@@ -1,0 +1,77 @@
+---------------------------------------------------------------------------
+
+by alexndlm at 2025-02-17T08:16:09Z
+
+@stof @derrabus Can we have this merged and released? This is an extremely needed feature.
+
+---------------------------------------------------------------------------
+
+by derrabus at 2025-02-17T08:20:12Z
+
+@alexndlm Did you review and test the change in your projects? I agree that we should try to get it merged.
+
+---------------------------------------------------------------------------
+
+by alexndlm at 2025-02-17T08:27:09Z
+
+Of course not, I have unlimited trust in Symfony 😎 But I will do this soon to double-check.
+
+---------------------------------------------------------------------------
+
+by derrabus at 2025-02-17T08:36:55Z
+
+> But I will do this soon to double-check.
+
+Thank you! I personally don't need this feature at the moment. So getting feedback from someone who'd actually use it is more than valuable to us.
+
+---------------------------------------------------------------------------
+
+by nicolas-grekas at 2025-04-08T08:44:51Z
+
+Looks like PR is needed for https://github.com/symfony/symfony/pull/54445?
+
+---------------------------------------------------------------------------
+
+by stof at 2025-04-08T10:11:25Z
+
+@nicolas-grekas no. this PR does not affect the Symfony PR (see my comment on the Symfony PR)
+
+---------------------------------------------------------------------------
+
+by alexndlm at 2025-04-14T12:07:45Z
+
+@derrabus I have tested it, and it works perfectly
+
+---------------------------------------------------------------------------
+
+by alexndlm at 2025-04-15T11:26:14Z
+
+@derrabus, my bad, it does not work; I have found one issue.
+
+When we add some processor only for channel `app` with the lowest priority, it will always be first. This is because in `\Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\AddProcessorsPass` for the `app` channel, we use `monolog.logger`, and when there is no channel, we use `monolog.logger_prototype`.
+
+And in `symfony/monolog-bundle/Resources/config/monolog.xml` the `monolog.logger` has parent `monolog.logger_prototype`.
+
+So, when DI create `monolog.logger` service, it first calls push `pushProcessor` for `monolog.logger_prototype` and then calls for `monolog.logger`.
+
+The same issue should be for any channel.
+
+---------------------------------------------------------------------------
+
+by alexndlm at 2025-04-15T11:36:55Z
+
+@HypeMC, do you have time to fix this?
+
+---------------------------------------------------------------------------
+
+by HypeMC at 2025-08-22T01:31:13Z
+
+> When we add some processor only for channel `app` with the lowest priority, it will always be first. This is because in `\Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\AddProcessorsPass` for the `app` channel, we use `monolog.logger`, and when there is no channel, we use `monolog.logger_prototype`.
+>
+> And in `symfony/monolog-bundle/Resources/config/monolog.xml` the `monolog.logger` has parent `monolog.logger_prototype`.
+>
+> So, when DI create `monolog.logger` service, it first calls push `pushProcessor` for `monolog.logger_prototype` and then calls for `monolog.logger`.
+>
+> The same issue should be for any channel.
+
+@alexndlm Sorry for the late reply, I missed your feedback. The issue should be fixed with https://github.com/symfony/monolog-bundle/pull/485/commits/1ad6fc7ee4bdc3ea9289234bb3bcef3b79da6857.
