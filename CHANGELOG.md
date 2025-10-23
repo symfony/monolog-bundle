@@ -16,6 +16,7 @@
 * Fix `host` configuration for `elastic_search` handler
 * Add `hosts` configuration for `elastica` handler
 * Add `enabled` option to `handlers` configuration
+* Add `priority` field to `processor` tag
 
 ## 3.10.0 (2023-11-06)
 

@@ -126,6 +126,7 @@ class LoggerChannelPass implements CompilerPassInterface
         if (!\in_array($channel, $createdLoggers, true)) {
             $logger = new ChildDefinition('monolog.logger_prototype');
             $logger->replaceArgument(0, $channel);
+            $logger->addTag('monolog.channel_logger');
             $container->setDefinition($loggerId, $logger);
             $createdLoggers[] = $channel;
         }

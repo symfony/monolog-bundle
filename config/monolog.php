@@ -36,6 +36,7 @@ return static function (ContainerConfigurator $container) {
             ->parent('monolog.logger_prototype')
             ->args(['index_0' => 'app'])
             ->call('useMicrosecondTimestamps', [param('monolog.use_microseconds')])
+            ->tag('monolog.channel_logger')
 
         ->set('monolog.logger_prototype', Logger::class)
             ->args([abstract_arg('channel')])

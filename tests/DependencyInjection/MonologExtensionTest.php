@@ -541,7 +541,7 @@ class MonologExtensionTest extends DependencyInjectionTestCase
 
         // Elasticsearch handler should receive the elasticsearch.client as first argument
         $esHandler = $container->getDefinition('monolog.handler.es_handler');
-        $this->assertSame(ElasticsearchHandler::class,$esHandler->getClass());
+        $this->assertSame(ElasticsearchHandler::class, $esHandler->getClass());
         $esClient = $esHandler->getArgument(0);
         $this->assertInstanceOf(Definition::class, $esClient);
         $this->assertStringEndsWith('Elasticsearch\Client', $esClient->getClass());
@@ -549,7 +549,7 @@ class MonologExtensionTest extends DependencyInjectionTestCase
 
         // Elastica handler should receive the elastica.client as first argument
         $elasticaHandler = $container->getDefinition('monolog.handler.elastica_handler');
-        $this->assertSame(ElasticaHandler::class,$elasticaHandler->getClass());
+        $this->assertSame(ElasticaHandler::class, $elasticaHandler->getClass());
         $elasticaClient = $elasticaHandler->getArgument(0);
         $this->assertInstanceOf(Definition::class, $elasticaClient);
         $this->assertSame('Elastica\Client', $elasticaClient->getClass());
