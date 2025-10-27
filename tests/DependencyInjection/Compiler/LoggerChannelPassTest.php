@@ -81,7 +81,7 @@ class LoggerChannelPassTest extends TestCase
     {
         $container = $this->getFunctionalContainer();
 
-        $dummyService = $container->register('dummy_service', 'Symfony\Bundle\MonologBundle\Tests\DependencyInjection\Compiler\DummyService')
+        $dummyService = $container->register('dummy_service', DummyService::class)
             ->setAutowired(true)
             ->setPublic(true)
             ->addTag('monolog.logger', ['channel' => 'test']);
@@ -95,10 +95,10 @@ class LoggerChannelPassTest extends TestCase
     {
         $container = $this->getFunctionalContainer();
 
-        $container->registerForAutoconfiguration('Symfony\Bundle\MonologBundle\Tests\DependencyInjection\Compiler\DummyService')
+        $container->registerForAutoconfiguration(DummyService::class)
             ->setProperty('fake', 'dummy');
 
-        $container->register('dummy_service', 'Symfony\Bundle\MonologBundle\Tests\DependencyInjection\Compiler\DummyService')
+        $container->register('dummy_service', DummyService::class)
             ->setAutowired(true)
             ->setAutoconfigured(true)
             ->setPublic(true)
@@ -113,7 +113,7 @@ class LoggerChannelPassTest extends TestCase
     {
         $container = $this->getFunctionalContainer();
 
-        $dummyService = $container->register('dummy_service', 'Symfony\Bundle\MonologBundle\Tests\DependencyInjection\Compiler\DummyService')
+        $dummyService = $container->register('dummy_service', DummyService::class)
             ->setAutowired(true)
             ->addArgument(new Reference('monolog.logger'))
             ->addTag('monolog.logger', ['channel' => 'test']);
@@ -127,7 +127,7 @@ class LoggerChannelPassTest extends TestCase
     {
         $container = $this->getFunctionalContainer();
 
-        $dummyService = $container->register('dummy_service', 'stdClass')
+        $dummyService = $container->register('dummy_service', \stdClass::class)
             ->addTag('monolog.logger', ['channel' => 'test']);
 
         $container->compile();

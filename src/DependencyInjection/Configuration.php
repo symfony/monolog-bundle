@@ -988,7 +988,7 @@ final class Configuration implements ConfigurationInterface
                         ->always(function ($v) {
                             $map = [];
                             foreach ($v as $verbosity => $level) {
-                                $verbosityConstant = 'Symfony\Component\Console\Output\OutputInterface::'.$verbosity;
+                                $verbosityConstant = \Symfony\Component\Console\Output\OutputInterface::class.'::'.$verbosity;
 
                                 if (!\defined($verbosityConstant)) {
                                     throw new InvalidConfigurationException(\sprintf('The configured verbosity "%s" is invalid as it is not defined in Symfony\Component\Console\Output\OutputInterface.', $verbosity));
