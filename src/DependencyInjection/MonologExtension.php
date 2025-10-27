@@ -231,39 +231,6 @@ final class MonologExtension extends Extension
                 ]);
                 break;
 
-            case 'mongo':
-                trigger_deprecation('symfony/monolog-bundle', '3.11', 'The "mongo" handler type is deprecated in MonologBundle since version 3.11.0, use the "mongodb" type instead.');
-
-                if (!class_exists(\MongoDB\Client::class)) {
-                    throw new \RuntimeException('The "mongo" handler requires the mongodb/mongodb package to be installed.');
-                }
-
-                if (isset($handler['mongo']['id'])) {
-                    $client = new Reference($handler['mongo']['id']);
-                } else {
-                    $server = 'mongodb://';
-
-                    if (isset($handler['mongo']['user'])) {
-                        $server .= $handler['mongo']['user'].':'.$handler['mongo']['pass'].'@';
-                    }
-
-                    $server .= $handler['mongo']['host'].':'.$handler['mongo']['port'];
-
-                    $client = new Definition(\MongoDB\Client::class, [
-                        $server,
-                        ['appname' => 'monolog-bundle'],
-                    ]);
-                }
-
-                $definition->setArguments([
-                    $client,
-                    $handler['mongo']['database'],
-                    $handler['mongo']['collection'],
-                    $handler['level'],
-                    $handler['bubble'],
-                ]);
-                break;
-
             case 'mongodb':
                 if (!class_exists(\MongoDB\Client::class)) {
                     throw new \RuntimeException('The "mongodb" handler requires the mongodb/mongodb package to be installed.');
@@ -301,10 +268,6 @@ final class MonologExtension extends Extension
                     $definition->addMethodCall('setFormatter', [$formatter]);
                 }
                 break;
-
-            case 'elasticsearch':
-                trigger_deprecation('symfony/monolog-bundle', '3.8', 'The "elasticsearch" handler type is deprecated in MonologBundle since version 3.8.0, use the "elastica" type instead, or switch to the official Elastic client using the "elastic_search" type.');
-                // no break
 
             case 'elastica':
             case 'elastic_search':
@@ -859,7 +822,7 @@ final class MonologExtension extends Extension
             'whatfailuregroup' => \Monolog\Handler\WhatFailureGroupHandler::class,
             'fingers_crossed' => \Monolog\Handler\FingersCrossedHandler::class,
             'filter' => \Monolog\Handler\FilterHandler::class,
-            'mongo','mongodb' => \Monolog\Handler\MongoDBHandler::class,
+            'mongodb' => \Monolog\Handler\MongoDBHandler::class,
             'telegram' => \Monolog\Handler\TelegramBotHandler::class,
             'server_log' => \Symfony\Bridge\Monolog\Handler\ServerLogHandler::class,
             'redis', 'predis' => \Monolog\Handler\RedisHandler::class,
