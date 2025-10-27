@@ -1,0 +1,33 @@
+---------------------------------------------------------------------------
+
+by jmikola at 2025-10-23T03:01:33Z
+
+The [Fabbot failure](https://github.com/symfony/monolog-bundle/actions/runs/18736075269/job/53442874847?pr=550) seems unrelated:
+
+> Error: Test case methods should not have a return type. Please apply the patch below.
+
+None of the new test methods introduced in this PR specify a return type.
+
+@GromNaN did this not come up in your previous PR (https://github.com/symfony/monolog-bundle/pull/485)?
+
+---------------------------------------------------------------------------
+
+by GromNaN at 2025-10-23T18:08:55Z
+
+> The [Fabbot failure](https://github.com/symfony/monolog-bundle/actions/runs/18736075269/job/53442874847?pr=550) seems unrelated:
+>
+> > Error: Test case methods should not have a return type. Please apply the patch below.
+>
+> None of the new test methods introduced in this PR specify a return type.
+>
+> @GromNaN did this not come up in your previous PR (#485)?
+
+We added the rule after. We should probably remove the return type in this branch. It's annoying to ignore fabbot failures.
+
+Edit: you can rebase.
+
+---------------------------------------------------------------------------
+
+by GromNaN at 2025-10-23T20:43:12Z
+
+For the error in the CI, we can add `extension: mongodb` to [setup-php](https://github.com/symfony/monolog-bundle/blob/d3cf193260a8bb0884e6cff521e386ff8927e9bb/.github/workflows/ci.yaml#L39).
