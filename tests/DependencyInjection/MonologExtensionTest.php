@@ -46,7 +46,7 @@ class MonologExtensionTest extends DependencyInjectionTestCase
         $this->assertDICDefinitionMethodCallAt(1, $logger, 'pushHandler', [new Reference('monolog.handler.main')]);
 
         $handler = $container->getDefinition('monolog.handler.main');
-        $this->assertDICDefinitionClass($handler, 'Monolog\Handler\StreamHandler');
+        $this->assertDICDefinitionClass($handler, \Monolog\Handler\StreamHandler::class);
         $this->assertDICConstructorArguments($handler, ['%kernel.logs_dir%/%kernel.environment%.log', 'DEBUG', true, null, false]);
         $this->assertDICDefinitionMethodCallAt(0, $handler, 'pushProcessor', [new Reference('monolog.processor.psr_log_message')]);
     }
@@ -64,7 +64,7 @@ class MonologExtensionTest extends DependencyInjectionTestCase
         $this->assertDICDefinitionMethodCallAt(1, $logger, 'pushHandler', [new Reference('monolog.handler.custom')]);
 
         $handler = $container->getDefinition('monolog.handler.custom');
-        $this->assertDICDefinitionClass($handler, 'Monolog\Handler\StreamHandler');
+        $this->assertDICDefinitionClass($handler, \Monolog\Handler\StreamHandler::class);
         $this->assertDICConstructorArguments($handler, ['/tmp/symfony.log', 'ERROR', false, 0666, true]);
     }
 
@@ -84,7 +84,7 @@ class MonologExtensionTest extends DependencyInjectionTestCase
         $this->assertDICDefinitionMethodCallAt(1, $logger, 'pushHandler', [new Reference('monolog.handler.custom')]);
 
         $handler = $container->getDefinition('monolog.handler.custom');
-        $this->assertDICDefinitionClass($handler, 'Monolog\Handler\StreamHandler');
+        $this->assertDICDefinitionClass($handler, \Monolog\Handler\StreamHandler::class);
         $this->assertDICConstructorArguments($handler, ['/tmp/symfony.log', 'ERROR', false, 0666, false]);
     }
 
@@ -92,7 +92,7 @@ class MonologExtensionTest extends DependencyInjectionTestCase
     {
         $container = $this->getContainer(
             [['handlers' => ['custom' => ['type' => 'service', 'id' => 'some.service.id']]]],
-            ['some.service.id' => new Definition('stdClass', ['foo', false])]
+            ['some.service.id' => new Definition(\stdClass::class, ['foo', false])]
         );
 
         $this->assertTrue($container->hasDefinition('monolog.logger'));
@@ -104,7 +104,7 @@ class MonologExtensionTest extends DependencyInjectionTestCase
         $this->assertDICDefinitionMethodCallAt(1, $logger, 'pushHandler', [new Reference('monolog.handler.custom')]);
 
         $handler = $container->findDefinition('monolog.handler.custom');
-        $this->assertDICDefinitionClass($handler, 'stdClass');
+        $this->assertDICDefinitionClass($handler, \stdClass::class);
         $this->assertDICConstructorArguments($handler, ['foo', false]);
     }
 
@@ -112,7 +112,7 @@ class MonologExtensionTest extends DependencyInjectionTestCase
     {
         $container = $this->getContainer(
             [['handlers' => ['custom' => ['type' => 'service', 'id' => 'some.service.id', 'nested' => true]]]],
-            ['some.service.id' => new Definition('stdClass', ['foo', false])]
+            ['some.service.id' => new Definition(\stdClass::class, ['foo', false])]
         );
 
         $this->assertTrue($container->hasDefinition('monolog.logger'));
@@ -124,7 +124,7 @@ class MonologExtensionTest extends DependencyInjectionTestCase
         $this->assertDICDefinitionMethodCallAt(0, $logger, 'useMicrosecondTimestamps', ['%monolog.use_microseconds%']);
 
         $handler = $container->findDefinition('monolog.handler.custom');
-        $this->assertDICDefinitionClass($handler, 'stdClass');
+        $this->assertDICDefinitionClass($handler, \stdClass::class);
         $this->assertDICConstructorArguments($handler, ['foo', false]);
     }
 
@@ -221,7 +221,7 @@ class MonologExtensionTest extends DependencyInjectionTestCase
         $this->assertDICDefinitionMethodCallAt(1, $logger, 'pushHandler', [new Reference('monolog.handler.main')]);
 
         $handler = $container->getDefinition('monolog.handler.main');
-        $this->assertDICDefinitionClass($handler, 'Monolog\Handler\SyslogHandler');
+        $this->assertDICDefinitionClass($handler, \Monolog\Handler\SyslogHandler::class);
         $this->assertDICConstructorArguments($handler, [false, 'user', 'DEBUG', true, \LOG_CONS]);
     }
 
@@ -237,7 +237,7 @@ class MonologExtensionTest extends DependencyInjectionTestCase
         $this->assertDICDefinitionMethodCallAt(1, $logger, 'pushHandler', [new Reference('monolog.handler.main')]);
 
         $handler = $container->getDefinition('monolog.handler.main');
-        $this->assertDICDefinitionClass($handler, 'Monolog\Handler\RollbarHandler');
+        $this->assertDICDefinitionClass($handler, RollbarHandler::class);
         $this->assertDICConstructorArguments($handler, [new Reference('monolog.rollbar.notifier.1c8e6a67728dff6a209f828427128dd8b3c2b746'), 'DEBUG', true]);
     }
 
@@ -256,7 +256,7 @@ class MonologExtensionTest extends DependencyInjectionTestCase
         $this->assertDICDefinitionMethodCallAt(1, $logger, 'pushHandler', [new Reference('monolog.handler.main')]);
 
         $handler = $container->getDefinition('monolog.handler.main');
-        $this->assertDICDefinitionClass($handler, 'Monolog\Handler\RollbarHandler');
+        $this->assertDICDefinitionClass($handler, RollbarHandler::class);
         $this->assertDICConstructorArguments($handler, [new Reference('my_rollbar_id'), 'DEBUG', true]);
     }
 
@@ -281,7 +281,7 @@ class MonologExtensionTest extends DependencyInjectionTestCase
         $this->assertDICDefinitionMethodCallAt(1, $logger, 'pushHandler', [new Reference('monolog.handler.socket')]);
 
         $handler = $container->getDefinition('monolog.handler.socket');
-        $this->assertDICDefinitionClass($handler, 'Monolog\Handler\SocketHandler');
+        $this->assertDICDefinitionClass($handler, \Monolog\Handler\SocketHandler::class);
         $this->assertDICConstructorArguments($handler, ['localhost:50505', 'DEBUG', true]);
         $this->assertDICDefinitionMethodCallAt(0, $handler, 'pushProcessor', [new Reference('monolog.processor.psr_log_message')]);
         $this->assertDICDefinitionMethodCallAt(1, $handler, 'setTimeout', ['1']);
@@ -318,7 +318,7 @@ class MonologExtensionTest extends DependencyInjectionTestCase
         $this->assertDICDefinitionMethodCallAt(0, $logger, 'useMicrosecondTimestamps', ['%monolog.use_microseconds%']);
         $this->assertDICDefinitionMethodCallAt(1, $logger, 'pushHandler', [new Reference('monolog.handler.loggly')]);
         $handler = $container->getDefinition('monolog.handler.loggly');
-        $this->assertDICDefinitionClass($handler, 'Monolog\Handler\LogglyHandler');
+        $this->assertDICDefinitionClass($handler, \Monolog\Handler\LogglyHandler::class);
         $this->assertDICConstructorArguments($handler, [$token, 'DEBUG', true]);
         $this->assertDICDefinitionMethodCallAt(0, $handler, 'pushProcessor', [new Reference('monolog.processor.psr_log_message')]);
 
@@ -353,7 +353,7 @@ class MonologExtensionTest extends DependencyInjectionTestCase
         $this->assertDICDefinitionMethodCallAt(1, $logger, 'pushHandler', [new Reference('monolog.handler.main')]);
 
         $strategy = $container->getDefinition('monolog.handler.main.http_code_strategy');
-        $this->assertDICDefinitionClass($strategy, 'Symfony\Bridge\Monolog\Handler\FingersCrossed\HttpCodeActivationStrategy');
+        $this->assertDICDefinitionClass($strategy, \Symfony\Bridge\Monolog\Handler\FingersCrossed\HttpCodeActivationStrategy::class);
         $this->assertDICConstructorArguments($strategy, [
             new Reference('request_stack'),
             [
@@ -365,7 +365,7 @@ class MonologExtensionTest extends DependencyInjectionTestCase
         ]);
 
         $handler = $container->getDefinition('monolog.handler.main');
-        $this->assertDICDefinitionClass($handler, 'Monolog\Handler\FingersCrossedHandler');
+        $this->assertDICDefinitionClass($handler, \Monolog\Handler\FingersCrossedHandler::class);
         $this->assertDICConstructorArguments($handler, [new Reference('monolog.handler.nested'), new Reference('monolog.handler.main.http_code_strategy'), 0, true, true, null]);
     }
 
@@ -391,7 +391,7 @@ class MonologExtensionTest extends DependencyInjectionTestCase
             'browser console with parameter level' => [
                 ['%log_level%' => 'info'],
                 ['type' => 'browser_console', 'level' => '%log_level%'],
-                'Monolog\Handler\BrowserConsoleHandler',
+                \Monolog\Handler\BrowserConsoleHandler::class,
                 [
                     '%log_level%',
                     true,
@@ -400,7 +400,7 @@ class MonologExtensionTest extends DependencyInjectionTestCase
             'browser console with envvar level' => [
                 ['%env(LOG_LEVEL)%' => 'info'],
                 ['type' => 'browser_console', 'level' => '%env(LOG_LEVEL)%'],
-                'Monolog\Handler\BrowserConsoleHandler',
+                \Monolog\Handler\BrowserConsoleHandler::class,
                 [
                     '%env(LOG_LEVEL)%',
                     true,
@@ -409,7 +409,7 @@ class MonologExtensionTest extends DependencyInjectionTestCase
             'stream with envvar level null or "~" (in yaml config)' => [
                 ['%env(LOG_LEVEL)%' => null],
                 ['type' => 'stream', 'level' => '%env(LOG_LEVEL)%'],
-                'Monolog\Handler\StreamHandler',
+                \Monolog\Handler\StreamHandler::class,
                 [
                     '%kernel.logs_dir%/%kernel.environment%.log',
                     '%env(LOG_LEVEL)%',
@@ -421,7 +421,7 @@ class MonologExtensionTest extends DependencyInjectionTestCase
             'stream with envvar level' => [
                 ['%env(LOG_LEVEL)%' => '400'],
                 ['type' => 'stream', 'level' => '%env(LOG_LEVEL)%'],
-                'Monolog\Handler\StreamHandler',
+                \Monolog\Handler\StreamHandler::class,
                 [
                     '%kernel.logs_dir%/%kernel.environment%.log',
                     '%env(LOG_LEVEL)%',
@@ -433,7 +433,7 @@ class MonologExtensionTest extends DependencyInjectionTestCase
             'stream with envvar and fallback parameter' => [
                 ['%env(LOG_LEVEL)%' => '500', '%log_level%' => '%env(LOG_LEVEL)%'],
                 ['type' => 'stream', 'level' => '%log_level%'],
-                'Monolog\Handler\StreamHandler',
+                \Monolog\Handler\StreamHandler::class,
                 [
                     '%kernel.logs_dir%/%kernel.environment%.log',
                     '%log_level%',
@@ -447,9 +447,6 @@ class MonologExtensionTest extends DependencyInjectionTestCase
 
     public function testProcessorAutoConfiguration()
     {
-        if (!interface_exists('Monolog\ResettableInterface')) {
-            $this->markTestSkipped('The ResettableInterface is not available.');
-        }
         $service = new Definition(UidProcessor::class);
         $service->setAutoconfigured(true);
         $container = $this->getContainer([], ['processor.uid' => $service]);
@@ -512,8 +509,8 @@ class MonologExtensionTest extends DependencyInjectionTestCase
     public function testElasticsearchAndElasticaHandlers()
     {
         $container = new ContainerBuilder();
-        $container->setDefinition('elasticsearch.client', new Definition('Elasticsearch\\Client'));
-        $container->setDefinition('elastica.client', new Definition('Elastica\\Client'));
+        $container->setDefinition('elasticsearch.client', new Definition(\Elasticsearch\Client::class));
+        $container->setDefinition('elastica.client', new Definition(\Elastica\Client::class));
 
         $config = [[
             'handlers' => [
@@ -547,7 +544,7 @@ class MonologExtensionTest extends DependencyInjectionTestCase
         $this->assertSame(ElasticsearchHandler::class, $esHandler->getClass());
         $esClient = $esHandler->getArgument(0);
         $this->assertInstanceOf(Definition::class, $esClient);
-        $this->assertStringEndsWith('Elasticsearch\Client', $esClient->getClass());
+        $this->assertStringEndsWith(\Elasticsearch\Client::class, $esClient->getClass());
         $this->assertSame(['hosts' => ['es:9200']], $esClient->getArgument(0));
 
         // Elastica handler should receive the elastica.client as first argument
@@ -555,7 +552,7 @@ class MonologExtensionTest extends DependencyInjectionTestCase
         $this->assertSame(ElasticaHandler::class, $elasticaHandler->getClass());
         $elasticaClient = $elasticaHandler->getArgument(0);
         $this->assertInstanceOf(Definition::class, $elasticaClient);
-        $this->assertSame('Elastica\Client', $elasticaClient->getClass());
+        $this->assertSame(\Elastica\Client::class, $elasticaClient->getClass());
         $this->assertSame(['hosts' => ['es:9200'], 'transport' => 'Http'], $elasticaClient->getArgument(0));
     }
 
@@ -567,7 +564,7 @@ class MonologExtensionTest extends DependencyInjectionTestCase
             $this->markTestSkipped('mongodb/mongodb is not installed.');
         }
 
-        //$this->expectDeprecation('Since symfony/monolog-bundle 3.11: The "mongo" handler type is deprecated in MonologBundle since version 3.11.0, use the "mongodb" type instead.');
+        // $this->expectDeprecation('Since symfony/monolog-bundle 3.11: The "mongo" handler type is deprecated in MonologBundle since version 3.11.0, use the "mongodb" type instead.');
 
         $container = new ContainerBuilder();
         $container->setDefinition('mongodb.client', new Definition('MongoDB\Client'));

@@ -75,7 +75,7 @@ class LoggerChannelPass implements CompilerPassInterface
                 $binding->setValues($values);
 
                 $bindings = $definition->getBindings();
-                $bindings['Psr\Log\LoggerInterface'] = $binding;
+                $bindings[LoggerInterface::class] = $binding;
                 $definition->setBindings($bindings);
             }
         }

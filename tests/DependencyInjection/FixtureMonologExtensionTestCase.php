@@ -41,15 +41,15 @@ abstract class FixtureMonologExtensionTestCase extends DependencyInjectionTestCa
         $this->assertDICDefinitionMethodCallAt(0, $logger, 'useMicrosecondTimestamps', ['%monolog.use_microseconds%']);
 
         $handler = $container->getDefinition('monolog.handler.custom');
-        $this->assertDICDefinitionClass($handler, 'Monolog\Handler\StreamHandler');
+        $this->assertDICDefinitionClass($handler, \Monolog\Handler\StreamHandler::class);
         $this->assertDICConstructorArguments($handler, ['/tmp/symfony.log', 'ERROR', false, 0666, false]);
 
         $handler = $container->getDefinition('monolog.handler.main');
-        $this->assertDICDefinitionClass($handler, 'Monolog\Handler\FingersCrossedHandler');
+        $this->assertDICDefinitionClass($handler, \Monolog\Handler\FingersCrossedHandler::class);
         $this->assertDICConstructorArguments($handler, [new Reference('monolog.handler.nested'), $activation, 0, true, true, 'NOTICE']);
 
         $handler = $container->getDefinition('monolog.handler.filtered');
-        $this->assertDICDefinitionClass($handler, 'Monolog\Handler\FilterHandler');
+        $this->assertDICDefinitionClass($handler, \Monolog\Handler\FilterHandler::class);
         $this->assertDICConstructorArguments($handler, [new Reference('monolog.handler.nested2'), ['WARNING', 'ERROR'], 'EMERGENCY', true]);
     }
 
@@ -70,11 +70,11 @@ abstract class FixtureMonologExtensionTestCase extends DependencyInjectionTestCa
         $this->assertDICDefinitionMethodCallAt(0, $logger, 'useMicrosecondTimestamps', ['%monolog.use_microseconds%']);
 
         $handler = $container->getDefinition('monolog.handler.custom');
-        $this->assertDICDefinitionClass($handler, 'Monolog\Handler\StreamHandler');
+        $this->assertDICDefinitionClass($handler, \Monolog\Handler\StreamHandler::class);
         $this->assertDICConstructorArguments($handler, ['/tmp/symfony.log', 'WARNING', true, null, false]);
 
         $handler = $container->getDefinition('monolog.handler.main');
-        $this->assertDICDefinitionClass($handler, 'Monolog\Handler\FingersCrossedHandler');
+        $this->assertDICDefinitionClass($handler, \Monolog\Handler\FingersCrossedHandler::class);
         $this->assertDICConstructorArguments($handler, [new Reference('monolog.handler.nested'), $activation, 0, true, true, null]);
     }
 
@@ -96,7 +96,7 @@ abstract class FixtureMonologExtensionTestCase extends DependencyInjectionTestCa
         $this->assertDICDefinitionMethodCallAt(0, $logger, 'useMicrosecondTimestamps', ['%monolog.use_microseconds%']);
 
         $handler = $container->getDefinition('monolog.handler.new');
-        $this->assertDICDefinitionClass($handler, 'Monolog\Handler\StreamHandler');
+        $this->assertDICDefinitionClass($handler, \Monolog\Handler\StreamHandler::class);
         $this->assertDICConstructorArguments($handler, ['/tmp/monolog.log', 'ERROR', true, null, false]);
     }
 
@@ -120,15 +120,15 @@ abstract class FixtureMonologExtensionTestCase extends DependencyInjectionTestCa
         $this->assertDICDefinitionMethodCallAt(0, $logger, 'useMicrosecondTimestamps', ['%monolog.use_microseconds%']);
 
         $handler = $container->getDefinition('monolog.handler.main');
-        $this->assertDICDefinitionClass($handler, 'Monolog\Handler\BufferHandler');
+        $this->assertDICDefinitionClass($handler, \Monolog\Handler\BufferHandler::class);
         $this->assertDICConstructorArguments($handler, [new Reference('monolog.handler.nested'), 0, 'INFO', true, false]);
 
         $handler = $container->getDefinition('monolog.handler.first');
-        $this->assertDICDefinitionClass($handler, 'Monolog\Handler\RotatingFileHandler');
+        $this->assertDICDefinitionClass($handler, \Monolog\Handler\RotatingFileHandler::class);
         $this->assertDICConstructorArguments($handler, ['/tmp/monolog.log', 0, 'ERROR', true, null, false]);
 
         $handler = $container->getDefinition('monolog.handler.last');
-        $this->assertDICDefinitionClass($handler, 'Monolog\Handler\StreamHandler');
+        $this->assertDICDefinitionClass($handler, \Monolog\Handler\StreamHandler::class);
         $this->assertDICConstructorArguments($handler, ['/tmp/last.log', 'ERROR', true, null, false]);
     }
 
