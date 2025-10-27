@@ -14,9 +14,12 @@ namespace Symfony\Bundle\MonologBundle\Tests\DependencyInjection;
 use Monolog\Handler\ElasticaHandler;
 use Monolog\Handler\ElasticsearchHandler;
 use Monolog\Handler\FingersCrossed\ErrorLevelActivationStrategy;
+use Monolog\Handler\MongoDBHandler;
 use Monolog\Handler\RollbarHandler;
 use Monolog\Processor\UidProcessor;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\IgnoreDeprecations;
 use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\LoggerChannelPass;
 use Symfony\Bundle\MonologBundle\DependencyInjection\MonologExtension;
 use Symfony\Bundle\MonologBundle\Tests\DependencyInjection\Fixtures\AsMonologProcessor\FooProcessorWithPriority;
@@ -554,6 +557,164 @@ class MonologExtensionTest extends DependencyInjectionTestCase
         $this->assertInstanceOf(Definition::class, $elasticaClient);
         $this->assertSame('Elastica\Client', $elasticaClient->getClass());
         $this->assertSame(['hosts' => ['es:9200'], 'transport' => 'Http'], $elasticaClient->getArgument(0));
+    }
+
+    #[Group('legacy')]
+    #[IgnoreDeprecations]
+    public function testMongo()
+    {
+        if (!class_exists('MongoDB\Client')) {
+            $this->markTestSkipped('mongodb/mongodb is not installed.');
+        }
+
+        //$this->expectDeprecation('Since symfony/monolog-bundle 3.11: The "mongo" handler type is deprecated in MonologBundle since version 3.11.0, use the "mongodb" type instead.');
+
+        $container = new ContainerBuilder();
+        $container->setDefinition('mongodb.client', new Definition('MongoDB\Client'));
+
+        $config = [[
+            'handlers' => [
+                'mongo_with_id' => [
+                    'type' => 'mongo',
+                    'mongo' => ['id' => 'mongodb.client'],
+                ],
+                'mongo_with_string_id' => [
+                    'type' => 'mongo',
+                    'mongo' => 'mongodb.client',
+                ],
+                'mongo_with_host' => [
+                    'type' => 'mongo',
+                    'mongo' => [
+                        'host' => 'localhost',
+                        'port' => '27018',
+                        'user' => 'username',
+                        'pass' => 'password',
+                        'database' => 'db',
+                        'collection' => 'coll',
+                    ],
+                ],
+                'mongo_with_host_and_default_args' => [
+                    'type' => 'mongo',
+                    'mongo' => [
+                        'host' => 'localhost',
+                    ],
+                ],
+            ],
+        ]];
+
+        $extension = new MonologExtension();
+        $extension->load($config, $container);
+
+        $this->assertTrue($container->hasDefinition('monolog.handler.mongo_with_id'));
+        $this->assertTrue($container->hasDefinition('monolog.handler.mongo_with_string_id'));
+        $this->assertTrue($container->hasDefinition('monolog.handler.mongo_with_host'));
+        $this->assertTrue($container->hasDefinition('monolog.handler.mongo_with_host_and_default_args'));
+
+        // MongoDB handler should receive the mongodb.client as first argument
+        $handler = $container->getDefinition('monolog.handler.mongo_with_id');
+        $this->assertDICDefinitionClass($handler, MongoDBHandler::class);
+        $this->assertDICConstructorArguments($handler, [new Reference('mongodb.client'), 'monolog', 'logs', 'DEBUG', true]);
+
+        // MongoDB handler should receive the mongodb.client as first argument
+        $handler = $container->getDefinition('monolog.handler.mongo_with_string_id');
+        $this->assertDICDefinitionClass($handler, MongoDBHandler::class);
+        $this->assertDICConstructorArguments($handler, [new Reference('mongodb.client'), 'monolog', 'logs', 'DEBUG', true]);
+
+        // MongoDB handler with host and arguments
+        $handler = $container->getDefinition('monolog.handler.mongo_with_host');
+        $this->assertDICDefinitionClass($handler, MongoDBHandler::class);
+        $client = $handler->getArgument(0);
+        $this->assertDICDefinitionClass($client, 'MongoDB\Client');
+        $this->assertDICConstructorArguments($client, ['mongodb://username:password@localhost:27018', ['appname' => 'monolog-bundle']]);
+        $this->assertDICConstructorArguments($handler, [$client, 'db', 'coll', 'DEBUG', true]);
+
+        // MongoDB handler with host and default arguments
+        $handler = $container->getDefinition('monolog.handler.mongo_with_host_and_default_args');
+        $this->assertDICDefinitionClass($handler, MongoDBHandler::class);
+        $client = $handler->getArgument(0);
+        $this->assertDICDefinitionClass($client, 'MongoDB\Client');
+        $this->assertDICConstructorArguments($client, ['mongodb://localhost:27017', ['appname' => 'monolog-bundle']]);
+        $this->assertDICConstructorArguments($handler, [$client, 'monolog', 'logs', 'DEBUG', true]);
+    }
+
+    public function testMongoDB()
+    {
+        if (!class_exists('MongoDB\Client')) {
+            $this->markTestSkipped('mongodb/mongodb is not installed.');
+        }
+
+        $container = new ContainerBuilder();
+        $container->setDefinition('mongodb.client', new Definition('MongoDB\Client'));
+
+        $config = [[
+            'handlers' => [
+                'mongodb_with_id' => [
+                    'type' => 'mongodb',
+                    'mongodb' => ['id' => 'mongodb.client'],
+                ],
+                'mongodb_with_string_id' => [
+                    'type' => 'mongodb',
+                    'mongodb' => 'mongodb.client',
+                ],
+                'mongodb_with_uri' => [
+                    'type' => 'mongodb',
+                    'mongodb' => [
+                        'uri' => 'mongodb://localhost:27018',
+                        'username' => 'username',
+                        'password' => 'password',
+                        'database' => 'db',
+                        'collection' => 'coll',
+                    ],
+                ],
+                'mongodb_with_uri_and_default_args' => [
+                    'type' => 'mongodb',
+                    'mongodb' => [
+                        'uri' => 'mongodb://localhost:27018',
+                    ],
+                ],
+            ],
+        ]];
+
+        $extension = new MonologExtension();
+        $extension->load($config, $container);
+
+        $this->assertTrue($container->hasDefinition('monolog.handler.mongodb_with_id'));
+        $this->assertTrue($container->hasDefinition('monolog.handler.mongodb_with_string_id'));
+        $this->assertTrue($container->hasDefinition('monolog.handler.mongodb_with_uri'));
+        $this->assertTrue($container->hasDefinition('monolog.handler.mongodb_with_uri_and_default_args'));
+
+        // A MongoDBFormatter will be applied to each handler by default
+        $formatter = new Definition('Monolog\Formatter\MongoDBFormatter');
+
+        // MongoDB handler should receive the mongodb.client as first argument
+        $handler = $container->getDefinition('monolog.handler.mongodb_with_id');
+        $this->assertDICDefinitionClass($handler, MongoDBHandler::class);
+        $this->assertDICConstructorArguments($handler, [new Reference('mongodb.client'), 'monolog', 'logs', 'DEBUG', true]);
+        $this->assertDICDefinitionMethodCallAt(1, $handler, 'setFormatter', [$formatter]);
+
+        // MongoDB handler should receive the mongodb.client as first argument
+        $handler = $container->getDefinition('monolog.handler.mongodb_with_string_id');
+        $this->assertDICDefinitionClass($handler, MongoDBHandler::class);
+        $this->assertDICConstructorArguments($handler, [new Reference('mongodb.client'), 'monolog', 'logs', 'DEBUG', true]);
+        $this->assertDICDefinitionMethodCallAt(1, $handler, 'setFormatter', [$formatter]);
+
+        // MongoDB handler with arguments
+        $handler = $container->getDefinition('monolog.handler.mongodb_with_uri');
+        $this->assertDICDefinitionClass($handler, MongoDBHandler::class);
+        $client = $handler->getArgument(0);
+        $this->assertDICDefinitionClass($client, 'MongoDB\Client');
+        $this->assertDICConstructorArguments($client, ['mongodb://localhost:27018', ['appname' => 'monolog-bundle', 'username' => 'username', 'password' => 'password']]);
+        $this->assertDICConstructorArguments($handler, [$client, 'db', 'coll', 'DEBUG', true]);
+        $this->assertDICDefinitionMethodCallAt(1, $handler, 'setFormatter', [$formatter]);
+
+        // MongoDB handler with host and default arguments
+        $handler = $container->getDefinition('monolog.handler.mongodb_with_uri_and_default_args');
+        $this->assertDICDefinitionClass($handler, MongoDBHandler::class);
+        $client = $handler->getArgument(0);
+        $this->assertDICDefinitionClass($client, 'MongoDB\Client');
+        $this->assertDICConstructorArguments($client, ['mongodb://localhost:27018', ['appname' => 'monolog-bundle']]);
+        $this->assertDICConstructorArguments($handler, [$client, 'monolog', 'logs', 'DEBUG', true]);
+        $this->assertDICDefinitionMethodCallAt(1, $handler, 'setFormatter', [$formatter]);
     }
 
     private function getContainer(array $config = [], array $thirdPartyDefinitions = []): ContainerBuilder

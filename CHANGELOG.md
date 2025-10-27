@@ -17,6 +17,7 @@
 * Add `hosts` configuration for `elastica` handler
 * Add `enabled` option to `handlers` configuration
 * Add `priority` field to `processor` tag
+* Add `mongodb` handler and deprecate `mongo`
 
 ## 3.10.0 (2023-11-06)
 

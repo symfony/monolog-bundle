@@ -12,6 +12,7 @@
 namespace Symfony\Bundle\MonologBundle\Tests\DependencyInjection;
 
 use Monolog\Handler\FingersCrossed\ErrorLevelActivationStrategy;
+use Monolog\Handler\MongoDBHandler;
 use Monolog\Handler\NoopHandler;
 use Monolog\Handler\NullHandler;
 use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\LoggerChannelPass;
@@ -261,6 +262,23 @@ abstract class FixtureMonologExtensionTestCase extends DependencyInjectionTestCa
         $this->assertTrue($container->hasDefinition('monolog.handler.default'));
         $this->assertTrue($container->hasDefinition('monolog.handler.enabled'));
         $this->assertFalse($container->hasDefinition('monolog.handler.disabled'));
+    }
+
+    public function testMongoDB()
+    {
+        if (!class_exists('MongoDB\Client')) {
+            $this->markTestSkipped('mongodb/mongodb is not installed.');
+        }
+
+        $container = $this->getContainer('mongodb');
+
+        $this->assertTrue($container->hasDefinition('monolog.handler.mongodb'));
+        $handler = $container->getDefinition('monolog.handler.mongodb');
+        $this->assertDICDefinitionClass($handler, MongoDBHandler::class);
+        $client = $handler->getArgument(0);
+        $this->assertDICDefinitionClass($client, 'MongoDB\Client');
+        $this->assertDICConstructorArguments($client, ['mongodb://localhost:27018', ['appname' => 'monolog-bundle', 'username' => 'username', 'password' => 'password']]);
+        $this->assertDICConstructorArguments($handler, [$client, 'db', 'coll', 'DEBUG', true]);
     }
 
     protected function getContainer($fixture): ContainerBuilder

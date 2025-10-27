@@ -91,6 +91,17 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
  *
+ * - mongodb:
+ *    - mongodb:
+ *       - id: optional if uri is given
+ *       - uri: MongoDB connection string, optional if id is given
+ *       - [username]: Username for database authentication
+ *       - [password]: Password for database authentication
+ *       - [database]: Database to which logs are written (not used for auth), defaults to "monolog"
+ *       - [collection]: Collection to which logs are written, defaults to "logs"
+ *    - [level]: level name or int value, defaults to DEBUG
+ *    - [bubble]: bool, defaults to true
+ *
  * - elastic_search:
  *   - elasticsearch:
  *      - id: optional if host is given
@@ -574,6 +585,7 @@ final class Configuration implements ConfigurationInterface
 
         $this->addGelfSection($handlerNode);
         $this->addMongoSection($handlerNode);
+        $this->addMongoDBSection($handlerNode);
         $this->addElasticsearchSection($handlerNode);
         $this->addRedisSection($handlerNode);
         $this->addPredisSection($handlerNode);
@@ -753,7 +765,7 @@ final class Configuration implements ConfigurationInterface
                     ->ifTrue(function ($v) {
                         return !isset($v['id']) && !isset($v['host']);
                     })
-                    ->thenInvalid('What must be set is either the host or the id.')
+                    ->thenInvalid('The "mongo" handler configuration requires either a service "id" or a connection "host".')
                     ->end()
                     ->validate()
                     ->ifTrue(function ($v) {
@@ -765,7 +777,43 @@ final class Configuration implements ConfigurationInterface
             ->end()
             ->validate()
                 ->ifTrue(function ($v) { return 'mongo' === $v['type'] && !isset($v['mongo']); })
-                ->thenInvalid('The mongo configuration has to be specified to use a MongoHandler')
+                ->thenInvalid('The "mongo" configuration has to be specified to use a "mongo" handler type.')
+            ->end()
+        ;
+    }
+
+    private function addMongoDBSection(ArrayNodeDefinition $handlerNode)
+    {
+        $handlerNode
+            ->children()
+                ->arrayNode('mongodb')
+                    ->canBeUnset()
+                    ->beforeNormalization()
+                        ->ifString()
+                        ->then(function ($v) { return ['id' => $v]; })
+                    ->end()
+                    ->children()
+                        ->scalarNode('id')
+                            ->info('ID of a MongoDB\Client service')
+                            ->example('doctrine_mongodb.odm.logs_connection')
+                        ->end()
+                        ->scalarNode('uri')->end()
+                        ->scalarNode('username')->end()
+                        ->scalarNode('password')->end()
+                        ->scalarNode('database')->defaultValue('monolog')->end()
+                        ->scalarNode('collection')->defaultValue('logs')->end()
+                    ->end()
+                    ->validate()
+                        ->ifTrue(function ($v) {
+                            return !isset($v['id']) && !isset($v['uri']);
+                        })
+                        ->thenInvalid('The "mongodb" handler configuration requires either a service "id" or a connection "uri".')
+                    ->end()
+                ->end()
+            ->end()
+            ->validate()
+                ->ifTrue(function ($v) { return 'mongodb' === $v['type'] && !isset($v['mongodb']); })
+                ->thenInvalid('The "mongodb" configuration has to be specified to use a "mongodb" handler type.')
             ->end()
         ;
     }

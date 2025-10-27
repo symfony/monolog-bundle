@@ -230,6 +230,12 @@ final class MonologExtension extends Extension
                 break;
 
             case 'mongo':
+                trigger_deprecation('symfony/monolog-bundle', '3.11', 'The "mongo" handler type is deprecated in MonologBundle since version 3.11.0, use the "mongodb" type instead.');
+
+                if (!class_exists('MongoDB\Client')) {
+                    throw new \RuntimeException('The "mongo" handler requires the mongodb/mongodb package to be installed.');
+                }
+
                 if (isset($handler['mongo']['id'])) {
                     $client = new Reference($handler['mongo']['id']);
                 } else {
@@ -243,9 +249,8 @@ final class MonologExtension extends Extension
 
                     $client = new Definition('MongoDB\Client', [
                         $server,
+                        ['appname' => 'monolog-bundle'],
                     ]);
-
-                    $client->setPublic(false);
                 }
 
                 $definition->setArguments([
@@ -256,6 +261,48 @@ final class MonologExtension extends Extension
                     $handler['bubble'],
                 ]);
                 break;
+
+            case 'mongodb':
+                if (!class_exists('MongoDB\Client')) {
+                    throw new \RuntimeException('The "mongodb" handler requires the mongodb/mongodb package to be installed.');
+                }
+
+                if (isset($handler['mongodb']['id'])) {
+                    $client = new Reference($handler['mongodb']['id']);
+                } else {
+                    $uriOptions = ['appname' => 'monolog-bundle'];
+
+                    if (isset($handler['mongodb']['username'])) {
+                        $uriOptions['username'] = $handler['mongodb']['username'];
+                    }
+
+                    if (isset($handler['mongodb']['password'])) {
+                        $uriOptions['password'] = $handler['mongodb']['password'];
+                    }
+
+                    $client = new Definition('MongoDB\Client', [
+                        $handler['mongodb']['uri'],
+                        $uriOptions,
+                    ]);
+                }
+
+                $definition->setArguments([
+                    $client,
+                    $handler['mongodb']['database'],
+                    $handler['mongodb']['collection'],
+                    $handler['level'],
+                    $handler['bubble'],
+                ]);
+
+                if (empty($handler['formatter'])) {
+                    $formatter = new Definition('Monolog\Formatter\MongoDBFormatter');
+                    $definition->addMethodCall('setFormatter', [$formatter]);
+                }
+                break;
+
+            case 'elasticsearch':
+                trigger_deprecation('symfony/monolog-bundle', '3.8', 'The "elasticsearch" handler type is deprecated in MonologBundle since version 3.8.0, use the "elastica" type instead, or switch to the official Elastic client using the "elastic_search" type.');
+                // no break
 
             case 'elastica':
             case 'elastic_search':
@@ -811,6 +858,7 @@ final class MonologExtension extends Extension
             'fingers_crossed' => 'Monolog\Handler\FingersCrossedHandler',
             'filter' => 'Monolog\Handler\FilterHandler',
             'mongo' => 'Monolog\Handler\MongoDBHandler',
+            'mongodb' => 'Monolog\Handler\MongoDBHandler',
             'telegram' => 'Monolog\Handler\TelegramBotHandler',
             'server_log' => 'Symfony\Bridge\Monolog\Handler\ServerLogHandler',
             'redis', 'predis' => 'Monolog\Handler\RedisHandler',

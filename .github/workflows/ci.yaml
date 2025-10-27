@@ -14,6 +14,7 @@ jobs:
                 php: [ '8.2', '8.3', '8.4' ]
                 symfony: [ false ]
                 deps: [ locked ]
+                extensions: [ '' ]
                 include:
                     -   php: '8.2'
                         deps: lowest
@@ -23,6 +24,10 @@ jobs:
                         deps: highest
                     -   php: '8.4'
                         deps: highest
+                        monolog: '3.*'
+                    -   php: '8.4'
+                        deps: locked
+                        extensions: mongodb
 
         env:
             SYMFONY_REQUIRE: ${{ matrix.symfony }}
@@ -37,10 +42,15 @@ jobs:
                     php-version: ${{ matrix.php }}
                     ini-values: zend.exception_ignore_args=false
                     tools: flex
+                    extensions: ${{ matrix.extensions }}
 
             -   name: Configure composer
                 if: "${{ matrix.deps == 'highest' }}"
                 run: composer config minimum-stability dev
+
+            -   name: Require mongodb/mongodb if ext-mongodb is available
+                if: "${{ contains(matrix.extensions, 'mongodb') }}"
+                run: composer require --no-update mongodb/mongodb
 
             -   name: Composer install
                 uses: ramsey/composer-install@v3

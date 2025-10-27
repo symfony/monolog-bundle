@@ -1,0 +1,10 @@
+monolog:
+    handlers:
+        mongodb:
+            type: mongodb
+            mongodb:
+                uri: "mongodb://localhost:27018"
+                username: username
+                password: password
+                database: db
+                collection: coll
