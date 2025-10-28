@@ -10,6 +10,7 @@
 * Remove `excluded_404s` option, use `excluded_http_codes` instead
 * Remove `console_formater_options` option, use `console_formatter_options` instead
 * Remove `elasticsearch` type, use `elastica` or `elastic_search` instead
+* Remove `mongo` type, use `mongodb` instead
 * Remove `sentry` and `raven` types, use a `service` type with [`sentry/sentry-symfony`](https://docs.sentryio/platforms/php/guides/symfony/logs/) instead
 * Remove `DebugHandlerPass`
 * Remove support for the `DebugHandler`

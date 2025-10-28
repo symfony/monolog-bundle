@@ -79,18 +79,6 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
  *   - [filename_format]: string, defaults to '{filename}-{date}'
  *   - [date_format]: string, defaults to 'Y-m-d'
  *
- * - mongo:
- *   - mongo:
- *      - id: optional if host is given
- *      - host: database host name, optional if id is given
- *      - [port]: defaults to 27017
- *      - [user]: database user name
- *      - pass: mandatory only if user is present
- *      - [database]: defaults to monolog
- *      - [collection]: defaults to logs
- *   - [level]: level name or int value, defaults to DEBUG
- *   - [bubble]: bool, defaults to true
- *
  * - mongodb:
  *    - mongodb:
  *       - id: optional if uri is given
@@ -584,7 +572,6 @@ final class Configuration implements ConfigurationInterface
             ->end();
 
         $this->addGelfSection($handlerNode);
-        $this->addMongoSection($handlerNode);
         $this->addMongoDBSection($handlerNode);
         $this->addElasticsearchSection($handlerNode);
         $this->addRedisSection($handlerNode);
@@ -738,46 +725,6 @@ final class Configuration implements ConfigurationInterface
             ->validate()
                 ->ifTrue(function ($v) { return 'gelf' === $v['type'] && !isset($v['publisher']); })
                 ->thenInvalid('The publisher has to be specified to use a GelfHandler')
-            ->end()
-        ;
-    }
-
-    private function addMongoSection(ArrayNodeDefinition $handlerNode): void
-    {
-        $handlerNode
-            ->children()
-                ->arrayNode('mongo')
-                    ->canBeUnset()
-                    ->beforeNormalization()
-                    ->ifString()
-                    ->then(function ($v) { return ['id' => $v]; })
-                    ->end()
-                    ->children()
-                        ->scalarNode('id')->end()
-                        ->scalarNode('host')->end()
-                        ->scalarNode('port')->defaultValue(27017)->end()
-                        ->scalarNode('user')->end()
-                        ->scalarNode('pass')->end()
-                        ->scalarNode('database')->defaultValue('monolog')->end()
-                        ->scalarNode('collection')->defaultValue('logs')->end()
-                    ->end()
-                    ->validate()
-                    ->ifTrue(function ($v) {
-                        return !isset($v['id']) && !isset($v['host']);
-                    })
-                    ->thenInvalid('The "mongo" handler configuration requires either a service "id" or a connection "host".')
-                    ->end()
-                    ->validate()
-                    ->ifTrue(function ($v) {
-                        return isset($v['user']) && !isset($v['pass']);
-                    })
-                    ->thenInvalid('If you set user, you must provide a password.')
-                    ->end()
-                ->end()
-            ->end()
-            ->validate()
-                ->ifTrue(function ($v) { return 'mongo' === $v['type'] && !isset($v['mongo']); })
-                ->thenInvalid('The "mongo" configuration has to be specified to use a "mongo" handler type.')
             ->end()
         ;
     }
