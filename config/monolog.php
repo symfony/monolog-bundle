@@ -20,6 +20,7 @@ use Monolog\Formatter\LogglyFormatter;
 use Monolog\Formatter\LogstashFormatter;
 use Monolog\Formatter\NormalizerFormatter;
 use Monolog\Formatter\ScalarFormatter;
+use Monolog\Formatter\SyslogFormatter;
 use Monolog\Formatter\WildfireFormatter;
 use Monolog\Logger;
 use Psr\Log\LoggerInterface;
@@ -48,6 +49,7 @@ return static function (ContainerConfigurator $container) {
         ->set('monolog.formatter.html', HtmlFormatter::class)
         ->set('monolog.formatter.json', JsonFormatter::class)
         ->set('monolog.formatter.line', LineFormatter::class)
+        ->set('monolog.formatter.syslog', SyslogFormatter::class)
         ->set('monolog.formatter.loggly', LogglyFormatter::class)
         ->set('monolog.formatter.normalizer', NormalizerFormatter::class)
         ->set('monolog.formatter.scalar', ScalarFormatter::class)

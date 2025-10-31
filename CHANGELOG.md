@@ -18,6 +18,7 @@
 * Add `enabled` option to `handlers` configuration
 * Add `priority` field to `processor` tag
 * Add `mongodb` handler and deprecate `mongo`
+* Add `monolog.formatter.syslog` service definition to format RFC5424-compliant messages
 
 ## 3.10.0 (2023-11-06)
 

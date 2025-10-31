@@ -73,6 +73,43 @@ class ConfigurationTest extends TestCase
         $this->assertEquals($expectedString, $config['handlers']['foobar']['channels']['elements'][0]);
     }
 
+    public function testUnsetExcludedHttpCodes()
+    {
+        $configs = [
+            [
+                'handlers' => [
+                    'main' => [
+                        'type' => 'fingers_crossed',
+                        'action_level' => 'error',
+                        'handler' => 'nested',
+                        'excluded_http_codes' => [404, 405],
+                        'channels' => ['!event'],
+                    ],
+                    'nested' => [
+                        'type' => 'stream',
+                        'path' => '%kernel.logs_dir%/%kernel.environment%.log',
+                        'level' => 'debug',
+                    ],
+                ],
+            ],
+            [
+                'handlers' => [
+                    'main' => [
+                        'type' => 'stream',
+                        'path' => '%kernel.logs_dir%/%kernel.environment%.log',
+                        'level' => 'debug',
+                        'excluded_http_codes' => false,
+                    ],
+                ],
+            ],
+        ];
+
+        $config = $this->process($configs);
+
+        $this->assertArrayNotHasKey('excluded_http_codes', $config['handlers']['main']);
+        $this->assertIsArray($config['handlers']['main']['channels']);
+    }
+
     public static function provideGelfPublisher(): array
     {
         return [
