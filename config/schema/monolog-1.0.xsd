@@ -95,6 +95,7 @@
         <xsd:attribute name="slack-team" type="xsd:string" />
         <xsd:attribute name="region" type="xsd:string" />
         <xsd:attribute name="enabled" type="xsd:boolean" />
+        <xsd:attribute name="handler_class" type="xsd:string" />
     </xsd:complexType>
 
     <xsd:simpleType name="level">

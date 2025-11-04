@@ -166,7 +166,15 @@ class MonologExtension extends Extension
             return $handlerId;
         }
 
-        $handlerClass = $this->getHandlerClassByType($handler['type']);
+        if (null !== $handler['handler_class']) {
+            $handlerClass = $handler['handler_class'];
+            if (!class_exists($handlerClass)) {
+                throw new \RuntimeException(sprintf('The handler class "%s" does not exist.', $handlerClass));
+            }
+        } else {
+            $handlerClass = $this->getHandlerClassByType($handler['type']);
+        }
+
         $definition = new Definition($handlerClass);
 
         if ($handler['include_stacktraces']) {

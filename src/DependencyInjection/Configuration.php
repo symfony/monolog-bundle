@@ -661,6 +661,7 @@ class Configuration implements ConfigurationInterface
                 ->end()
                 ->scalarNode('formatter')->end()
                 ->booleanNode('nested')->defaultFalse()->end()
+                ->scalarNode('handler_class')->defaultNull()->end()
             ->end();
 
         $this->addGelfSection($handlerNode);
