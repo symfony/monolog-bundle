@@ -169,7 +169,7 @@ class MonologExtension extends Extension
         if (null !== $handler['handler_class']) {
             $handlerClass = $handler['handler_class'];
             if (!class_exists($handlerClass)) {
-                throw new \RuntimeException(sprintf('The handler class "%s" does not exist.', $handlerClass));
+                throw new \RuntimeException(\sprintf('The handler class "%s" does not exist.', $handlerClass));
             }
         } else {
             $handlerClass = $this->getHandlerClassByType($handler['type']);
