@@ -930,10 +930,10 @@ class MonologExtension extends Extension
                 } else {
                     $config = $handler['config'] ?: [];
                     $config['access_token'] = $handler['token'];
-                    $rollbar = new Definition('RollbarNotifier', [
+                    $rollbar = new Definition('Rollbar\RollbarLogger', [
                         $config,
                     ]);
-                    $rollbarId = 'monolog.rollbar.notifier.'.sha1(json_encode($config));
+                    $rollbarId = 'monolog.rollbar.logger.'.sha1(json_encode($config));
                     $rollbar->setPublic(false);
                     $container->setDefinition($rollbarId, $rollbar);
                 }
