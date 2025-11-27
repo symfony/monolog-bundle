@@ -1,6 +1,6 @@
 ## Unreleased
 
-## 3.11.0 unreleased
+## 3.11.0 (2025-11-27)
 
 * Reorganize files to match the "Reusable Bundles" structure
 * Migrate services configuration to PHP
