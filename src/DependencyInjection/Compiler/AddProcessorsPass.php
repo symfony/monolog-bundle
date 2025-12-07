@@ -39,7 +39,7 @@ class AddProcessorsPass implements CompilerPassInterface
 
         foreach ($container->findTaggedServiceIds('monolog.processor') as $id => $tags) {
             if (array_any($tags, $closure = function (array $tag) { return (bool) $tag; })) {
-                $tags = array_filter($tags, $closure);
+                $tags = array_values(array_filter($tags, $closure));
             }
 
             foreach ($tags as &$tag) {
