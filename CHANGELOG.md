@@ -1,5 +1,9 @@
 ## Unreleased
 
+## unreleased
+
+* Fix `rollbar` handler to use `RollbarLogger` with Monolog 2+
+
 ## 3.11.0 (2025-11-27)
 
 * Reorganize files to match the "Reusable Bundles" structure
