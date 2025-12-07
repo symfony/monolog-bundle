@@ -696,7 +696,7 @@ final class MonologExtension extends Extension
                 } else {
                     $config = $handler['config'] ?: [];
                     $config['access_token'] = $handler['token'];
-                    $rollbar = new Definition(\RollbarNotifier::class, [
+                    $rollbar = new Definition(\Rollbar\RollbarLogger::class, [
                         $config,
                     ]);
                     $rollbarId = 'monolog.rollbar.notifier.'.sha1(json_encode($config));

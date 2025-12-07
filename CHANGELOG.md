@@ -1,5 +1,7 @@
 ## Unreleased
 
+* Fix `rollbar` handler to use `RollbarLogger`
+
 ## 4.0.0 (2025-11-27)
 
 * Add support for Symfony 8.0
