@@ -1,6 +1,9 @@
 ## Unreleased
 
+# 4.0.1 (2025-12-09)
+
 * Fix `rollbar` handler to use `RollbarLogger`
+* Fix `monolog.processor` attributes to use consecutive keys
 
 ## 4.0.0 (2025-11-27)
 
@@ -16,6 +19,11 @@
 * Remove `sentry` and `raven` types, use a `service` type with [`sentry/sentry-symfony`](https://docs.sentry.io/platforms/php/guides/symfony/logs/) instead
 * Remove `DebugHandlerPass`
 * Remove support for the `DebugHandler`
+
+## 3.11.1 (2025-12-09)
+
+* Fix `rollbar` handler to use `RollbarLogger` with Monolog 2+
+* Fix `monolog.processor` attributes to use consecutive keys
 
 ## 3.11.0 (2025-11-27)
 
