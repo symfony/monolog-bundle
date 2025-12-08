@@ -1,8 +1,9 @@
 ## Unreleased
 
-## unreleased
+## 3.11.1 (2025-12-09)
 
 * Fix `rollbar` handler to use `RollbarLogger` with Monolog 2+
+* Fix `monolog.processor` attributes to use consecutive keys
 
 ## 3.11.0 (2025-11-27)
 
