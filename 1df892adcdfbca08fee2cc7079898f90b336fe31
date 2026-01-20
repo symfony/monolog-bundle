@@ -1,0 +1,15 @@
+---------------------------------------------------------------------------
+
+by GromNaN at 2026-01-20T12:45:16Z
+
+> I can target 3.x if preferred.
+
+The 3.x branch will not support Symfony 8.0, so there is no need to backport this change.
+
+---------------------------------------------------------------------------
+
+by mickverm at 2026-01-20T12:48:42Z
+
+> The 3.x branch will not support Symfony 8.0, so there is no need to backport this change.
+
+That's what I thought, the only reason to backport would be to circumvent the `@internal` on the HttpKernel Extension.
