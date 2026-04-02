@@ -20,6 +20,10 @@
 * Remove `DebugHandlerPass`
 * Remove support for the `DebugHandler`
 
+## 3.11.2 (2026-04-02)
+
+* Add missing target to named autowiring alias
+
 ## 3.11.1 (2025-12-09)
 
 * Fix `rollbar` handler to use `RollbarLogger` with Monolog 2+
