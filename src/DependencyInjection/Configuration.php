@@ -357,6 +357,7 @@ final class Configuration implements ConfigurationInterface
             ->children()
                 ->scalarNode('use_microseconds')->defaultTrue()->end()
                 ->arrayNode('channels')
+                    ->info('List of additional channels to create. The "app" channel is already created by default. Channels are also automatically created for services using the "monolog.logger" DI tag with a custom channel attribute.')
                     ->canBeUnset()
                     ->prototype('scalar')->end()
                 ->end()

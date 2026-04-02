@@ -131,7 +131,7 @@ class LoggerChannelPass implements CompilerPassInterface
             $createdLoggers[] = $channel;
         }
 
-        $container->registerAliasForArgument($loggerId, LoggerInterface::class, $channel.'.logger');
+        $container->registerAliasForArgument($loggerId, LoggerInterface::class, $channel.'.logger', $channel);
     }
 
     /**
