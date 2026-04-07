@@ -11,9 +11,6 @@
 
 namespace Symfony\Bundle\MonologBundle;
 
-use Monolog\Formatter\JsonFormatter;
-use Monolog\Formatter\LineFormatter;
-use Monolog\Handler\HandlerInterface;
 use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\AddProcessorsPass;
 use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\LoggerChannelPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -30,16 +27,5 @@ final class MonologBundle extends Bundle
 
         $container->addCompilerPass(new LoggerChannelPass());
         $container->addCompilerPass(new AddProcessorsPass());
-    }
-
-    /**
-     * @internal
-     */
-    public static function includeStacktraces(HandlerInterface $handler): void
-    {
-        $formatter = $handler->getFormatter();
-        if ($formatter instanceof LineFormatter || $formatter instanceof JsonFormatter) {
-            $formatter->includeStacktraces();
-        }
     }
 }

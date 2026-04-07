@@ -19,6 +19,7 @@ use Monolog\Handler\RollbarHandler;
 use Monolog\Processor\UidProcessor;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\LoggerChannelPass;
+use Symfony\Bundle\MonologBundle\DependencyInjection\FormatterConfigurator;
 use Symfony\Bundle\MonologBundle\DependencyInjection\MonologExtension;
 use Symfony\Bundle\MonologBundle\Tests\DependencyInjection\Fixtures\AsMonologProcessor\FooProcessorWithPriority;
 use Symfony\Bundle\MonologBundle\Tests\DependencyInjection\Fixtures\AsMonologProcessor\RedeclareMethodProcessor;
@@ -632,6 +633,69 @@ class MonologExtensionTest extends DependencyInjectionTestCase
         $this->assertDICConstructorArguments($client, ['mongodb://localhost:27018', ['appname' => 'monolog-bundle']]);
         $this->assertDICConstructorArguments($handler, [$client, 'monolog', 'logs', 'DEBUG', true]);
         $this->assertDICDefinitionMethodCallAt(1, $handler, 'setFormatter', [$formatter]);
+    }
+
+    public function testBasePathOption()
+    {
+        $container = $this->getContainer([['handlers' => [
+            'main' => [
+                'type' => 'stream',
+                'path' => '/tmp/symfony.log',
+                'base_path' => '/var/www/project',
+            ],
+        ]]]);
+
+        $this->assertTrue($container->hasDefinition('monolog.handler.main'));
+
+        $handler = $container->getDefinition('monolog.handler.main');
+        $configuratorRef = $handler->getConfigurator();
+        $this->assertIsArray($configuratorRef);
+        [$configurator, $method] = $configuratorRef;
+        $this->assertInstanceOf(Definition::class, $configurator);
+        $this->assertSame('__invoke', $method);
+        $this->assertDICDefinitionClass($configurator, FormatterConfigurator::class);
+        $this->assertDICConstructorArguments($configurator, [false, '/var/www/project']);
+    }
+
+    public function testBasePathWithIncludeStacktraces()
+    {
+        $container = $this->getContainer([['handlers' => [
+            'main' => [
+                'type' => 'stream',
+                'path' => '/tmp/symfony.log',
+                'base_path' => '/var/www/project',
+                'include_stacktraces' => true,
+            ],
+        ]]]);
+
+        $handler = $container->getDefinition('monolog.handler.main');
+        $configuratorRef = $handler->getConfigurator();
+        $this->assertIsArray($configuratorRef);
+        [$configurator, $method] = $configuratorRef;
+        $this->assertInstanceOf(Definition::class, $configurator);
+        $this->assertSame('__invoke', $method);
+        $this->assertDICDefinitionClass($configurator, FormatterConfigurator::class);
+        $this->assertDICConstructorArguments($configurator, [true, '/var/www/project']);
+    }
+
+    public function testIncludeStacktracesWithFormatterConfigurator()
+    {
+        $container = $this->getContainer([['handlers' => [
+            'main' => [
+                'type' => 'stream',
+                'path' => '/tmp/symfony.log',
+                'include_stacktraces' => true,
+            ],
+        ]]]);
+
+        $handler = $container->getDefinition('monolog.handler.main');
+        $configuratorRef = $handler->getConfigurator();
+        $this->assertIsArray($configuratorRef);
+        [$configurator, $method] = $configuratorRef;
+        $this->assertInstanceOf(Definition::class, $configurator);
+        $this->assertSame('__invoke', $method);
+        $this->assertDICDefinitionClass($configurator, FormatterConfigurator::class);
+        $this->assertDICConstructorArguments($configurator, [true, null]);
     }
 
     private function getContainer(array $config = [], array $thirdPartyDefinitions = []): ContainerBuilder

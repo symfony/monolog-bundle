@@ -36,6 +36,7 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
  *   - [bubble]: bool, defaults to true
  *   - [file_permission]: int|null, defaults to null (0644)
  *   - [use_locking]: bool, defaults to false
+ *   - [base_path]: string|null, base path to strip from file paths in stack traces (e.g. %kernel.project_dir%)
  *
  * - console:
  *   - [verbosity_levels]: level => verbosity configuration
@@ -416,6 +417,7 @@ final class Configuration implements ConfigurationInterface
                 ->booleanNode('interactive_only')->defaultFalse()->end()
                 ->scalarNode('app_name')->defaultNull()->end()
                 ->booleanNode('include_stacktraces')->defaultFalse()->end()
+                ->scalarNode('base_path')->defaultNull()->end()
                 ->arrayNode('process_psr_3_messages')
                     ->addDefaultsIfNotSet()
                     ->beforeNormalization()

@@ -20,7 +20,6 @@ use Monolog\Processor\PsrLogMessageProcessor;
 use Monolog\ResettableInterface;
 use Symfony\Bridge\Monolog\Handler\FingersCrossed\HttpCodeActivationStrategy;
 use Symfony\Bridge\Monolog\Processor\TokenProcessor;
-use Symfony\Bundle\MonologBundle\MonologBundle;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\Argument\BoundArgument;
 use Symfony\Component\DependencyInjection\ChildDefinition;
@@ -147,8 +146,12 @@ final class MonologExtension extends Extension
         $handlerClass = $this->getHandlerClassByType($handler['type']);
         $definition = new Definition($handlerClass);
 
-        if ($handler['include_stacktraces']) {
-            $definition->setConfigurator([MonologBundle::class, 'includeStacktraces']);
+        if ($handler['include_stacktraces'] || null !== $handler['base_path']) {
+            $configurator = new Definition(FormatterConfigurator::class, [
+                $handler['include_stacktraces'],
+                $handler['base_path'],
+            ]);
+            $definition->setConfigurator([$configurator, '__invoke']);
         }
 
         if (null === $handler['process_psr_3_messages']['enabled']) {
