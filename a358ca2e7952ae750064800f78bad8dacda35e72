@@ -1,0 +1,17 @@
+---------------------------------------------------------------------------
+
+by Amoifr at 2026-04-08T06:04:55Z
+
+Thanks @GromNaN and @HypeMC for the thorough review! All feedback has been addressed in the latest push. 🙏
+
+---------------------------------------------------------------------------
+
+by Amoifr at 2026-04-08T10:36:39Z
+
+All feedback addressed in the latest push:
+- Bumped monolog dependency to `^3.6` instead of runtime validation (thanks @stof!)
+- Configurator fully inlined as `[$definition, '__invoke']` (thanks @GromNaN!)
+- Removed the unused imports that sneaked back in with the rebase
+- Rebased on 4.x
+
+Should be good to go now! 🤞
