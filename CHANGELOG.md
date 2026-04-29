@@ -1,5 +1,7 @@
 ## Unreleased
 
+* Add `GoogleCloudLoggingFormatter` as `monolog.formatter.google` to services
+
 ## 4.0.2 (2026-04-02)
 
 * Fix `TaggedIteratorArgument` deprecation warning when using `symfony/dependency-injection` 8.1
