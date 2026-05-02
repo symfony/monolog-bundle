@@ -13,6 +13,7 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
 use Monolog\Formatter\ChromePHPFormatter;
 use Monolog\Formatter\GelfMessageFormatter;
+use Monolog\Formatter\GoogleCloudLoggingFormatter;
 use Monolog\Formatter\HtmlFormatter;
 use Monolog\Formatter\JsonFormatter;
 use Monolog\Formatter\LineFormatter;
@@ -46,6 +47,7 @@ return static function (ContainerConfigurator $container) {
         // Formatters
         ->set('monolog.formatter.chrome_php', ChromePHPFormatter::class)
         ->set('monolog.formatter.gelf_message', GelfMessageFormatter::class)
+        ->set('monolog.formatter.google', GoogleCloudLoggingFormatter::class)
         ->set('monolog.formatter.html', HtmlFormatter::class)
         ->set('monolog.formatter.json', JsonFormatter::class)
         ->set('monolog.formatter.line', LineFormatter::class)
