@@ -1,6 +1,7 @@
 ## Unreleased
 
 * Add `GoogleCloudLoggingFormatter` as `monolog.formatter.google` to services
+* Add `expand_newlines` option to the `error_log` handler
 
 ## 4.0.2 (2026-04-02)
 

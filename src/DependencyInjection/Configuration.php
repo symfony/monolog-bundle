@@ -268,6 +268,7 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
  *   - [message_type]: int 0 or 4, defaults to 0
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
+ *   - [expand_newlines]: bool, defaults to false
  *
  * - null:
  *   - [level]: level name or int value, defaults to DEBUG
@@ -550,6 +551,7 @@ final class Configuration implements ConfigurationInterface
                 ->scalarNode('connection_timeout')->end() // socket_handler, logentries, pushover & slack
                 ->booleanNode('persistent')->end() // socket_handler
                 ->scalarNode('message_type')->defaultValue(0)->end() // error_log
+                ->booleanNode('expand_newlines')->defaultFalse()->end() // error_log
                 ->scalarNode('parse_mode')->defaultNull()->end() // telegram
                 ->booleanNode('disable_webpage_preview')->defaultNull()->end() // telegram
                 ->booleanNode('disable_notification')->defaultNull()->end() // telegram
