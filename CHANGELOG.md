@@ -1,5 +1,7 @@
 ## Unreleased
 
+* Fix `ServiceNotFoundException` when a disabled handler is a member of a `group`, `whatfailuregroup` or `fallbackgroup` handler
+
 ## 3.11.2 (2026-04-02)
 
 * Add missing target to named autowiring alias
