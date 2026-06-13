@@ -1,5 +1,6 @@
 ## Unreleased
 
+* Add a `timezone` config option to set the timezone used for the timestamp of log records
 * Add `GoogleCloudLoggingFormatter` as `monolog.formatter.google` to services
 
 ## 4.0.2 (2026-04-02)
