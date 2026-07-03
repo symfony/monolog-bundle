@@ -634,6 +634,7 @@ final class MonologExtension extends Extension
                     $handler['message_type'],
                     $handler['level'],
                     $handler['bubble'],
+                    $handler['expand_newlines'],
                 ]);
                 break;
 
