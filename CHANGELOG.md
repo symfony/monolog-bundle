@@ -1,5 +1,6 @@
 ## Unreleased
 
+* Add a `timezone` config option to set the timezone used for the timestamp of log records
 * Add `GoogleCloudLoggingFormatter` as `monolog.formatter.google` to services
 * Add `expand_newlines` option to the `error_log` handler
 

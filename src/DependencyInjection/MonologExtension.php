@@ -58,6 +58,13 @@ final class MonologExtension extends Extension
 
             $container->setParameter('monolog.use_microseconds', $config['use_microseconds']);
 
+            if (null !== $config['timezone']) {
+                $prototype = $container->getDefinition('monolog.logger_prototype');
+                $prototype->setArgument(1, []);
+                $prototype->setArgument(2, []);
+                $prototype->setArgument(3, new Definition(\DateTimeZone::class, [$config['timezone']]));
+            }
+
             $handlers = [];
 
             foreach ($config['handlers'] as $name => $handler) {

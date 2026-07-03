@@ -67,6 +67,24 @@ class MonologExtensionTest extends DependencyInjectionTestCase
         $this->assertDICConstructorArguments($handler, ['/tmp/symfony.log', 'ERROR', false, 0666, true]);
     }
 
+    public function testLoadWithTimezone()
+    {
+        $container = $this->getContainer([['timezone' => 'Europe/Paris', 'handlers' => ['main' => ['type' => 'stream']]]]);
+
+        // the timezone is set on the logger prototype, so every logger (the
+        // "app" logger and the channel loggers) inherits it through its constructor
+        $prototype = $container->getDefinition('monolog.logger_prototype');
+        $this->assertEquals(new Definition(\DateTimeZone::class, ['Europe/Paris']), $prototype->getArgument(3));
+    }
+
+    public function testLoadWithoutTimezoneDoesNotSetTimezone()
+    {
+        $container = $this->getContainer([['handlers' => ['main' => ['type' => 'stream']]]]);
+
+        $prototype = $container->getDefinition('monolog.logger_prototype');
+        $this->assertArrayNotHasKey(3, $prototype->getArguments());
+    }
+
     public function testLoadWithNestedHandler()
     {
         $container = $this->getContainer([['handlers' => [
