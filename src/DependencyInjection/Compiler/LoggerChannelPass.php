@@ -16,6 +16,7 @@ use Symfony\Component\DependencyInjection\Argument\BoundArgument;
 use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
 use Symfony\Component\DependencyInjection\Reference;
 
@@ -50,6 +51,12 @@ class LoggerChannelPass implements CompilerPassInterface
                 $loggerId = \sprintf('monolog.logger.%s', $resolvedChannel);
                 $this->createLogger($resolvedChannel, $loggerId, $container, $createdLoggers);
 
+                if (isset($tag['argument'])) {
+                    $this->bindLogger($definition, LoggerInterface::class.' $'.$tag['argument'], $loggerId);
+
+                    continue;
+                }
+
                 foreach ($definition->getArguments() as $index => $argument) {
                     if ($argument instanceof Reference && 'logger' === (string) $argument) {
                         $definition->replaceArgument($index, $this->changeReference($argument, $loggerId));
@@ -66,17 +73,7 @@ class LoggerChannelPass implements CompilerPassInterface
                 }
                 $definition->setMethodCalls($calls);
 
-                $binding = new BoundArgument(new Reference($loggerId));
-
-                // Mark the binding as used already, to avoid reporting it as unused if the service does not use a
-                // logger injected through the LoggerInterface alias.
-                $values = $binding->getValues();
-                $values[2] = true;
-                $binding->setValues($values);
-
-                $bindings = $definition->getBindings();
-                $bindings[LoggerInterface::class] = $binding;
-                $definition->setBindings($bindings);
+                $this->bindLogger($definition, LoggerInterface::class, $loggerId);
             }
         }
 
@@ -140,5 +137,22 @@ class LoggerChannelPass implements CompilerPassInterface
     private function changeReference(Reference $reference, string $serviceId): Reference
     {
         return new Reference($serviceId, $reference->getInvalidBehavior());
+    }
+
+    /**
+     * Binds a channel logger to the given binding key, marking it as used so it is not
+     * reported as an unused binding when the service does not consume it through autowiring.
+     */
+    private function bindLogger(Definition $definition, string $bindingKey, string $loggerId): void
+    {
+        $binding = new BoundArgument(new Reference($loggerId));
+
+        $values = $binding->getValues();
+        $values[2] = true;
+        $binding->setValues($values);
+
+        $bindings = $definition->getBindings();
+        $bindings[$bindingKey] = $binding;
+        $definition->setBindings($bindings);
     }
 }

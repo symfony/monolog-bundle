@@ -24,6 +24,7 @@ use Symfony\Bundle\MonologBundle\DependencyInjection\MonologExtension;
 use Symfony\Bundle\MonologBundle\Tests\DependencyInjection\Fixtures\AsMonologProcessor\FooProcessorWithPriority;
 use Symfony\Bundle\MonologBundle\Tests\DependencyInjection\Fixtures\AsMonologProcessor\RedeclareMethodProcessor;
 use Symfony\Bundle\MonologBundle\Tests\DependencyInjection\Fixtures\ServiceWithChannel;
+use Symfony\Bundle\MonologBundle\Tests\DependencyInjection\Fixtures\ServiceWithChannelOnArgument;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
@@ -521,6 +522,24 @@ class MonologExtensionTest extends DependencyInjectionTestCase
                 'channel' => 'fixture',
             ],
         ], $container->getDefinition(ServiceWithChannel::class)->getTag('monolog.logger'));
+    }
+
+    public function testWithLoggerChannelAutoconfigurationOnArgument()
+    {
+        $container = $this->getContainer([], [
+            ServiceWithChannelOnArgument::class => (new Definition(ServiceWithChannelOnArgument::class))->setAutoconfigured(true),
+        ]);
+
+        $this->assertSame([
+            [
+                'channel' => 'fixture',
+                'argument' => 'logger',
+            ],
+            [
+                'channel' => 'fixture_bis',
+                'argument' => 'otherLogger',
+            ],
+        ], $container->getDefinition(ServiceWithChannelOnArgument::class)->getTag('monolog.logger'));
     }
 
     public function testElasticsearchAndElasticaHandlers()

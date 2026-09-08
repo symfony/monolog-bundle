@@ -123,6 +123,60 @@ class LoggerChannelPassTest extends TestCase
         $this->assertEquals('monolog.logger', (string) $dummyService->getArgument(0));
     }
 
+    public function testChannelBoundToASingleConstructorArgument()
+    {
+        $container = $this->getFunctionalContainer();
+
+        $dummyService = $container->register('dummy_service', DummyServiceWithTwoLoggers::class)
+            ->setAutowired(true)
+            ->setAutoconfigured(true)
+            ->setPublic(true)
+            ->addTag('monolog.logger', ['channel' => 'test', 'argument' => 'logger']);
+
+        $container->compile();
+
+        $this->assertEquals('monolog.logger.test', (string) $dummyService->getArgument(0));
+        $this->assertEquals('monolog.logger', (string) $dummyService->getArgument(1));
+    }
+
+    public function testDifferentChannelsBoundToDifferentConstructorArguments()
+    {
+        $container = $this->getFunctionalContainer();
+
+        $dummyService = $container->register('dummy_service', DummyServiceWithTwoLoggers::class)
+            ->setAutowired(true)
+            ->setAutoconfigured(true)
+            ->setPublic(true)
+            ->addTag('monolog.logger', ['channel' => 'test', 'argument' => 'logger'])
+            ->addTag('monolog.logger', ['channel' => 'foo', 'argument' => 'otherLogger']);
+
+        $container->compile();
+
+        $this->assertEquals('monolog.logger.test', (string) $dummyService->getArgument(0));
+        $this->assertEquals('monolog.logger.foo', (string) $dummyService->getArgument(1));
+    }
+
+    public function testChannelBoundToArgumentIsNotConfusedByAFactory()
+    {
+        $container = $this->getFunctionalContainer();
+
+        $dummyService = $container->register('dummy_service', DummyFactoryProduct::class)
+            ->setFactory([DummyFactory::class, 'create'])
+            ->setAutowired(true)
+            ->setAutoconfigured(true)
+            ->setPublic(true)
+            ->addTag('monolog.logger', ['channel' => 'test', 'argument' => 'logger']);
+
+        $container->compile();
+
+        // The untagged factory argument keeps the default logger...
+        $this->assertEquals('monolog.logger', (string) $dummyService->getArgument(0));
+        // ...only the factory argument matching the tagged parameter name gets the channel logger,
+        // even though the produced class' own (unused) constructor also has a "logger" parameter,
+        // at a different position.
+        $this->assertEquals('monolog.logger.test', (string) $dummyService->getArgument(1));
+    }
+
     public function testTagNotBreakingIfNoLogger()
     {
         $container = $this->getFunctionalContainer();
@@ -260,5 +314,29 @@ class DummyService
 {
     public function __construct(LoggerInterface $logger)
     {
+    }
+}
+
+class DummyServiceWithTwoLoggers
+{
+    public function __construct(LoggerInterface $logger, LoggerInterface $otherLogger)
+    {
+    }
+}
+
+class DummyFactoryProduct
+{
+    // Irrelevant when built through DummyFactory::create(): it also happens to declare a
+    // "logger" parameter, but at a different position than the factory method.
+    public function __construct(LoggerInterface $logger)
+    {
+    }
+}
+
+class DummyFactory
+{
+    public static function create(LoggerInterface $other, LoggerInterface $logger): DummyFactoryProduct
+    {
+        return new DummyFactoryProduct($logger);
     }
 }
