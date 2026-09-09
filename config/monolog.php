@@ -25,6 +25,7 @@ use Monolog\Formatter\SyslogFormatter;
 use Monolog\Formatter\WildfireFormatter;
 use Monolog\Logger;
 use Psr\Log\LoggerInterface;
+use Symfony\Bundle\MonologBundle\HandlerLifecycleManager;
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
@@ -62,5 +63,9 @@ return static function (ContainerConfigurator $container) {
 
         ->set('monolog.http_client', HttpClientInterface::class)
             ->factory([HttpClient::class, 'create'])
+
+        ->set('monolog.handler_lifecycle_manager', HandlerLifecycleManager::class)
+            ->public()
+            ->args([abstract_arg('Iterator of handler services, populated by AddHandlersToManagerPass')])
     ;
 };

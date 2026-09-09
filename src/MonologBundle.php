@@ -11,6 +11,7 @@
 
 namespace Symfony\Bundle\MonologBundle;
 
+use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\AddHandlersToManagerPass;
 use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\AddProcessorsPass;
 use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\LoggerChannelPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -27,5 +28,15 @@ final class MonologBundle extends Bundle
 
         $container->addCompilerPass(new LoggerChannelPass());
         $container->addCompilerPass(new AddProcessorsPass());
+        $container->addCompilerPass(new AddHandlersToManagerPass());
+    }
+
+    public function shutdown(): void
+    {
+        parent::shutdown();
+
+        if ($this->container?->has('monolog.handler_lifecycle_manager')) {
+            $this->container->get('monolog.handler_lifecycle_manager')->close();
+        }
     }
 }

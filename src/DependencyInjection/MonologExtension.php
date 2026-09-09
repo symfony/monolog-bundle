@@ -800,6 +800,11 @@ final class MonologExtension extends Extension
             $definition->addTag('kernel.reset', ['method' => 'reset']);
         }
 
+        // All handlers (including nested ones) are tagged so the handler manager can close them
+        // on kernel shutdown. Unlike "kernel.reset", nested handlers must be closed too, as they
+        // hold resources that are not released when their wrapper handler is reset.
+        $definition->addTag('monolog.handler');
+
         $container->setDefinition($handlerId, $definition);
 
         return $handlerId;

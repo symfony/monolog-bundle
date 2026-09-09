@@ -8,6 +8,7 @@
 * Add `rfc` option to the `syslogudp` handler to select the syslog RFC format (RFC3164, RFC5424 or RFC5424e)
 * Fix `ServiceNotFoundException` when a disabled handler is a member of a `group`, `whatfailuregroup` or `fallbackgroup` handler
 * Allow using `OutputInterface::VERBOSITY_*` constants (or numeric indexes) as keys of the `console` handler `verbosity_levels` option
+* Close all handlers on kernel shutdown (only handlers already instantiated are closed, so unused handlers are not instantiated just to be closed)
 
 ## 4.0.2 (2026-04-02)
 
