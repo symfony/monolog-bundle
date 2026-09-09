@@ -125,6 +125,9 @@ final class MonologExtension extends Extension
         $container->registerAttributeForAutoconfiguration(WithMonologChannel::class, static function (ChildDefinition $definition, WithMonologChannel $attribute): void {
             $definition->addTag('monolog.logger', ['channel' => $attribute->channel]);
         });
+        $container->registerAttributeForAutoconfiguration(WithMonologChannel::class, static function (ChildDefinition $definition, WithMonologChannel $attribute, \ReflectionParameter $reflector): void {
+            $definition->addTag('monolog.logger', ['channel' => $attribute->channel, 'argument' => $reflector->getName()]);
+        });
     }
 
     public function getXsdValidationBasePath(): string
