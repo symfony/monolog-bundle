@@ -1,0 +1,52 @@
+---------------------------------------------------------------------------
+
+by gwinn at 2020-07-03T15:39:03Z
+
+Can you review latest changes?
+
+---------------------------------------------------------------------------
+
+by iyzoer at 2021-01-19T07:13:22Z
+
+Hi! When can we expect a merge? This very important for me. It seems like nothing else prevents the merge.
+
+---------------------------------------------------------------------------
+
+by HontoNoRoger at 2021-01-25T12:30:23Z
+
+Also highly requested from my side, need it to select RFC5424e (time with miliseconds) for SyslogUDP logging.
+
+---------------------------------------------------------------------------
+
+by gwinn at 2021-02-01T17:12:20Z
+
+> It would be nice to have a test case in Tests/DependencyInjection/ConfigurationTest.php to see if the default is used when rfc is not set in config and another case for when an invalid number is picked.
+
+Done
+
+---------------------------------------------------------------------------
+
+by gwinn at 2021-03-25T10:23:38Z
+
+Can I expect a review soon? It seems to me important and necessary to contribute to open source projects, especially if the proposed changes are needed not only by one developer, but, frankly, it is a little confusing how quickly the library development team considers proposals, this PR was created a year ago
+
+---------------------------------------------------------------------------
+
+by gwinn at 2021-03-31T09:25:29Z
+
+> A last comment for my side ;-).
+>
+> Don't forget to add an entry in the ChangeLog pray
+
+done )
+
+---------------------------------------------------------------------------
+
+by GromNaN at 2026-09-09T16:26:06Z
+
+Rebased onto `4.x` and adapted to the current codebase (`src/` layout, modern Monolog API).
+
+- Add `rfc` config option for the `syslogudp` handler (defaults to `RFC5424`, accepts `RFC3164`/`RFC5424e`).
+- Pass `ident` and `rfc` explicitly to `SyslogUdpHandler`, falling back to `'php'` when `ident` is falsy (the handler now requires a string).
+- Change the `ident` config default from `false` to `'php'`, which also fixes a latent `TypeError` on the `syslog` handler.
+- Add the `rfc` attribute to the XML schema and cover the new option with tests.
