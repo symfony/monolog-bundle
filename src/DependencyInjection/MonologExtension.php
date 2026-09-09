@@ -41,6 +41,9 @@ final class MonologExtension extends Extension
     /** @var list<string> */
     private array $nestedHandlers = [];
 
+    /** @var array<string, true> */
+    private array $disabledHandlers = [];
+
     /**
      * Loads the Monolog configuration.
      *
@@ -66,6 +69,14 @@ final class MonologExtension extends Extension
             }
 
             $handlers = [];
+
+            // Collect disabled handlers first so that group members referencing
+            // them can be skipped, regardless of the order they are declared in.
+            foreach ($config['handlers'] as $name => $handler) {
+                if (!$handler['enabled']) {
+                    $this->disabledHandlers[$name] = true;
+                }
+            }
 
             foreach ($config['handlers'] as $name => $handler) {
                 if (!$handler['enabled']) {
@@ -483,6 +494,10 @@ final class MonologExtension extends Extension
             case 'fallbackgroup':
                 $references = [];
                 foreach ($handler['members'] as $nestedHandler) {
+                    if (isset($this->disabledHandlers[$nestedHandler])) {
+                        // a disabled handler is not registered as a service, skip it
+                        continue;
+                    }
                     $nestedHandlerId = $this->getHandlerId($nestedHandler);
                     $this->markNestedHandler($nestedHandlerId);
                     $references[] = new Reference($nestedHandlerId);

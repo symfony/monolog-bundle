@@ -106,6 +106,26 @@ class MonologExtensionTest extends DependencyInjectionTestCase
         $this->assertDICConstructorArguments($handler, ['/tmp/symfony.log', 'ERROR', false, 0666, false]);
     }
 
+    public function testLoadWithGroupHandlerAndDisabledMember()
+    {
+        $container = $this->getContainer([['handlers' => [
+            'main' => ['type' => 'group', 'members' => ['enabled_member', 'disabled_member']],
+            'enabled_member' => ['type' => 'stream', 'path' => '/tmp/symfony.log'],
+            'disabled_member' => ['type' => 'stream', 'path' => '/tmp/symfony.log', 'enabled' => false],
+        ]]]);
+
+        $this->assertTrue($container->hasDefinition('monolog.handler.main'));
+        $this->assertTrue($container->hasDefinition('monolog.handler.enabled_member'));
+        // a disabled handler is not registered as a service...
+        $this->assertFalse($container->hasDefinition('monolog.handler.disabled_member'));
+
+        // ...and is therefore skipped from the group it belongs to, instead of
+        // leaving a reference to a non-existent service (see issue #561)
+        $handler = $container->getDefinition('monolog.handler.main');
+        $this->assertDICDefinitionClass($handler, 'Monolog\Handler\GroupHandler');
+        $this->assertDICConstructorArguments($handler, [[new Reference('monolog.handler.enabled_member')], true]);
+    }
+
     public function testLoadWithServiceHandler()
     {
         $container = $this->getContainer(

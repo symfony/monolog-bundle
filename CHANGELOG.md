@@ -4,6 +4,7 @@
 * Add a `timezone` config option to set the timezone used for the timestamp of log records
 * Add `GoogleCloudLoggingFormatter` as `monolog.formatter.google` to services
 * Add `expand_newlines` option to the `error_log` handler
+* Fix `ServiceNotFoundException` when a disabled handler is a member of a `group`, `whatfailuregroup` or `fallbackgroup` handler
 
 ## 4.0.2 (2026-04-02)
 
@@ -31,6 +32,10 @@
 * Remove `sentry` and `raven` types, use a `service` type with [`sentry/sentry-symfony`](https://docs.sentry.io/platforms/php/guides/symfony/logs/) instead
 * Remove `DebugHandlerPass`
 * Remove support for the `DebugHandler`
+
+## 3.11.3 unreleased
+
+* Fix `ServiceNotFoundException` when a disabled handler is a member of a `group`, `whatfailuregroup` or `fallbackgroup` handler
 
 ## 3.11.2 (2026-04-02)
 
