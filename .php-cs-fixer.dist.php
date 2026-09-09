@@ -29,6 +29,20 @@ return (new PhpCsFixer\Config())
         'modernize_strpos' => false,
         'trailing_comma_in_multiline' => ['elements' => ['arrays', 'match', 'parameters']],
     ])
+    ->setRuleCustomisationPolicy(new class implements PhpCsFixer\Config\RuleCustomisationPolicyInterface {
+        public function getPolicyVersionForCache(): string
+        {
+            return hash_file('xxh128', __FILE__);
+        }
+
+        public function getRuleCustomisers(): array
+        {
+            return [
+                // don't touch test files, we don't do that in symfony
+                'void_return' => static fn (SplFileInfo $file): bool => !str_starts_with($file->getPathname(), __DIR__.'/tests/'),
+            ];
+        }
+    })
     ->setRiskyAllowed(true)
     ->setFinder(
         PhpCsFixer\Finder::create()
