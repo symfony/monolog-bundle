@@ -1,0 +1,25 @@
+---------------------------------------------------------------------------
+
+by Seldaek at 2026-09-09T08:46:35Z
+
+https://github.com/Seldaek/monolog/releases/tag/3.12.0 is out
+
+---------------------------------------------------------------------------
+
+by lyrixx at 2026-09-09T11:17:12Z
+
+@fabpot There is an issue with fabpot One rule wants me to add `: void` after tests, and the other one doesn't 😬
+
+---------------------------------------------------------------------------
+
+by HypeMC at 2026-09-09T11:25:15Z
+
+@lyrixx This is actually a PhpCSFixer config issue, see https://github.com/symfony/symfony/blob/f97561205bd250c0ba567fe2ce5f7dfdff566590/.php-cs-fixer.dist.php#L85
+
+`void_return` should be disabled for tests.
+
+---------------------------------------------------------------------------
+
+by lyrixx at 2026-09-09T12:57:29Z
+
+@HypeMC Thanks for the pointer. I made https://github.com/symfony/monolog-bundle/pull/586, it has been merged. So I rebased, and it should be okay!
