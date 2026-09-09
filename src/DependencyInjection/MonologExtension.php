@@ -543,6 +543,9 @@ final class MonologExtension extends Extension
                 if (!empty($handler['headers'])) {
                     $definition->addMethodCall('addHeader', [$handler['headers']]);
                 }
+                if (!empty($handler['parameters'])) {
+                    $definition->addMethodCall('addParameter', [$handler['parameters']]);
+                }
                 break;
 
             case 'symfony_mailer':

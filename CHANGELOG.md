@@ -4,6 +4,7 @@
 * Add a `timezone` config option to set the timezone used for the timestamp of log records
 * Add `GoogleCloudLoggingFormatter` as `monolog.formatter.google` to services
 * Add `expand_newlines` option to the `error_log` handler
+* Add `parameters` option to the `native_mailer` handler to pass additional parameters to `mail()` (e.g. `-f sender@example.com`)
 * Fix `ServiceNotFoundException` when a disabled handler is a member of a `group`, `whatfailuregroup` or `fallbackgroup` handler
 
 ## 4.0.2 (2026-04-02)

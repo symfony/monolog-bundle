@@ -220,6 +220,27 @@ class ConfigurationTest extends TestCase
         $this->process($configs);
     }
 
+    public function testNativeMailerRejectsNewlineInParameters()
+    {
+        $configs = [
+            [
+                'handlers' => [
+                    'foo' => [
+                        'type' => 'native_mailer',
+                        'from_email' => 'from@example.com',
+                        'to_email' => 'to@example.com',
+                        'subject' => 'a subject',
+                        'parameters' => ["-ftest@example.com\nX-Injected: header"],
+                    ],
+                ],
+            ],
+        ];
+
+        $this->expectException(InvalidConfigurationException::class);
+
+        $this->process($configs);
+    }
+
     public function testMergingInvalidChannels()
     {
         $configs = [

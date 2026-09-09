@@ -10,6 +10,8 @@
         <handler name="mailer" type="native_mailer" to-email="foo@example.com" from-email="bar@example.com" subject="a subject">
             <header>Foo: bar</header>
             <header>Baz: inga</header>
+            <parameter>--foo bar</parameter>
+            <parameter>--baz inga</parameter>
         </handler>
     </config>
 </srv:container>
