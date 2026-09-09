@@ -5,6 +5,7 @@
 * Add `GoogleCloudLoggingFormatter` as `monolog.formatter.google` to services
 * Add `expand_newlines` option to the `error_log` handler
 * Fix `ServiceNotFoundException` when a disabled handler is a member of a `group`, `whatfailuregroup` or `fallbackgroup` handler
+* Allow using `OutputInterface::VERBOSITY_*` constants (or numeric indexes) as keys of the `console` handler `verbosity_levels` option
 
 ## 4.0.2 (2026-04-02)
 

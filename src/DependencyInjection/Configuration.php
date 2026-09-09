@@ -18,6 +18,7 @@ use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
+use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * This class contains the configuration information for the bundle.
@@ -926,13 +927,27 @@ final class Configuration implements ConfigurationInterface
                         ->ifArray()
                         ->then(static function ($v) {
                             $map = [];
-                            $verbosities = ['VERBOSITY_QUIET', 'VERBOSITY_NORMAL', 'VERBOSITY_VERBOSE', 'VERBOSITY_VERY_VERBOSE', 'VERBOSITY_DEBUG'];
-                            // allow numeric indexed array with ascendning verbosity and lowercase names of the constants
+                            $verbosities = [
+                                // allow numeric indexed array with ascending verbosity
+                                0 => 'VERBOSITY_QUIET',
+                                1 => 'VERBOSITY_NORMAL',
+                                2 => 'VERBOSITY_VERBOSE',
+                                3 => 'VERBOSITY_VERY_VERBOSE',
+                                4 => 'VERBOSITY_DEBUG',
+                                // or array indexed by verbosity constants
+                                OutputInterface::VERBOSITY_QUIET => 'VERBOSITY_QUIET',
+                                OutputInterface::VERBOSITY_NORMAL => 'VERBOSITY_NORMAL',
+                                OutputInterface::VERBOSITY_VERBOSE => 'VERBOSITY_VERBOSE',
+                                OutputInterface::VERBOSITY_VERY_VERBOSE => 'VERBOSITY_VERY_VERBOSE',
+                                OutputInterface::VERBOSITY_DEBUG => 'VERBOSITY_DEBUG',
+                            ];
+                            // allow numeric indexed array with ascending verbosity, verbosity constants
+                            // or lowercase names of the constants as keys
                             foreach ($v as $verbosity => $level) {
                                 if (\is_int($verbosity) && isset($verbosities[$verbosity])) {
-                                    $map[$verbosities[$verbosity]] = strtoupper($level);
+                                    $map[$verbosities[$verbosity]] = $level;
                                 } else {
-                                    $map[strtoupper($verbosity)] = strtoupper($level);
+                                    $map[strtoupper($verbosity)] = $level;
                                 }
                             }
 
@@ -950,7 +965,7 @@ final class Configuration implements ConfigurationInterface
                         ->always(static function ($v) {
                             $map = [];
                             foreach ($v as $verbosity => $level) {
-                                $verbosityConstant = \Symfony\Component\Console\Output\OutputInterface::class.'::'.$verbosity;
+                                $verbosityConstant = OutputInterface::class.'::'.$verbosity;
 
                                 if (!\defined($verbosityConstant)) {
                                     throw new InvalidConfigurationException(\sprintf('The configured verbosity "%s" is invalid as it is not defined in Symfony\Component\Console\Output\OutputInterface.', $verbosity));

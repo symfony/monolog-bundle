@@ -293,18 +293,15 @@ class ConfigurationTest extends TestCase
         $this->assertEquals(1234, $config['handlers']['telegram']['topic']);
     }
 
-    public function testWithConsoleHandler()
+    #[DataProvider('provideConsoleHandlerCases')]
+    public function testWithConsoleHandler(array $verbosityLevels, array $expectedVerbosityMap)
     {
         $configs = [
             [
                 'handlers' => [
                     'console' => [
                         'type' => 'console',
-                        'verbosity_levels' => [
-                            'VERBOSITY_NORMAL' => 'NOTICE',
-                            'verbosity_verbose' => 'info',
-                            'VERBOSITY_very_VERBOSE' => '200',
-                        ],
+                        'verbosity_levels' => $verbosityLevels,
                     ],
                 ],
             ],
@@ -313,13 +310,57 @@ class ConfigurationTest extends TestCase
         $config = $this->process($configs);
 
         $this->assertSame('console', $config['handlers']['console']['type']);
-        $this->assertSame([
-            OutputInterface::VERBOSITY_NORMAL => Level::Notice->value,
-            OutputInterface::VERBOSITY_VERBOSE => Level::Info->value,
-            OutputInterface::VERBOSITY_VERY_VERBOSE => 200,
-            OutputInterface::VERBOSITY_QUIET => Level::Error->value,
-            OutputInterface::VERBOSITY_DEBUG => Level::Debug->value,
-        ], $config['handlers']['console']['verbosity_levels']);
+        $this->assertSame($expectedVerbosityMap, $config['handlers']['console']['verbosity_levels']);
+    }
+
+    public static function provideConsoleHandlerCases(): iterable
+    {
+        yield 'with strings only' => [
+            [
+                'VERBOSITY_NORMAL' => 'NOTICE',
+                'verbosity_verbose' => 'info',
+                'VERBOSITY_very_VERBOSE' => '200',
+            ],
+            [
+                OutputInterface::VERBOSITY_NORMAL => Level::Notice->value,
+                OutputInterface::VERBOSITY_VERBOSE => Level::Info->value,
+                OutputInterface::VERBOSITY_VERY_VERBOSE => 200,
+                OutputInterface::VERBOSITY_QUIET => Level::Error->value,
+                OutputInterface::VERBOSITY_DEBUG => Level::Debug->value,
+            ],
+        ];
+
+        yield 'with numeric index' => [
+            [
+                Level::Alert->value,
+                Level::Error->value,
+                Level::Warning->value,
+                Level::Notice->value,
+                Level::Info->value,
+            ],
+            [
+                OutputInterface::VERBOSITY_QUIET => Level::Alert->value,
+                OutputInterface::VERBOSITY_NORMAL => Level::Error->value,
+                OutputInterface::VERBOSITY_VERBOSE => Level::Warning->value,
+                OutputInterface::VERBOSITY_VERY_VERBOSE => Level::Notice->value,
+                OutputInterface::VERBOSITY_DEBUG => Level::Info->value,
+            ],
+        ];
+
+        yield 'with constants' => [
+            [
+                OutputInterface::VERBOSITY_NORMAL => Level::Notice->value,
+                'verbosity_verbose' => 'info',
+                OutputInterface::VERBOSITY_VERY_VERBOSE => Level::Info->value,
+            ],
+            [
+                OutputInterface::VERBOSITY_NORMAL => Level::Notice->value,
+                OutputInterface::VERBOSITY_VERBOSE => Level::Info->value,
+                OutputInterface::VERBOSITY_VERY_VERBOSE => Level::Info->value,
+                OutputInterface::VERBOSITY_QUIET => Level::Error->value,
+                OutputInterface::VERBOSITY_DEBUG => Level::Debug->value,
+            ],
+        ];
     }
 
     public function testWithType()
