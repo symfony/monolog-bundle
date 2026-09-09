@@ -1,0 +1,41 @@
+---------------------------------------------------------------------------
+
+by andy-educake at 2020-11-24T13:55:05Z
+
+Thanks for the comments @lyrixx Have dealt with all of them I think. I notice that Travis has failed for PHP 5.6 and PHP 7.0. Possibly because I used the `iterable` type hint on the constructor param. Should I use the `Iterator` interface instead for bc?
+
+---------------------------------------------------------------------------
+
+by stof at 2020-11-27T11:57:52Z
+
+Regarding a generic solution in symfony, I think we need something similar to the `ServiceResetter`, but which is always called by the kernel on `shutdown`, for services which need to close some resources for their shutdown. This way, MonologBundle could hook the `close` method of handlers in there, DoctrineBundle could hook connections, etc...
+
+---------------------------------------------------------------------------
+
+by GromNaN at 2026-09-09T15:50:08Z
+
+Rebased the branch onto current 4.x and applied the standing review feedback so it can move forward. The previous structure (root `DependencyInjection/`, `Resources/config/monolog.xml`, root `MonologBundle.php`) no longer exists on 4.x, so this is a re-apply rather than a mechanical rebase.
+
+Changes:
+- `HandlerLifecycleManager` is now `@internal` (stof, GromNaN) and lives in `src/`.
+- The constructor takes `iterable $handlers` (derrabus).
+- `MonologBundle::shutdown()` uses the one-liner form (GromNaN), with a guard for when the manager is not defined.
+- All handlers (including nested ones) are tagged `monolog.handler`. Nested handlers are excluded from `kernel.reset`, but they hold real resources and must be closed on shutdown.
+
+stof suggestion implemented: instead of a `tagged_iterator` (which would instantiate every handler on shutdown, opening connections/files for unused handlers just to close them), a new `AddHandlersToManagerPass` compiler pass injects the handlers as an `IteratorArgument` of weak references (`ContainerInterface::IGNORE_ON_UNINITIALIZED_REFERENCE`). This is the same mechanism Symfony uses for `services_resetter`: the generated iterator only yields already-instantiated services, so unused handlers are never instantiated at shutdown.
+
+Added a CHANGELOG entry and tests (handlers are tagged; the manager receives weak references).
+
+Local checks: full PHPUnit suite passes, php-cs-fixer is clean.
+
+Happy to adjust anything.
+
+---------------------------------------------------------------------------
+
+by GromNaN at 2026-09-09T16:05:22Z
+
+Regarding stof's earlier point about a generic Symfony solution: a framework-level mechanism similar to `services_resetter`, but invoked on kernel shutdown (so MonologBundle could hook handler `close()`, DoctrineBundle could hook connections, etc.), would be the ideal long-term answer. Symfony does not provide such a mechanism today: there is no `kernel.shutdown` event and `Kernel::shutdown()` only calls `Bundle::shutdown()`. So this PR uses `Bundle::shutdown()` as the available hook.
+
+The design is intended to be forward-compatible with that future generic closer: handlers are tagged (`monolog.handler`) and collected by a compiler pass into an iterator of weak references. Swapping the bundle-specific `monolog.handler_lifecycle_manager` service for a framework-provided closer later would not require changing how handlers are tagged or collected.
+
+Side note on the service being public: it has to be public because `Bundle::shutdown()` reaches it through `$this->container->get()`, the same way Symfony's `services_resetter` is public and fetched in `Kernel::boot()`. Private services are not retrievable via `get()` at runtime, and there is no shutdown event to subscribe to instead.
