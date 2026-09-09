@@ -526,10 +526,9 @@ final class MonologExtension extends Extension
                     $handler['facility'],
                     $handler['level'],
                     $handler['bubble'],
+                    $handler['ident'] ?: 'php',
+                    $handler['rfc'],
                 ]);
-                if ($handler['ident']) {
-                    $definition->addArgument($handler['ident']);
-                }
                 break;
 
             case 'native_mailer':

@@ -5,6 +5,7 @@
 * Add `GoogleCloudLoggingFormatter` as `monolog.formatter.google` to services
 * Add `expand_newlines` option to the `error_log` handler
 * Add `parameters` option to the `native_mailer` handler to pass additional parameters to `mail()` (e.g. `-f sender@example.com`)
+* Add `rfc` option to the `syslogudp` handler to select the syslog RFC format (RFC3164, RFC5424 or RFC5424e)
 * Fix `ServiceNotFoundException` when a disabled handler is a member of a `group`, `whatfailuregroup` or `fallbackgroup` handler
 
 ## 4.0.2 (2026-04-02)

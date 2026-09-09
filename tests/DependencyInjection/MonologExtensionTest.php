@@ -16,6 +16,7 @@ use Monolog\Handler\ElasticsearchHandler;
 use Monolog\Handler\FingersCrossed\ErrorLevelActivationStrategy;
 use Monolog\Handler\MongoDBHandler;
 use Monolog\Handler\RollbarHandler;
+use Monolog\Handler\SyslogUdpHandler;
 use Monolog\Processor\UidProcessor;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\LoggerChannelPass;
@@ -260,7 +261,28 @@ class MonologExtensionTest extends DependencyInjectionTestCase
 
         $handler = $container->getDefinition('monolog.handler.main');
         $this->assertDICDefinitionClass($handler, \Monolog\Handler\SyslogHandler::class);
-        $this->assertDICConstructorArguments($handler, [false, 'user', 'DEBUG', true, \LOG_CONS]);
+        $this->assertDICConstructorArguments($handler, ['php', 'user', 'DEBUG', true, \LOG_CONS]);
+    }
+
+    public function testSyslogUdpHandler()
+    {
+        $container = $this->getContainer([
+            ['handlers' => [
+                'syslogudp' => [
+                    'type' => 'syslogudp',
+                    'host' => '127.0.0.1',
+                    'port' => 514,
+                    'facility' => 'USER',
+                    'level' => 'ERROR',
+                    'ident' => null,
+                    'rfc' => SyslogUdpHandler::RFC5424,
+                ],
+            ]],
+        ]);
+
+        $handler = $container->getDefinition('monolog.handler.syslogudp');
+        $this->assertDICDefinitionClass($handler, \Monolog\Handler\SyslogUdpHandler::class);
+        $this->assertDICConstructorArguments($handler, ['127.0.0.1', 514, 'USER', 'ERROR', true, 'php', SyslogUdpHandler::RFC5424]);
     }
 
     public function testRollbarHandlerCreatesNotifier()

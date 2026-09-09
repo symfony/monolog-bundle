@@ -12,6 +12,7 @@
 namespace Symfony\Bundle\MonologBundle\Tests\DependencyInjection;
 
 use Composer\InstalledVersions;
+use Monolog\Handler\SyslogUdpHandler;
 use Monolog\Level;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
@@ -475,6 +476,54 @@ class ConfigurationTest extends TestCase
 
         $this->assertEquals('127.0.1.1', $config['handlers']['redis']['redis']['host']);
         $this->assertEquals('monolog_redis_test', $config['handlers']['redis']['redis']['key_name']);
+    }
+
+    public function testWithSyslogUdpHandler()
+    {
+        $configs = [
+            [
+                'handlers' => [
+                    'syslogudp' => [
+                        'type' => 'syslogudp',
+                        'host' => '127.0.0.1',
+                        'port' => 514,
+                        'facility' => 'USER',
+                        'level' => 'ERROR',
+                        'rfc' => SyslogUdpHandler::RFC3164,
+                    ],
+                ],
+            ],
+        ];
+
+        $config = $this->process($configs);
+
+        $this->assertEquals('syslogudp', $config['handlers']['syslogudp']['type']);
+        $this->assertEquals('127.0.0.1', $config['handlers']['syslogudp']['host']);
+        $this->assertEquals(514, $config['handlers']['syslogudp']['port']);
+        $this->assertEquals('php', $config['handlers']['syslogudp']['ident']);
+        $this->assertEquals(SyslogUdpHandler::RFC3164, $config['handlers']['syslogudp']['rfc']);
+
+        $configs = [
+            [
+                'handlers' => [
+                    'syslogudp' => [
+                        'type' => 'syslogudp',
+                        'host' => '127.0.0.1',
+                        'port' => 514,
+                        'facility' => 'USER',
+                        'level' => 'ERROR',
+                    ],
+                ],
+            ],
+        ];
+
+        $config = $this->process($configs);
+
+        $this->assertEquals('syslogudp', $config['handlers']['syslogudp']['type']);
+        $this->assertEquals('127.0.0.1', $config['handlers']['syslogudp']['host']);
+        $this->assertEquals(514, $config['handlers']['syslogudp']['port']);
+        $this->assertEquals('php', $config['handlers']['syslogudp']['ident']);
+        $this->assertEquals(SyslogUdpHandler::RFC5424, $config['handlers']['syslogudp']['rfc']);
     }
 
     #[DataProvider('processPsr3MessagesProvider')]
