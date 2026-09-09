@@ -45,6 +45,8 @@ class MonologExtension extends Extension
 {
     private $nestedHandlers = [];
 
+    private $disabledHandlers = [];
+
     private $swiftMailerHandlers = [];
 
     /**
@@ -65,6 +67,14 @@ class MonologExtension extends Extension
             $container->setParameter('monolog.use_microseconds', $config['use_microseconds']);
 
             $handlers = [];
+
+            // Collect disabled handlers first so that group members referencing
+            // them can be skipped, regardless of the order they are declared in.
+            foreach ($config['handlers'] as $name => $handler) {
+                if (!$handler['enabled']) {
+                    $this->disabledHandlers[$name] = true;
+                }
+            }
 
             foreach ($config['handlers'] as $name => $handler) {
                 if (!$handler['enabled']) {
@@ -558,6 +568,10 @@ class MonologExtension extends Extension
             case 'fallbackgroup':
                 $references = [];
                 foreach ($handler['members'] as $nestedHandler) {
+                    if (isset($this->disabledHandlers[$nestedHandler])) {
+                        // a disabled handler is not registered as a service, skip it
+                        continue;
+                    }
                     $nestedHandlerId = $this->getHandlerId($nestedHandler);
                     $this->markNestedHandler($nestedHandlerId);
                     $references[] = new Reference($nestedHandlerId);
