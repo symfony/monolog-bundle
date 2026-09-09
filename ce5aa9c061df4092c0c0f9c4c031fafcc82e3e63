@@ -1,0 +1,14 @@
+---------------------------------------------------------------------------
+
+by GromNaN at 2026-09-09T15:13:59Z
+
+Thanks for this contribution! I rebased your branch onto the current `4.x` branch and retargeted the PR to `4.x`, since that is where new changes go now. The directory layout changed between 3.x and 4.x, so the files moved to `src/`, `config/` and `tests/`.
+
+Summary of what changed:
+
+- Added a `parameters` option to the `native_mailer` handler, mirroring the existing `headers` option. It maps to `NativeMailerHandler::addParameter()` and lets you pass extra parameters to `mail()`, e.g. `-f sender@example.com` to set the envelope sender.
+- Added the matching XML config support (`fixXmlConfig('parameter')` and the `<parameter>` XSD element) so it works in XML too.
+- Added a hardening on top of the original patch: unlike `addHeader()`, `addParameter()` performs no validation. Because these values end up on the sendmail command line through `mail()`, a value containing a newline could allow argument or header injection. Each parameter is now validated at config compile time and rejected if it contains `\r` or `\n`, mirroring the protection already in place for headers.
+- Updated the `native_mailer` fixtures and test assertion, added a dedicated `ConfigurationTest` case for the newline rejection, and added a CHANGELOG entry.
+
+Let me know if you want any adjustment.
