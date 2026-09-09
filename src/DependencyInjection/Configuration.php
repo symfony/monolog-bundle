@@ -12,6 +12,7 @@
 namespace Symfony\Bundle\MonologBundle\DependencyInjection;
 
 use Composer\InstalledVersions;
+use Monolog\Handler\SyslogUdpHandler;
 use Monolog\Level;
 use Monolog\Logger;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
@@ -187,7 +188,8 @@ use Symfony\Component\Console\Output\OutputInterface;
  *   - [logopts]: defaults to LOG_PID
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
- *   - [ident]: string, defaults to
+ *   - [ident]: string, defaults to 'php'
+ *   - [rfc]: SyslogUdpHandler::RFC3164 (0), SyslogUdpHandler::RFC5424 (1) or SyslogUdpHandler::RFC5424e (2), defaults to SyslogUdpHandler::RFC5424
  *
  * - native_mailer:
  *   - from_email: string
@@ -455,7 +457,7 @@ final class Configuration implements ConfigurationInterface
                 ->booleanNode('use_locking')->defaultFalse()->end() // stream and rotating
                 ->scalarNode('filename_format')->defaultValue('{filename}-{date}')->end() // rotating
                 ->scalarNode('date_format')->defaultValue('Y-m-d')->end() // rotating
-                ->scalarNode('ident')->defaultFalse()->end() // syslog and syslogudp
+                ->scalarNode('ident')->defaultValue('php')->end() // syslog and syslogudp
                 ->scalarNode('logopts')->defaultValue(\LOG_PID)->end() // syslog
                 ->scalarNode('facility')->defaultValue('user')->end() // syslog
                 ->scalarNode('max_files')->defaultValue(0)->end() // rotating
@@ -541,6 +543,7 @@ final class Configuration implements ConfigurationInterface
                 ->scalarNode('title')->defaultNull()->end() // pushover
                 ->scalarNode('host')->defaultNull()->end() // syslogudp
                 ->scalarNode('port')->defaultValue(514)->end() // syslogudp
+                ->scalarNode('rfc')->defaultValue(SyslogUdpHandler::RFC5424)->end() // syslogudp
                 ->arrayNode('config')
                     ->canBeUnset()
                     ->prototype('scalar')->end()
