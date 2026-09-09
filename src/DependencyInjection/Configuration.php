@@ -744,7 +744,7 @@ final class Configuration implements ConfigurationInterface
         ;
     }
 
-    private function addMongoDBSection(ArrayNodeDefinition $handlerNode)
+    private function addMongoDBSection(ArrayNodeDefinition $handlerNode): void
     {
         $handlerNode
             ->children()
