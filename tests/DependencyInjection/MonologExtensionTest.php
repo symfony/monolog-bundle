@@ -19,6 +19,7 @@ use Monolog\Handler\RollbarHandler;
 use Monolog\Handler\SyslogUdpHandler;
 use Monolog\Processor\UidProcessor;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\AddHandlersToManagerPass;
 use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\LoggerChannelPass;
 use Symfony\Bundle\MonologBundle\DependencyInjection\FormatterConfigurator;
 use Symfony\Bundle\MonologBundle\DependencyInjection\MonologExtension;
@@ -27,7 +28,9 @@ use Symfony\Bundle\MonologBundle\Tests\DependencyInjection\Fixtures\AsMonologPro
 use Symfony\Bundle\MonologBundle\Tests\DependencyInjection\Fixtures\ServiceWithChannel;
 use Symfony\Bundle\MonologBundle\Tests\DependencyInjection\Fixtures\ServiceWithChannelOnArgument;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
+use Symfony\Component\DependencyInjection\Argument\IteratorArgument;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\ParameterBag\EnvPlaceholderParameterBag;
 use Symfony\Component\DependencyInjection\Reference;
@@ -105,6 +108,50 @@ class MonologExtensionTest extends DependencyInjectionTestCase
         $handler = $container->getDefinition('monolog.handler.custom');
         $this->assertDICDefinitionClass($handler, \Monolog\Handler\StreamHandler::class);
         $this->assertDICConstructorArguments($handler, ['/tmp/symfony.log', 'ERROR', false, 0666, false]);
+    }
+
+    public function testAllHandlersAreTaggedForClosing()
+    {
+        $container = $this->getContainer([['handlers' => [
+            'custom' => ['type' => 'stream', 'path' => '/tmp/symfony.log', 'bubble' => false, 'level' => 'ERROR', 'file_permission' => '0666'],
+            'nested' => ['type' => 'stream', 'path' => '/tmp/symfony.log', 'bubble' => false, 'level' => 'ERROR', 'file_permission' => '0666', 'nested' => true],
+        ]]]);
+        $taggedHandlers = $container->findTaggedServiceIds('monolog.handler');
+
+        // Both top-level and nested handlers are tagged, as nested handlers hold resources
+        // that must be released on shutdown even though their wrapper handles the reset.
+        $this->assertCount(2, $taggedHandlers);
+        $this->assertArrayHasKey('monolog.handler.custom', $taggedHandlers);
+        $this->assertArrayHasKey('monolog.handler.nested', $taggedHandlers);
+    }
+
+    public function testHandlerLifecycleManagerReceivesWeakReferencesToAllHandlers()
+    {
+        $container = new ContainerBuilder(new EnvPlaceholderParameterBag());
+        $container->addCompilerPass(new LoggerChannelPass());
+        $container->addCompilerPass(new AddHandlersToManagerPass());
+        (new MonologExtension())->load([['handlers' => [
+            'main' => ['type' => 'stream', 'path' => '/tmp/symfony.log'],
+            'other' => ['type' => 'stream', 'path' => '/tmp/other.log'],
+        ]]], $container);
+        $container->compile();
+
+        $this->assertTrue($container->hasDefinition('monolog.handler_lifecycle_manager'));
+
+        $arguments = $container->getDefinition('monolog.handler_lifecycle_manager')->getArguments();
+        $this->assertCount(1, $arguments);
+
+        $iterator = $arguments[0];
+        $this->assertInstanceOf(IteratorArgument::class, $iterator);
+
+        $references = $iterator->getValues();
+        $this->assertCount(2, $references);
+
+        // Weak references so only handlers already instantiated are closed at shutdown.
+        foreach ($references as $reference) {
+            $this->assertInstanceOf(Reference::class, $reference);
+            $this->assertSame(ContainerInterface::IGNORE_ON_UNINITIALIZED_REFERENCE, $reference->getInvalidBehavior());
+        }
     }
 
     public function testLoadWithGroupHandlerAndDisabledMember()
