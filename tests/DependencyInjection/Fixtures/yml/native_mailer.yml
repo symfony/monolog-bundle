@@ -3,8 +3,11 @@ monolog:
         mailer:
             type: native_mailer
             from_email: foo@example.com
-            to_email: bar@exemple.com
+            to_email: bar@example.com
             subject: a subject
             headers:
                 - "Foo: bar"
                 - "Baz: inga"
+            parameters:
+                - "--foo bar"
+                - "--baz inga"

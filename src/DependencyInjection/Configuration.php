@@ -195,6 +195,7 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
  *   - [headers]: optional array containing additional headers: ['Foo: Bar', '...']
+ *   - [parameters]: optional array containing additional parameters: ['--foo bar', '...']
  *
  * - symfony_mailer:
  *   - from_email: optional if email_prototype is given
@@ -403,6 +404,7 @@ final class Configuration implements ConfigurationInterface
                 ->fixXmlConfig('tag')
                 ->fixXmlConfig('accepted_level')
                 ->fixXmlConfig('header')
+                ->fixXmlConfig('parameter')
                 ->canBeUnset();
 
         $handlerNode
@@ -892,6 +894,15 @@ final class Configuration implements ConfigurationInterface
                 ->arrayNode('headers') // native_mailer
                     ->canBeUnset()
                     ->scalarPrototype()->end()
+                ->end()
+                ->arrayNode('parameters') // native_mailer
+                    ->canBeUnset()
+                    ->scalarPrototype()
+                        ->validate()
+                            ->ifTrue(static function ($v) { return false !== strpbrk($v, "\r\n"); })
+                            ->thenInvalid('Mailer parameters can not contain newline characters for security reasons.')
+                        ->end()
+                    ->end()
                 ->end()
                 ->scalarNode('mailer')->defaultNull()->end() // symfony_mailer
                 ->arrayNode('email_prototype') // symfony_mailer
