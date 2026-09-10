@@ -857,6 +857,7 @@ final class Configuration implements ConfigurationInterface
         $handlerNode
             ->children()
                 ->arrayNode('predis')
+                    ->setDeprecated('symfony/monolog-bundle', '4.1', 'The "%node%" option is deprecated and ignored, use the "redis" option to configure the Predis client.')
                     ->canBeUnset()
                     ->beforeNormalization()
                     ->ifString()
