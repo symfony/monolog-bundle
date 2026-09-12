@@ -15,6 +15,7 @@ use Composer\InstalledVersions;
 use Monolog\Handler\SyslogUdpHandler;
 use Monolog\Level;
 use Monolog\Logger;
+use Symfony\Bundle\MonologBundle\DependencyInjection\Handler\HandlerExtensionInterface;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
@@ -350,6 +351,14 @@ use Symfony\Component\Console\Output\OutputInterface;
 final class Configuration implements ConfigurationInterface
 {
     /**
+     * @param list<HandlerExtensionInterface> $handlerExtensions
+     */
+    public function __construct(
+        private array $handlerExtensions = [],
+    ) {
+    }
+
+    /**
      * Generates the configuration tree builder.
      */
     public function getConfigTreeBuilder(): TreeBuilder
@@ -593,7 +602,6 @@ final class Configuration implements ConfigurationInterface
             ->end();
 
         $this->addGelfSection($handlerNode);
-        $this->addMongoDBSection($handlerNode);
         $this->addElasticsearchSection($handlerNode);
         $this->addRedisSection($handlerNode);
         $this->addPredisSection($handlerNode);
@@ -601,116 +609,76 @@ final class Configuration implements ConfigurationInterface
         $this->addVerbosityLevelSection($handlerNode);
         $this->addChannelsSection($handlerNode);
 
+        $types = [];
+        \assert($handlerNode instanceof ArrayNodeDefinition);
+        foreach ($this->handlerExtensions as $handlerExtension) {
+            $types[$handlerExtension->getName()] = [];
+            $arrayNode = $handlerNode->children()->arrayNode($handlerExtension->getName());
+            $handlerExtension->buildArrayNode($arrayNode);
+            foreach ($arrayNode->getChildNodeDefinitions() as $name => $childNodeDefinition) {
+                $types[$handlerExtension->getName()][] = $name;
+            }
+        }
+
+        foreach ($this->handlerExtensions as $handlerExtension) {
+            $handlerExtension->buildHandlerValidates($handlerNode);
+        }
+
         $handlerNode
-            ->validate()
-                ->ifTrue(static function ($v) { return 'service' === $v['type'] && !empty($v['formatter']); })
-                ->thenInvalid('Service handlers can not have a formatter configured in the bundle, you must reconfigure the service itself instead')
-            ->end()
-            ->validate()
-                ->ifTrue(static function ($v) { return \in_array($v['type'], ['fingers_crossed', 'buffer', 'filter', 'deduplication', 'sampling'], true) && empty($v['handler']); })
-                ->thenInvalid('The handler has to be specified to use a FingersCrossedHandler, BufferHandler, FilterHandler, DeduplicationHandler or SamplingHandler')
-            ->end()
-            ->validate()
-                ->ifTrue(static function ($v) { return 'fingers_crossed' === $v['type'] && !empty($v['excluded_http_codes']) && !empty($v['activation_strategy']); })
-                ->thenInvalid('You can not use excluded_http_codes together with a custom activation_strategy in a FingersCrossedHandler')
-            ->end()
-            ->validate()
-                ->ifTrue(static function ($v) { return 'fingers_crossed' !== $v['type'] && !empty($v['excluded_http_codes']); })
-                ->thenInvalid('You can only use excluded_http_codes with a FingersCrossedHandler definition')
-            ->end()
-            ->validate()
-                ->ifTrue(static function ($v) { return 'filter' === $v['type'] && 'DEBUG' !== $v['min_level'] && !empty($v['accepted_levels']); })
-                ->thenInvalid('You can not use min_level together with accepted_levels in a FilterHandler')
-            ->end()
-            ->validate()
-                ->ifTrue(static function ($v) { return 'filter' === $v['type'] && 'EMERGENCY' !== $v['max_level'] && !empty($v['accepted_levels']); })
-                ->thenInvalid('You can not use max_level together with accepted_levels in a FilterHandler')
-            ->end()
-            ->validate()
-                ->ifTrue(static function ($v) { return 'rollbar' === $v['type'] && !empty($v['id']) && !empty($v['token']); })
-                ->thenInvalid('You can not use both an id and a token in a RollbarHandler')
-            ->end()
-            ->validate()
-                ->ifTrue(static function ($v) { return 'rollbar' === $v['type'] && empty($v['id']) && empty($v['token']); })
-                ->thenInvalid('The id or the token has to be specified to use a RollbarHandler')
-            ->end()
-            ->validate()
-                ->ifTrue(static function ($v) { return 'telegram' === $v['type'] && (empty($v['token']) || empty($v['channel'])); })
-                ->thenInvalid('The token and channel have to be specified to use a TelegramBotHandler')
-            ->end()
-            ->validate()
-                ->ifTrue(static function ($v) { return 'service' === $v['type'] && !isset($v['id']); })
-                ->thenInvalid('The id has to be specified to use a service as handler')
-            ->end()
-            ->validate()
-                ->ifTrue(static function ($v) { return 'syslogudp' === $v['type'] && !isset($v['host']); })
-                ->thenInvalid('The host has to be specified to use a syslogudp as handler')
-            ->end()
-            ->validate()
-                ->ifTrue(static function ($v) { return 'socket' === $v['type'] && !isset($v['connection_string']); })
-                ->thenInvalid('The connection_string has to be specified to use a SocketHandler')
-            ->end()
-            ->validate()
-                ->ifTrue(static function ($v) { return 'pushover' === $v['type'] && (empty($v['token']) || empty($v['user'])); })
-                ->thenInvalid('The token and user have to be specified to use a PushoverHandler')
-            ->end()
-            ->validate()
-                ->ifTrue(static function ($v) { return 'slack' === $v['type'] && (empty($v['token']) || empty($v['channel'])); })
-                ->thenInvalid('The token and channel have to be specified to use a SlackHandler')
-            ->end()
-            ->validate()
-                ->ifTrue(static function ($v) { return 'slackwebhook' === $v['type'] && (empty($v['webhook_url'])); })
-                ->thenInvalid('The webhook_url have to be specified to use a SlackWebhookHandler')
-            ->end()
-            ->validate()
-                ->ifTrue(static function ($v) { return 'cube' === $v['type'] && empty($v['url']); })
-                ->thenInvalid('The url has to be specified to use a CubeHandler')
-            ->end()
-            ->validate()
-                ->ifTrue(static function ($v) { return 'amqp' === $v['type'] && empty($v['exchange']); })
-                ->thenInvalid('The exchange has to be specified to use a AmqpHandler')
-            ->end()
-            ->validate()
-                ->ifTrue(static function ($v) { return 'loggly' === $v['type'] && empty($v['token']); })
-                ->thenInvalid('The token has to be specified to use a LogglyHandler')
-            ->end()
-            ->validate()
-                ->ifTrue(static function ($v) { return 'loggly' === $v['type'] && !empty($v['tags']); })
-                ->then(static function ($v) {
-                    $invalidTags = preg_grep('/^[a-z0-9][a-z0-9\.\-_]*$/i', $v['tags'], \PREG_GREP_INVERT);
-                    if (!empty($invalidTags)) {
-                        throw new InvalidConfigurationException(\sprintf('The following Loggly tags are invalid: "%s".', implode('", "', $invalidTags)));
+            ->beforeNormalization()
+                ->always(static function ($v) use ($types) {
+                    if (!\array_key_exists('type', $v)) {
+                        $handlerFields = array_intersect_key($types, $v);
+                        if (0 === \count($handlerFields)) {
+                            throw new InvalidConfigurationException('The handler type could not be determined automatically. Please specify the "type" option.');
+                        }
+
+                        if (1 < \count($handlerFields)) {
+                            throw new InvalidConfigurationException('The handler type could not be determined automatically as multiple handler types are configured: '.implode(', ', array_keys($handlerFields)).'. Please specify the "type" option.');
+                        }
+
+                        $v['type'] = key($handlerFields);
+                    } elseif (isset($types[$type = $v['type'] ?? 'null'])) {
+                        // Migrate legacy flat config: move type-specific fields into
+                        // the dedicated sub-node so that per-type defaults apply even
+                        // when the legacy values rely on defaults.
+                        $v[$type] ??= [];
+                        foreach ($types[$type] as $field) {
+                            if (isset($v[$field])) {
+                                $v[$type][$field] = $v[$field];
+                                unset($v[$field]);
+                            } elseif (str_ends_with($field, 's')) {
+                                // XML keys produced by fixXmlConfig() use the singular
+                                // form of the field, with dashes for underscores.
+                                $singular = substr($field, 0, -1);
+                                foreach ([$singular, str_replace('_', '-', $singular)] as $xmlKey) {
+                                    if (isset($v[$xmlKey])) {
+                                        $v[$type][$field] = $v[$xmlKey];
+                                        unset($v[$xmlKey]);
+                                        break;
+                                    }
+                                }
+                            }
+                        }
                     }
 
                     return $v;
                 })
             ->end()
             ->validate()
-                ->ifTrue(static function ($v) { return 'logentries' === $v['type'] && empty($v['token']); })
-                ->thenInvalid('The token has to be specified to use a LogEntriesHandler')
+                ->ifTrue(static function ($v) { return 'service' === $v['type'] && !empty($v['formatter']); })
+                ->thenInvalid('Service handlers can not have a formatter configured in the bundle, you must reconfigure the service itself instead')
             ->end()
             ->validate()
-                ->ifTrue(static function ($v) { return 'insightops' === $v['type'] && empty($v['token']); })
-                ->thenInvalid('The token has to be specified to use a InsightOpsHandler')
+                ->ifTrue(static function ($v) { return 'service' === $v['type'] && !isset($v['id']); })
+                ->thenInvalid('The id has to be specified to use a service as handler')
             ->end()
             ->validate()
-                ->ifTrue(static function ($v) { return 'flowdock' === $v['type'] && empty($v['token']); })
-                ->thenInvalid('The token has to be specified to use a FlowdockHandler')
-            ->end()
-            ->validate()
-                ->ifTrue(static function ($v) { return 'flowdock' === $v['type'] && empty($v['from_email']); })
-                ->thenInvalid('The from_email has to be specified to use a FlowdockHandler')
-            ->end()
-            ->validate()
-                ->ifTrue(static function ($v) { return 'flowdock' === $v['type'] && empty($v['source']); })
-                ->thenInvalid('The source has to be specified to use a FlowdockHandler')
-            ->end()
-            ->validate()
-                ->ifTrue(static function ($v) { return 'server_log' === $v['type'] && empty($v['host']); })
-                ->thenInvalid('The host has to be specified to use a ServerLogHandler')
-            ->end()
-            ->validate()
-                ->ifTrue(static function ($v) { return $v['interactive_only'] && version_compare(InstalledVersions::getVersion('symfony/monolog-bridge'), '7.4.0', '<'); })
+                ->ifTrue(static function ($v) {
+                    $interactiveOnly = $v['console']['interactive_only'] ?? $v['interactive_only'] ?? false;
+
+                    return $interactiveOnly && version_compare(InstalledVersions::getVersion('symfony/monolog-bridge'), '7.4.0', '<');
+                })
                 ->thenInvalid('The interactive_only flag requires symfony/monolog-bridge 7.4 or higher')
             ->end()
         ;
@@ -742,46 +710,6 @@ final class Configuration implements ConfigurationInterface
                         ->thenInvalid('What must be set is either the hostname or the id.')
                     ->end()
                 ->end()
-            ->end()
-            ->validate()
-                ->ifTrue(static function ($v) { return 'gelf' === $v['type'] && !isset($v['publisher']); })
-                ->thenInvalid('The publisher has to be specified to use a GelfHandler')
-            ->end()
-        ;
-    }
-
-    private function addMongoDBSection(ArrayNodeDefinition $handlerNode): void
-    {
-        $handlerNode
-            ->children()
-                ->arrayNode('mongodb')
-                    ->canBeUnset()
-                    ->beforeNormalization()
-                        ->ifString()
-                        ->then(static function ($v) { return ['id' => $v]; })
-                    ->end()
-                    ->children()
-                        ->scalarNode('id')
-                            ->info('ID of a MongoDB\Client service')
-                            ->example('doctrine_mongodb.odm.logs_connection')
-                        ->end()
-                        ->scalarNode('uri')->end()
-                        ->scalarNode('username')->end()
-                        ->scalarNode('password')->end()
-                        ->scalarNode('database')->defaultValue('monolog')->end()
-                        ->scalarNode('collection')->defaultValue('logs')->end()
-                    ->end()
-                    ->validate()
-                        ->ifTrue(static function ($v) {
-                            return !isset($v['id']) && !isset($v['uri']);
-                        })
-                        ->thenInvalid('The "mongodb" handler configuration requires either a service "id" or a connection "uri".')
-                    ->end()
-                ->end()
-            ->end()
-            ->validate()
-                ->ifTrue(static function ($v) { return 'mongodb' === $v['type'] && !isset($v['mongodb']); })
-                ->thenInvalid('The "mongodb" configuration has to be specified to use a "mongodb" handler type.')
             ->end()
         ;
     }
@@ -921,14 +849,6 @@ final class Configuration implements ConfigurationInterface
                         ->scalarNode('method')->defaultNull()->end()
                     ->end()
                 ->end()
-            ->end()
-            ->validate()
-                ->ifTrue(static function ($v) { return 'native_mailer' === $v['type'] && (empty($v['from_email']) || empty($v['to_email']) || empty($v['subject'])); })
-                ->thenInvalid('The sender, recipient and subject have to be specified to use a NativeMailerHandler')
-            ->end()
-            ->validate()
-                ->ifTrue(static function ($v) { return 'symfony_mailer' === $v['type'] && empty($v['email_prototype']) && (empty($v['from_email']) || empty($v['to_email']) || empty($v['subject'])); })
-                ->thenInvalid('The sender, recipient and subject or an email prototype have to be specified to use the Symfony MailerHandler')
             ->end()
         ;
     }
