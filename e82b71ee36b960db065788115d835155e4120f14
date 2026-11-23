@@ -1,0 +1,11 @@
+---------------------------------------------------------------------------
+
+by nicolas-grekas at 2026-10-15T17:23:28Z
+
+Back to draft: we plan a `kernel.shutdown` tag for Symfony 8.3. With it, the handlers can be tagged to be closed when the kernel shuts down, even when something else keeps them alive. Removing the lifecycle manager before that would stop closing those handlers, so I'd rather move to the tag directly.
+
+---------------------------------------------------------------------------
+
+by nicolas-grekas at 2026-10-16T14:51:19Z
+
+Ready for review and merge again now that [symfony/symfony#67018](https://github.com/symfony/symfony/pull/67018) is merged.
