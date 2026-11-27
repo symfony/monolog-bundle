@@ -16,10 +16,10 @@ use Monolog\Handler\SyslogUdpHandler;
 use Monolog\Level;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
-use Symfony\Bundle\MonologBundle\DependencyInjection\Configuration;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Bundle\MonologBundle\DependencyInjection\Configuration;
 
 class ConfigurationTest extends TestCase
 {

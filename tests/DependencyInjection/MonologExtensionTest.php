@@ -72,6 +72,758 @@ class MonologExtensionTest extends DependencyInjectionTestCase
         $this->assertDICConstructorArguments($handler, ['/tmp/symfony.log', 'ERROR', false, 0666, true]);
     }
 
+    public function testStreamHandlerWithSubNodeConfig()
+    {
+        $container = $this->getContainer([['handlers' => [
+            'custom' => ['type' => 'stream', 'stream' => ['path' => '/tmp/sub.log', 'file_permission' => '0640', 'use_locking' => true], 'level' => 'WARNING', 'bubble' => false],
+        ]]]);
+
+        $handler = $container->getDefinition('monolog.handler.custom');
+        $this->assertDICDefinitionClass($handler, \Monolog\Handler\StreamHandler::class);
+        $this->assertDICConstructorArguments($handler, ['/tmp/sub.log', 'WARNING', false, 0640, true]);
+    }
+
+    public function testStreamHandlerTypeInferredFromSubNode()
+    {
+        $container = $this->getContainer([['handlers' => [
+            'custom' => ['stream' => ['path' => '/tmp/inferred.log']],
+        ]]]);
+
+        $handler = $container->getDefinition('monolog.handler.custom');
+        $this->assertDICDefinitionClass($handler, \Monolog\Handler\StreamHandler::class);
+        $this->assertDICConstructorArguments($handler, ['/tmp/inferred.log', 'DEBUG', true, null, false]);
+    }
+
+    #[DataProvider('provideConvertedHandlersWithSubNodeConfig')]
+    public function testConvertedHandlersWithSubNodeConfig(string $name, array $handlers, string $expectedClass, array $expectedArgs, array $expectedMethodCalls = []): void
+    {
+        $container = $this->getContainer([['handlers' => $handlers]], $this->handlerServiceDependencies());
+
+        $handler = $container->getDefinition('monolog.handler.'.$name);
+        $this->assertDICDefinitionClass($handler, $expectedClass);
+        $this->assertDICConstructorArguments($handler, $expectedArgs);
+
+        $methodCalls = $handler->getMethodCalls();
+        $this->assertCount(\count($expectedMethodCalls), $methodCalls);
+        foreach ($expectedMethodCalls as $pos => [$method, $args]) {
+            $this->assertDICDefinitionMethodCallAt($pos, $handler, $method, $args);
+        }
+    }
+
+    public static function provideConvertedHandlersWithSubNodeConfig(): iterable
+    {
+        $nested = static fn (string $name) => ['type' => 'stream', 'path' => '/tmp/'.$name.'.log'];
+        $psr3 = [new Reference('monolog.processor.psr_log_message')];
+
+        yield 'rotating_file' => ['rotating', ['rotating' => [
+            'type' => 'rotating_file',
+            'level' => 'WARNING',
+            'rotating_file' => [
+                'path' => '/tmp/rot.log',
+                'max_files' => 5,
+                'file_permission' => '0600',
+                'use_locking' => true,
+                'filename_format' => '{filename}-{date}',
+                'date_format' => 'Y-m-d',
+            ],
+        ]], \Monolog\Handler\RotatingFileHandler::class, ['/tmp/rot.log', 5, 'WARNING', true, 0600, true], [
+            ['pushProcessor', $psr3],
+            ['setFilenameFormat', ['{filename}-{date}', 'Y-m-d']],
+        ]];
+
+        yield 'socket' => ['socket', ['socket' => [
+            'type' => 'socket',
+            'socket' => [
+                'connection_string' => 'localhost:9000',
+                'timeout' => 2,
+                'connection_timeout' => 0.7,
+                'persistent' => false,
+            ],
+        ]], \Monolog\Handler\SocketHandler::class, ['localhost:9000', 'DEBUG', true], [
+            ['pushProcessor', $psr3],
+            ['setTimeout', [2]],
+            ['setConnectionTimeout', [0.7]],
+            ['setPersistent', [false]],
+        ]];
+
+        yield 'syslog' => ['syslog', ['syslog' => [
+            'type' => 'syslog',
+            'syslog' => ['ident' => 'myapp', 'facility' => 'local0', 'logopts' => 1],
+        ]], \Monolog\Handler\SyslogHandler::class, ['myapp', 'local0', 'DEBUG', true, 1], [
+            ['pushProcessor', $psr3],
+        ]];
+
+        yield 'syslogudp' => ['syslogudp', ['syslogudp' => [
+            'type' => 'syslogudp',
+            'syslogudp' => [
+                'host' => '127.0.0.2',
+                'port' => 1514,
+                'facility' => 'user',
+                'ident' => 'php',
+                'rfc' => SyslogUdpHandler::RFC3164,
+            ],
+        ]], \Monolog\Handler\SyslogUdpHandler::class, ['127.0.0.2', 1514, 'user', 'DEBUG', true, 'php', SyslogUdpHandler::RFC3164], [
+            ['pushProcessor', $psr3],
+        ]];
+
+        yield 'cube' => ['cube', ['cube' => [
+            'type' => 'cube',
+            'cube' => ['url' => 'udp://127.0.0.1:1180'],
+        ]], \Monolog\Handler\CubeHandler::class, ['udp://127.0.0.1:1180', 'DEBUG', true], [
+            ['pushProcessor', $psr3],
+        ]];
+
+        yield 'error_log' => ['error_log', ['error_log' => [
+            'type' => 'error_log',
+            'error_log' => ['message_type' => 4, 'expand_newlines' => true],
+        ]], \Monolog\Handler\ErrorLogHandler::class, [4, 'DEBUG', true, true], [
+            ['pushProcessor', $psr3],
+        ]];
+
+        yield 'server_log' => ['server_log', ['server_log' => [
+            'type' => 'server_log',
+            'server_log' => ['host' => '0:9911'],
+        ]], \Symfony\Bridge\Monolog\Handler\ServerLogHandler::class, ['0:9911', 'DEBUG', true], [
+            ['pushProcessor', $psr3],
+        ]];
+
+        yield 'amqp' => ['amqp', ['amqp' => [
+            'type' => 'amqp',
+            'amqp' => ['exchange' => 'my.exchange', 'exchange_name' => 'logs'],
+        ]], \Monolog\Handler\AmqpHandler::class, [new Reference('my.exchange'), 'logs', 'DEBUG', true], [
+            ['pushProcessor', $psr3],
+        ]];
+
+        yield 'logentries' => ['logentries', ['logentries' => [
+            'type' => 'logentries',
+            'logentries' => ['token' => 'mytoken', 'use_ssl' => false],
+        ]], \Monolog\Handler\LogEntriesHandler::class, ['mytoken', false, 'DEBUG', true], [
+            ['pushProcessor', $psr3],
+        ]];
+
+        yield 'loggly' => ['loggly', ['loggly' => [
+            'type' => 'loggly',
+            'loggly' => ['token' => 'mytoken', 'tags' => ['foo', 'bar']],
+        ]], \Monolog\Handler\LogglyHandler::class, ['mytoken', 'DEBUG', true], [
+            ['pushProcessor', $psr3],
+            ['setTag', ['foo,bar']],
+        ]];
+
+        yield 'insightops' => ['insightops', ['insightops' => [
+            'type' => 'insightops',
+            'insightops' => ['token' => 'mytoken', 'region' => 'eu', 'use_ssl' => false],
+        ]], \Monolog\Handler\InsightOpsHandler::class, ['mytoken', 'eu', false, 'DEBUG', true], [
+            ['pushProcessor', $psr3],
+        ]];
+
+        yield 'flowdock' => ['flowdock', ['flowdock' => [
+            'type' => 'flowdock',
+            'flowdock' => ['token' => 'mytoken', 'source' => 'src', 'from_email' => 'f@example.com'],
+        ]], \Monolog\Handler\FlowdockHandler::class, ['mytoken', 'DEBUG', true], [
+            ['pushProcessor', $psr3],
+            ['setFormatter', [new Reference('monolog.flowdock.formatter.'.sha1('src|f@example.com'))]],
+        ]];
+
+        yield 'pushover' => ['pushover', ['pushover' => [
+            'type' => 'pushover',
+            'level' => 'ERROR',
+            'pushover' => ['token' => 'token1', 'user' => 'user1', 'title' => 'My Title'],
+        ]], \Monolog\Handler\PushoverHandler::class, ['token1', 'user1', 'My Title', 'ERROR', true], [
+            ['pushProcessor', $psr3],
+        ]];
+
+        yield 'telegram' => ['telegram', ['telegram' => [
+            'type' => 'telegram',
+            'telegram' => ['token' => 'bot-token', 'channel' => '-100', 'parse_mode' => 'HTML'],
+        ]], \Monolog\Handler\TelegramBotHandler::class, ['bot-token', '-100', 'DEBUG', true, 'HTML', null, null, false, false, null], [
+            ['pushProcessor', $psr3],
+        ]];
+
+        yield 'rollbar' => ['rollbar', ['rollbar' => [
+            'type' => 'rollbar',
+            'rollbar' => ['token' => 'TOKEN'],
+        ]], RollbarHandler::class, [new Reference('monolog.rollbar.notifier.'.sha1(json_encode(['access_token' => 'TOKEN']))), 'DEBUG', true], [
+            ['pushProcessor', $psr3],
+        ]];
+
+        yield 'newrelic' => ['newrelic', ['newrelic' => [
+            'type' => 'newrelic',
+            'newrelic' => ['app_name' => 'myapp'],
+        ]], \Monolog\Handler\NewRelicHandler::class, ['DEBUG', true, 'myapp'], [
+            ['pushProcessor', $psr3],
+        ]];
+
+        yield 'console' => ['console', ['console' => [
+            'type' => 'console',
+            'console' => [
+                'verbosity_levels' => [500, 400, 300, 250, 200],
+                'console_formatter_options' => [],
+                'interactive_only' => false,
+            ],
+        ]], \Symfony\Bridge\Monolog\Handler\ConsoleHandler::class, [
+            null,
+            true,
+            [
+                \Symfony\Component\Console\Output\OutputInterface::VERBOSITY_QUIET => 500,
+                \Symfony\Component\Console\Output\OutputInterface::VERBOSITY_NORMAL => 400,
+                \Symfony\Component\Console\Output\OutputInterface::VERBOSITY_VERBOSE => 300,
+                \Symfony\Component\Console\Output\OutputInterface::VERBOSITY_VERY_VERBOSE => 250,
+                \Symfony\Component\Console\Output\OutputInterface::VERBOSITY_DEBUG => 200,
+            ],
+            [],
+            false,
+        ], [
+            ['pushProcessor', $psr3],
+        ]];
+
+        yield 'firephp' => ['firephp', ['firephp' => [
+            'type' => 'firephp',
+            'level' => 'WARNING',
+        ]], \Symfony\Bridge\Monolog\Handler\FirePHPHandler::class, ['WARNING', true], [
+            ['pushProcessor', $psr3],
+        ]];
+
+        yield 'chromephp' => ['chromephp', ['chromephp' => [
+            'type' => 'chromephp',
+            'level' => 'WARNING',
+        ]], \Symfony\Bridge\Monolog\Handler\ChromePhpHandler::class, ['WARNING', true], [
+            ['pushProcessor', $psr3],
+        ]];
+
+        yield 'slack' => ['slack', ['slack' => [
+            'type' => 'slack',
+            'slack' => [
+                'token' => 'slack-token',
+                'channel' => '#logs',
+                'exclude_fields' => ['field1'],
+            ],
+        ]], \Monolog\Handler\SlackHandler::class, ['slack-token', '#logs', 'Monolog', true, null, 'DEBUG', true, false, false, ['field1']], [
+            ['pushProcessor', $psr3],
+        ]];
+
+        yield 'slackwebhook' => ['slackwebhook', ['slackwebhook' => [
+            'type' => 'slackwebhook',
+            'slackwebhook' => [
+                'webhook_url' => 'https://hooks.slack.com/services/...',
+                'channel' => '#logs',
+                'exclude_fields' => ['field1'],
+            ],
+        ]], \Monolog\Handler\SlackWebhookHandler::class, ['https://hooks.slack.com/services/...', '#logs', 'Monolog', true, null, false, false, 'DEBUG', true, ['field1']], [
+            ['pushProcessor', $psr3],
+        ]];
+
+        yield 'gelf' => ['gelf', ['gelf' => [
+            'type' => 'gelf',
+            'gelf' => ['publisher' => ['id' => 'gelf.publisher']],
+        ]], \Monolog\Handler\GelfHandler::class, [new Reference('gelf.publisher'), 'DEBUG', true], [
+            ['pushProcessor', $psr3],
+        ]];
+
+        yield 'fingers_crossed' => ['fingers_crossed', [
+            'fingers_crossed' => [
+                'type' => 'fingers_crossed',
+                'fingers_crossed' => ['handler' => 'nested', 'buffer_size' => 30],
+            ],
+            'nested' => $nested('nested'),
+        ], \Monolog\Handler\FingersCrossedHandler::class, [
+            new Reference('monolog.handler.nested'),
+            new Definition(\Monolog\Handler\FingersCrossed\ErrorLevelActivationStrategy::class, ['WARNING']),
+            30,
+            true,
+            true,
+            null,
+        ]];
+
+        yield 'filter' => ['filter', [
+            'filter' => [
+                'type' => 'filter',
+                'filter' => ['handler' => 'nested', 'accepted_levels' => ['WARNING', 'ERROR']],
+            ],
+            'nested' => $nested('nested'),
+        ], \Monolog\Handler\FilterHandler::class, [
+            new Reference('monolog.handler.nested'),
+            ['WARNING', 'ERROR'],
+            'EMERGENCY',
+            true,
+        ]];
+
+        yield 'buffer' => ['buffer', [
+            'buffer' => [
+                'type' => 'buffer',
+                'buffer' => ['handler' => 'nested', 'buffer_size' => 5],
+            ],
+            'nested' => $nested('nested'),
+        ], \Monolog\Handler\BufferHandler::class, [
+            new Reference('monolog.handler.nested'),
+            5,
+            'DEBUG',
+            true,
+            false,
+        ]];
+
+        yield 'deduplication' => ['deduplication', [
+            'deduplication' => [
+                'type' => 'deduplication',
+                'deduplication' => ['handler' => 'nested', 'time' => 60],
+            ],
+            'nested' => $nested('nested'),
+        ], \Monolog\Handler\DeduplicationHandler::class, [
+            new Reference('monolog.handler.nested'),
+            '%kernel.cache_dir%/monolog_dedup_'.sha1('monolog.handler.deduplication'),
+            \Monolog\Level::Error->value,
+            60,
+            true,
+        ]];
+
+        yield 'sampling' => ['sampling', [
+            'sampling' => [
+                'type' => 'sampling',
+                'sampling' => ['handler' => 'nested', 'factor' => 10],
+            ],
+            'nested' => $nested('nested'),
+        ], \Monolog\Handler\SamplingHandler::class, [
+            new Reference('monolog.handler.nested'),
+            10,
+        ]];
+
+        yield 'group' => ['group', [
+            'group' => ['type' => 'group', 'group' => ['members' => ['a', 'b']]],
+            'a' => $nested('a'),
+            'b' => $nested('b'),
+        ], \Monolog\Handler\GroupHandler::class, [
+            [new Reference('monolog.handler.a'), new Reference('monolog.handler.b')],
+            true,
+        ]];
+
+        yield 'whatfailuregroup' => ['whatfailuregroup', [
+            'whatfailuregroup' => ['type' => 'whatfailuregroup', 'whatfailuregroup' => ['members' => ['a', 'b']]],
+            'a' => $nested('a'),
+            'b' => $nested('b'),
+        ], \Monolog\Handler\WhatFailureGroupHandler::class, [
+            [new Reference('monolog.handler.a'), new Reference('monolog.handler.b')],
+            true,
+        ]];
+
+        yield 'fallbackgroup' => ['fallbackgroup', [
+            'fallbackgroup' => ['type' => 'fallbackgroup', 'fallbackgroup' => ['members' => ['a', 'b']]],
+            'a' => $nested('a'),
+            'b' => $nested('b'),
+        ], \Monolog\Handler\FallbackGroupHandler::class, [
+            [new Reference('monolog.handler.a'), new Reference('monolog.handler.b')],
+            true,
+        ]];
+
+        yield 'native_mailer' => ['native_mailer', ['native_mailer' => [
+            'type' => 'native_mailer',
+            'native_mailer' => [
+                'from_email' => 'f@example.com',
+                'to_email' => ['t@example.com'],
+                'subject' => 'Subject',
+                'headers' => ['Foo: bar'],
+                'parameters' => ['--foo'],
+            ],
+        ]], \Monolog\Handler\NativeMailerHandler::class, [['t@example.com'], 'Subject', 'f@example.com', 'DEBUG', true], [
+            ['pushProcessor', $psr3],
+            ['addHeader', [['Foo: bar']]],
+            ['addParameter', [['--foo']]],
+        ]];
+
+        $symfonyMailerPrototype = (new Definition(\Symfony\Component\Mime\Email::class))
+            ->setPublic(false)
+            ->addMethodCall('from', ['f@example.com'])
+            ->addMethodCall('to', ['t@example.com'])
+            ->addMethodCall('subject', ['Subject']);
+
+        yield 'symfony_mailer' => ['symfony_mailer', ['symfony_mailer' => [
+            'type' => 'symfony_mailer',
+            'symfony_mailer' => [
+                'from_email' => 'f@example.com',
+                'to_email' => ['t@example.com'],
+                'subject' => 'Subject',
+            ],
+        ]], \Symfony\Bridge\Monolog\Handler\MailerHandler::class, [
+            new Reference('mailer.mailer'),
+            $symfonyMailerPrototype,
+            'DEBUG',
+            true,
+        ], [
+            ['pushProcessor', $psr3],
+        ]];
+    }
+
+    #[DataProvider('provideConvertedHandlersWithLegacyFlatConfig')]
+    public function testConvertedHandlersWithLegacyFlatConfig(string $name, array $handlers, string $expectedClass, array $expectedArgs, array $expectedMethodCalls = []): void
+    {
+        $container = $this->getContainer([['handlers' => $handlers]], $this->handlerServiceDependencies());
+
+        $handler = $container->getDefinition('monolog.handler.'.$name);
+        $this->assertDICDefinitionClass($handler, $expectedClass);
+        $this->assertDICConstructorArguments($handler, $expectedArgs);
+
+        $methodCalls = $handler->getMethodCalls();
+        $this->assertCount(\count($expectedMethodCalls), $methodCalls);
+        foreach ($expectedMethodCalls as $pos => [$method, $args]) {
+            $this->assertDICDefinitionMethodCallAt($pos, $handler, $method, $args);
+        }
+    }
+
+    public static function provideConvertedHandlersWithLegacyFlatConfig(): iterable
+    {
+        $nested = static fn (string $name) => ['type' => 'stream', 'path' => '/tmp/'.$name.'.log'];
+        $psr3 = [new Reference('monolog.processor.psr_log_message')];
+
+        yield 'rotating_file' => ['rotating', ['rotating' => [
+            'type' => 'rotating_file',
+            'level' => 'WARNING',
+            'path' => '/tmp/rot.log',
+            'max_files' => 5,
+            'file_permission' => '0600',
+            'use_locking' => true,
+            'filename_format' => '{filename}-{date}',
+            'date_format' => 'Y-m-d',
+        ]], \Monolog\Handler\RotatingFileHandler::class, ['/tmp/rot.log', 5, 'WARNING', true, 0600, true], [
+            ['pushProcessor', $psr3],
+            ['setFilenameFormat', ['{filename}-{date}', 'Y-m-d']],
+        ]];
+
+        yield 'socket' => ['socket', ['socket' => [
+            'type' => 'socket',
+            'connection_string' => 'localhost:9000',
+            'timeout' => 2,
+            'connection_timeout' => 0.7,
+            'persistent' => false,
+        ]], \Monolog\Handler\SocketHandler::class, ['localhost:9000', 'DEBUG', true], [
+            ['pushProcessor', $psr3],
+            ['setTimeout', [2]],
+            ['setConnectionTimeout', [0.7]],
+            ['setPersistent', [false]],
+        ]];
+
+        yield 'syslog' => ['syslog', ['syslog' => [
+            'type' => 'syslog',
+            'ident' => 'myapp',
+            'facility' => 'local0',
+            'logopts' => 1,
+        ]], \Monolog\Handler\SyslogHandler::class, ['myapp', 'local0', 'DEBUG', true, 1], [
+            ['pushProcessor', $psr3],
+        ]];
+
+        yield 'syslogudp' => ['syslogudp', ['syslogudp' => [
+            'type' => 'syslogudp',
+            'host' => '127.0.0.2',
+            'port' => 1514,
+            'facility' => 'user',
+            'ident' => 'php',
+            'rfc' => SyslogUdpHandler::RFC3164,
+        ]], \Monolog\Handler\SyslogUdpHandler::class, ['127.0.0.2', 1514, 'user', 'DEBUG', true, 'php', SyslogUdpHandler::RFC3164], [
+            ['pushProcessor', $psr3],
+        ]];
+
+        yield 'cube' => ['cube', ['cube' => [
+            'type' => 'cube',
+            'url' => 'udp://127.0.0.1:1180',
+        ]], \Monolog\Handler\CubeHandler::class, ['udp://127.0.0.1:1180', 'DEBUG', true], [
+            ['pushProcessor', $psr3],
+        ]];
+
+        yield 'error_log' => ['error_log', ['error_log' => [
+            'type' => 'error_log',
+            'message_type' => 4,
+            'expand_newlines' => true,
+        ]], \Monolog\Handler\ErrorLogHandler::class, [4, 'DEBUG', true, true], [
+            ['pushProcessor', $psr3],
+        ]];
+
+        yield 'server_log' => ['server_log', ['server_log' => [
+            'type' => 'server_log',
+            'host' => '0:9911',
+        ]], \Symfony\Bridge\Monolog\Handler\ServerLogHandler::class, ['0:9911', 'DEBUG', true], [
+            ['pushProcessor', $psr3],
+        ]];
+
+        yield 'amqp' => ['amqp', ['amqp' => [
+            'type' => 'amqp',
+            'exchange' => 'my.exchange',
+            'exchange_name' => 'logs',
+        ]], \Monolog\Handler\AmqpHandler::class, [new Reference('my.exchange'), 'logs', 'DEBUG', true], [
+            ['pushProcessor', $psr3],
+        ]];
+
+        yield 'logentries' => ['logentries', ['logentries' => [
+            'type' => 'logentries',
+            'token' => 'mytoken',
+            'use_ssl' => false,
+        ]], \Monolog\Handler\LogEntriesHandler::class, ['mytoken', false, 'DEBUG', true], [
+            ['pushProcessor', $psr3],
+        ]];
+
+        yield 'loggly' => ['loggly', ['loggly' => [
+            'type' => 'loggly',
+            'token' => 'mytoken',
+            'tags' => ['foo', 'bar'],
+        ]], \Monolog\Handler\LogglyHandler::class, ['mytoken', 'DEBUG', true], [
+            ['pushProcessor', $psr3],
+            ['setTag', ['foo,bar']],
+        ]];
+
+        yield 'insightops' => ['insightops', ['insightops' => [
+            'type' => 'insightops',
+            'token' => 'mytoken',
+            'region' => 'eu',
+            'use_ssl' => false,
+        ]], \Monolog\Handler\InsightOpsHandler::class, ['mytoken', 'eu', false, 'DEBUG', true], [
+            ['pushProcessor', $psr3],
+        ]];
+
+        yield 'flowdock' => ['flowdock', ['flowdock' => [
+            'type' => 'flowdock',
+            'token' => 'mytoken',
+            'source' => 'src',
+            'from_email' => 'f@example.com',
+        ]], \Monolog\Handler\FlowdockHandler::class, ['mytoken', 'DEBUG', true], [
+            ['pushProcessor', $psr3],
+            ['setFormatter', [new Reference('monolog.flowdock.formatter.'.sha1('src|f@example.com'))]],
+        ]];
+
+        yield 'pushover' => ['pushover', ['pushover' => [
+            'type' => 'pushover',
+            'level' => 'ERROR',
+            'token' => 'token1',
+            'user' => 'user1',
+            'title' => 'My Title',
+        ]], \Monolog\Handler\PushoverHandler::class, ['token1', 'user1', 'My Title', 'ERROR', true], [
+            ['pushProcessor', $psr3],
+        ]];
+
+        yield 'telegram' => ['telegram', ['telegram' => [
+            'type' => 'telegram',
+            'token' => 'bot-token',
+            'channel' => '-100',
+            'parse_mode' => 'HTML',
+        ]], \Monolog\Handler\TelegramBotHandler::class, ['bot-token', '-100', 'DEBUG', true, 'HTML', null, null, false, false, null], [
+            ['pushProcessor', $psr3],
+        ]];
+
+        yield 'rollbar' => ['rollbar', ['rollbar' => [
+            'type' => 'rollbar',
+            'token' => 'TOKEN',
+        ]], RollbarHandler::class, [new Reference('monolog.rollbar.notifier.'.sha1(json_encode(['access_token' => 'TOKEN']))), 'DEBUG', true], [
+            ['pushProcessor', $psr3],
+        ]];
+
+        yield 'newrelic' => ['newrelic', ['newrelic' => [
+            'type' => 'newrelic',
+            'app_name' => 'myapp',
+        ]], \Monolog\Handler\NewRelicHandler::class, ['DEBUG', true, 'myapp'], [
+            ['pushProcessor', $psr3],
+        ]];
+
+        yield 'console' => ['console', ['console' => [
+            'type' => 'console',
+            'verbosity_levels' => [500, 400, 300, 250, 200],
+            'console_formatter_options' => [],
+            'interactive_only' => false,
+        ]], \Symfony\Bridge\Monolog\Handler\ConsoleHandler::class, [
+            null,
+            true,
+            [
+                \Symfony\Component\Console\Output\OutputInterface::VERBOSITY_QUIET => 500,
+                \Symfony\Component\Console\Output\OutputInterface::VERBOSITY_NORMAL => 400,
+                \Symfony\Component\Console\Output\OutputInterface::VERBOSITY_VERBOSE => 300,
+                \Symfony\Component\Console\Output\OutputInterface::VERBOSITY_VERY_VERBOSE => 250,
+                \Symfony\Component\Console\Output\OutputInterface::VERBOSITY_DEBUG => 200,
+            ],
+            [],
+            false,
+        ], [
+            ['pushProcessor', $psr3],
+        ]];
+
+        yield 'firephp' => ['firephp', ['firephp' => [
+            'type' => 'firephp',
+            'level' => 'WARNING',
+        ]], \Symfony\Bridge\Monolog\Handler\FirePHPHandler::class, ['WARNING', true], [
+            ['pushProcessor', $psr3],
+        ]];
+
+        yield 'chromephp' => ['chromephp', ['chromephp' => [
+            'type' => 'chromephp',
+            'level' => 'WARNING',
+        ]], \Symfony\Bridge\Monolog\Handler\ChromePhpHandler::class, ['WARNING', true], [
+            ['pushProcessor', $psr3],
+        ]];
+
+        yield 'slack' => ['slack', ['slack' => [
+            'type' => 'slack',
+            'token' => 'slack-token',
+            'channel' => '#logs',
+            'exclude_fields' => ['field1'],
+        ]], \Monolog\Handler\SlackHandler::class, ['slack-token', '#logs', 'Monolog', true, null, 'DEBUG', true, false, false, ['field1']], [
+            ['pushProcessor', $psr3],
+        ]];
+
+        yield 'slackwebhook' => ['slackwebhook', ['slackwebhook' => [
+            'type' => 'slackwebhook',
+            'webhook_url' => 'https://hooks.slack.com/services/...',
+            'channel' => '#logs',
+            'exclude_fields' => ['field1'],
+        ]], \Monolog\Handler\SlackWebhookHandler::class, ['https://hooks.slack.com/services/...', '#logs', 'Monolog', true, null, false, false, 'DEBUG', true, ['field1']], [
+            ['pushProcessor', $psr3],
+        ]];
+
+        yield 'gelf' => ['gelf', ['gelf' => [
+            'type' => 'gelf',
+            'publisher' => ['id' => 'gelf.publisher'],
+        ]], \Monolog\Handler\GelfHandler::class, [new Reference('gelf.publisher'), 'DEBUG', true], [
+            ['pushProcessor', $psr3],
+        ]];
+
+        yield 'fingers_crossed' => ['fingers_crossed', [
+            'fingers_crossed' => [
+                'type' => 'fingers_crossed',
+                'action_level' => 'WARNING',
+                'handler' => 'nested',
+                'buffer_size' => 30,
+                'stop_buffering' => true,
+                'passthru_level' => null,
+            ],
+            'nested' => $nested('nested'),
+        ], \Monolog\Handler\FingersCrossedHandler::class, [
+            new Reference('monolog.handler.nested'),
+            new Definition(\Monolog\Handler\FingersCrossed\ErrorLevelActivationStrategy::class, ['WARNING']),
+            30,
+            true,
+            true,
+            null,
+        ]];
+
+        yield 'filter' => ['filter', [
+            'filter' => [
+                'type' => 'filter',
+                'handler' => 'nested',
+                'accepted_levels' => ['WARNING', 'ERROR'],
+            ],
+            'nested' => $nested('nested'),
+        ], \Monolog\Handler\FilterHandler::class, [
+            new Reference('monolog.handler.nested'),
+            ['WARNING', 'ERROR'],
+            'EMERGENCY',
+            true,
+        ]];
+
+        yield 'buffer' => ['buffer', [
+            'buffer' => [
+                'type' => 'buffer',
+                'handler' => 'nested',
+                'buffer_size' => 5,
+                'flush_on_overflow' => false,
+            ],
+            'nested' => $nested('nested'),
+        ], \Monolog\Handler\BufferHandler::class, [
+            new Reference('monolog.handler.nested'),
+            5,
+            'DEBUG',
+            true,
+            false,
+        ]];
+
+        yield 'deduplication' => ['deduplication', [
+            'deduplication' => [
+                'type' => 'deduplication',
+                'handler' => 'nested',
+                'time' => 60,
+            ],
+            'nested' => $nested('nested'),
+        ], \Monolog\Handler\DeduplicationHandler::class, [
+            new Reference('monolog.handler.nested'),
+            '%kernel.cache_dir%/monolog_dedup_'.sha1('monolog.handler.deduplication'),
+            \Monolog\Level::Error->value,
+            60,
+            true,
+        ]];
+
+        yield 'sampling' => ['sampling', [
+            'sampling' => [
+                'type' => 'sampling',
+                'handler' => 'nested',
+                'factor' => 10,
+            ],
+            'nested' => $nested('nested'),
+        ], \Monolog\Handler\SamplingHandler::class, [
+            new Reference('monolog.handler.nested'),
+            10,
+        ]];
+
+        yield 'group' => ['group', [
+            'group' => ['type' => 'group', 'members' => ['a', 'b']],
+            'a' => $nested('a'),
+            'b' => $nested('b'),
+        ], \Monolog\Handler\GroupHandler::class, [
+            [new Reference('monolog.handler.a'), new Reference('monolog.handler.b')],
+            true,
+        ]];
+
+        yield 'whatfailuregroup' => ['whatfailuregroup', [
+            'whatfailuregroup' => ['type' => 'whatfailuregroup', 'members' => ['a', 'b']],
+            'a' => $nested('a'),
+            'b' => $nested('b'),
+        ], \Monolog\Handler\WhatFailureGroupHandler::class, [
+            [new Reference('monolog.handler.a'), new Reference('monolog.handler.b')],
+            true,
+        ]];
+
+        yield 'fallbackgroup' => ['fallbackgroup', [
+            'fallbackgroup' => ['type' => 'fallbackgroup', 'members' => ['a', 'b']],
+            'a' => $nested('a'),
+            'b' => $nested('b'),
+        ], \Monolog\Handler\FallbackGroupHandler::class, [
+            [new Reference('monolog.handler.a'), new Reference('monolog.handler.b')],
+            true,
+        ]];
+
+        yield 'native_mailer' => ['native_mailer', ['native_mailer' => [
+            'type' => 'native_mailer',
+            'from_email' => 'f@example.com',
+            'to_email' => ['t@example.com'],
+            'subject' => 'Subject',
+            'headers' => ['Foo: bar'],
+            'parameters' => ['--foo'],
+        ]], \Monolog\Handler\NativeMailerHandler::class, [['t@example.com'], 'Subject', 'f@example.com', 'DEBUG', true], [
+            ['pushProcessor', $psr3],
+            ['addHeader', [['Foo: bar']]],
+            ['addParameter', [['--foo']]],
+        ]];
+
+        $symfonyMailerPrototype = (new Definition(\Symfony\Component\Mime\Email::class))
+            ->setPublic(false)
+            ->addMethodCall('from', ['f@example.com'])
+            ->addMethodCall('to', ['t@example.com'])
+            ->addMethodCall('subject', ['Subject']);
+
+        yield 'symfony_mailer' => ['symfony_mailer', ['symfony_mailer' => [
+            'type' => 'symfony_mailer',
+            'from_email' => 'f@example.com',
+            'to_email' => ['t@example.com'],
+            'subject' => 'Subject',
+        ]], \Symfony\Bridge\Monolog\Handler\MailerHandler::class, [
+            new Reference('mailer.mailer'),
+            $symfonyMailerPrototype,
+            'DEBUG',
+            true,
+        ], [
+            ['pushProcessor', $psr3],
+        ]];
+    }
+
+    private function handlerServiceDependencies(): array
+    {
+        return [
+            'gelf.publisher' => new Definition(\stdClass::class),
+            'my.exchange' => new Definition(\stdClass::class),
+            'mailer.mailer' => new Definition(\stdClass::class),
+        ];
+    }
+
     public function testLoadWithTimezone()
     {
         $container = $this->getContainer([['timezone' => 'Europe/Paris', 'handlers' => ['main' => ['type' => 'stream']]]]);
@@ -716,6 +1468,11 @@ class MonologExtensionTest extends DependencyInjectionTestCase
                         'uri' => 'mongodb://localhost:27018',
                     ],
                 ],
+                'mongodb_without_explicit_type' => [
+                    'mongodb' => [
+                        'uri' => 'mongodb://localhost:27018',
+                    ],
+                ],
             ],
         ]];
 
@@ -759,6 +1516,13 @@ class MonologExtensionTest extends DependencyInjectionTestCase
         $this->assertDICConstructorArguments($client, ['mongodb://localhost:27018', ['appname' => 'monolog-bundle']]);
         $this->assertDICConstructorArguments($handler, [$client, 'monolog', 'logs', 'DEBUG', true]);
         $this->assertDICDefinitionMethodCallAt(1, $handler, 'setFormatter', [$formatter]);
+
+        // MongoDB handler without an explicit type
+        $handler = $container->getDefinition('monolog.handler.mongodb_without_explicit_type');
+        $this->assertDICDefinitionClass($handler, MongoDBHandler::class);
+        $client = $handler->getArgument(0);
+        $this->assertDICDefinitionClass($client, 'MongoDB\Client');
+        $this->assertDICConstructorArguments($client, ['mongodb://localhost:27018', ['appname' => 'monolog-bundle']]);
     }
 
     public function testBasePathOption()
